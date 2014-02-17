@@ -1,4 +1,5 @@
 from multipledispatch import dispatch
+from pytest import raises
 
 def test_singledispatch():
     @dispatch(int)
@@ -26,11 +27,12 @@ def test_multipledispatch():
     assert f(1.0, 2.0) == -1.0
 
 
-def test_inheritance():
-    class A(object): pass
-    class B(object): pass
-    class C(A): pass
+class A(object): pass
+class B(object): pass
+class C(A): pass
 
+
+def test_inheritance():
     @dispatch(A)
     def f(x):
         return 'a'
@@ -42,3 +44,19 @@ def test_inheritance():
     assert f(A()) == 'a'
     assert f(B()) == 'b'
     assert f(C()) == 'a'
+
+
+def test_inheritance_and_multiple_dispatch():
+    @dispatch(A, A)
+    def f(x, y):
+        return type(x), type(y)
+
+    @dispatch(A, B)
+    def f(x, y):
+        return 0
+
+    assert f(A(), A()) == (A, A)
+    assert f(A(), C()) == (A, C)
+    assert f(A(), B()) == 0
+    assert f(C(), B()) == 0
+    assert raises(NotImplementedError, lambda: f(B(), B()))

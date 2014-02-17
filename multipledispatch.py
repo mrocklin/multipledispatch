@@ -20,6 +20,7 @@ class Dispatcher(object):
                 matches.append(func)
         if len(matches) == 1:
             return matches[0]
+        raise NotImplementedError()
 
     def __call__(self, *args, **kwargs):
         func = self.resolve(*args, **kwargs)
