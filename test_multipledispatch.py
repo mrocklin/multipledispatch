@@ -25,3 +25,20 @@ def test_multipledispatch():
     assert f(1, 2) == 3
     assert f(1.0, 2.0) == -1.0
 
+
+def test_inheritance():
+    class A(object): pass
+    class B(object): pass
+    class C(A): pass
+
+    @dispatch(A)
+    def f(x):
+        return 'a'
+
+    @dispatch(B)
+    def f(x):
+        return 'b'
+
+    assert f(A()) == 'a'
+    assert f(B()) == 'b'
+    assert f(C()) == 'a'
