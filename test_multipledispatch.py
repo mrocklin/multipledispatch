@@ -18,6 +18,8 @@ def test_singledispatch():
     assert g(1) == 3
     assert f(1.0) == 0
 
+    assert raises(NotImplementedError, lambda: f('hello'))
+
 
 def test_multipledispatch():
     @dispatch(int, int)
