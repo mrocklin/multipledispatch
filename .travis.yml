@@ -10,7 +10,7 @@ env:
     - PEP8_IGNORE=""
 
 
-# command to run tests
+script:
 nosetests --with-doctests
 
 notifications:
