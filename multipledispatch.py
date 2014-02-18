@@ -11,38 +11,38 @@ class Dispatcher(object):
     def add(self, signature, func):
         self.funcs[signature] = func
 
-    def resolve(self, *args, **kwargs):
-        types = tuple(map(type, args))
-        if types in self.funcs:
-            return self.funcs[types]
-
-        matches = dict()
-        n = len(types)
-        for signature, func in self.funcs.items():
-            if len(signature) == n and all(map(issubclass, types, signature)):
-                matches[signature] = func
-        if len(matches) == 1:
-            return matches.values()[0]
-        if len(matches) > 1:
-            scores = {func: [typ.mro().index(sig)
-                                for typ, sig in zip(types, signature)]
-                            for signature, func in matches.items()}
-            winners = [minset(scores, key=lambda func: scores[func][i])
-                        for i in range(len(types))]
-            intersection = set.intersection(*winners)
-            if len(intersection) == 1:  # One obvious best choice
-                return next(iter(intersection))
-            else:
-                warn("Multiple competing implementations found"
-                     "Using one at random.")
-                union = set.union(*winners)
-                return next(iter(union))
-
-        raise NotImplementedError()
-
     def __call__(self, *args, **kwargs):
-        func = self.resolve(*args, **kwargs)
+        func = resolve(self.funcs, *args, **kwargs)
         return func(*args, **kwargs)
+
+
+def resolve(funcs, *args, **kwargs):
+    types = tuple(map(type, args))
+    if types in funcs:
+        return funcs[types]
+
+    matches = dict()
+    n = len(types)
+    for signature, func in funcs.items():
+        if len(signature) == n and all(map(issubclass, types, signature)):
+            matches[signature] = func
+    if len(matches) == 1:
+        return matches.values()[0]
+    if len(matches) > 1:
+        scores = {func: [typ.mro().index(sig)
+                            for typ, sig in zip(types, signature)]
+                        for signature, func in matches.items()}
+        winners = [minset(scores, key=lambda func: scores[func][i])
+                    for i in range(len(types))]
+        intersection = set.intersection(*winners)
+        if len(intersection) == 1:  # One obvious best choice
+            return next(iter(intersection))
+        else:
+            warn("Multiple competing implementations found"
+                 "Using one at random.")
+            union = set.union(*winners)
+            return next(iter(union))
+    raise NotImplementedError()
 
 
 dispatchers = dict()
