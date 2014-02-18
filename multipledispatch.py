@@ -29,9 +29,9 @@ def resolve(funcs, *args, **kwargs):
     if len(matches) == 1:
         return next(iter(matches.values()))
     if len(matches) > 1:
-        scores = {func: [typ.mro().index(sig)
-                            for typ, sig in zip(types, signature)]
-                        for signature, func in matches.items()}
+        scores = dict((func, [typ.mro().index(sig)
+                            for typ, sig in zip(types, signature)])
+                        for signature, func in matches.items())
         winners = [minset(scores, key=lambda func: scores[func][i])
                     for i in range(len(types))]
         intersection = set.intersection(*winners)
