@@ -27,7 +27,7 @@ def resolve(funcs, *args, **kwargs):
         if len(signature) == n and all(map(issubclass, types, signature)):
             matches[signature] = func
     if len(matches) == 1:
-        return matches.values()[0]
+        return next(iter(matches.values()))
     if len(matches) > 1:
         scores = {func: [typ.mro().index(sig)
                             for typ, sig in zip(types, signature)]
@@ -51,7 +51,7 @@ dispatchers = dict()
 def dispatch(*types):
     types = tuple(types)
     def _(func):
-        name = func.func_name
+        name = func.__name__
         if name not in dispatchers:
             dispatchers[name] = Dispatcher(name)
         dispatchers[name].add(types, func)
@@ -62,8 +62,8 @@ def dispatch(*types):
 def minset(seq, key=lambda x: x):
     """ Find all minimum elements of sequence
 
-    >>> minset(['Cat', 'Dog', 'Camel', 'Mouse'], key=lambda x: x[0])
-    set(['Camel', 'Cat'])
+    >>> sorted(minset(['Cat', 'Dog', 'Camel', 'Mouse'], key=lambda x: x[0]))
+    ['Camel', 'Cat']
     """
     if not seq:
         raise ValueError("Empty input")

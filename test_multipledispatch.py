@@ -1,5 +1,5 @@
 from multipledispatch import dispatch, minset
-from pytest import raises
+from compatibility import raises
 
 def test_singledispatch():
     @dispatch(int)
@@ -80,7 +80,6 @@ def test_competing_solutions():
     def h(x):
         return 2
 
-    print h(D())
     assert h(D()) == 2
 
 
