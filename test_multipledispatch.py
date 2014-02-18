@@ -1,4 +1,4 @@
-from multipledispatch import dispatch
+from multipledispatch import dispatch, minset
 from pytest import raises
 
 def test_singledispatch():
@@ -106,4 +106,9 @@ def test_competing_ambiguous():
         return 2
 
     assert f(A(), C()) == f(C(), A()) == 2
-    # assert raises(Warning, lambda : f(A(), C()))
+    # assert raises(Warning, lambda : f(C(), C()))
+
+
+def test_minset():
+    assert minset([0, 0, 1, 2, 3]) == set((0, 0))
+    assert minset([0, 1, 2, 3 ,4], key=lambda i: int(i/2)) == set((0, 1))

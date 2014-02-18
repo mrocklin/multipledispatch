@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from warnings import warn
 
 
 class Dispatcher(object):
@@ -26,22 +27,26 @@ class Dispatcher(object):
             scores = {func: [typ.mro().index(sig)
                                 for typ, sig in zip(types, signature)]
                             for signature, func in matches.items()}
-            winners = [min([(func, indices) for (func, indices)
-                                            in scores.items()],
-                           key=lambda (f, ind): ind[i])
-                       for i in range(len(types))]
-            winners = set([func for func, ind in winners])
-            if len(winners) != 1:
-                raise Warning("Multiple competing implementations found",
-                              "Using one at random.")
-            return next(iter(winners))
+            winners = [minset(scores, key=lambda func: scores[func][i])
+                        for i in range(len(types))]
+            intersection = set.intersection(*winners)
+            if len(intersection) == 1:  # One obvious best choice
+                return next(iter(intersection))
+            else:
+                warn("Multiple competing implementations found"
+                     "Using one at random.")
+                union = set.union(*winners)
+                return next(iter(union))
+
         raise NotImplementedError()
 
     def __call__(self, *args, **kwargs):
         func = self.resolve(*args, **kwargs)
         return func(*args, **kwargs)
 
+
 dispatchers = dict()
+
 
 def dispatch(*types):
     types = tuple(types)
@@ -52,3 +57,27 @@ def dispatch(*types):
         dispatchers[name].add(types, func)
         return dispatchers[name]
     return _
+
+
+def minset(seq, key=lambda x: x):
+    """ Find all minimum elements of sequence
+
+    >>> minset(['Cat', 'Dog', 'Camel', 'Mouse'], key=lambda x: x[0])
+    set(['Camel', 'Cat'])
+    """
+    if not seq:
+        raise ValueError("Empty input")
+    seq = iter(seq)
+    first = next(seq)
+    best = set([first])
+    bestval = key(first)
+
+    for item in seq:
+        val = key(item)
+        if val < bestval:
+            bestval = val
+            best.clear()
+            best.add(item)
+        elif val == bestval:
+            best.add(item)
+    return best
