@@ -12,12 +12,12 @@ class Dispatcher(object):
         self.funcs[signature] = func
 
     def __call__(self, *args, **kwargs):
-        func = resolve(self.funcs, *args, **kwargs)
+        types = tuple(map(type, args))
+        func = resolve(self.funcs, types, **kwargs)
         return func(*args, **kwargs)
 
 
-def resolve(funcs, *args, **kwargs):
-    types = tuple(map(type, args))
+def resolve(funcs, types, **kwargs):
     if types in funcs:
         return funcs[types]
 
