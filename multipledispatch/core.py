@@ -12,7 +12,7 @@ class Dispatcher(object):
         self.funcs[signature] = func
 
     def __call__(self, *args, **kwargs):
-        types = tuple(map(type, args))
+        types = tuple([type(arg) for arg in args])
         func = resolve(self.funcs, types, **kwargs)
         return func(*args, **kwargs)
 
