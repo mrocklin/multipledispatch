@@ -1,6 +1,8 @@
 Multiple Dispatch
 =================
 
+[![](https://travis-ci.org/mrocklin/multipledispatch.png)](https://travis-ci.org/mrocklin/multipledispatch)
+
 Arbitrary decisions
 -------------------
 
