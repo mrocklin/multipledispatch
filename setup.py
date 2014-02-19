@@ -6,7 +6,7 @@ import multipledispatch
 
 setup(name='multipledispatch',
       version=multipledispatch.__version__,
-      description='Multiple dispatch'
+      description='Multiple dispatch',
       url='http://github.com/mrocklin/multipledispatch/',
       author='Matthew Rocklin',
       author_email='mrocklin@gmail.com',
