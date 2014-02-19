@@ -18,8 +18,10 @@ class Dispatcher(object):
 
 
 def resolve(funcs, types, **kwargs):
-    if types in funcs:
+    try:
         return funcs[types]
+    except KeyError:
+        pass
 
     n = len(types)
     matches = dict((signature, func) for signature, func in funcs.items()
