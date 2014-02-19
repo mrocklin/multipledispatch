@@ -12,7 +12,7 @@ setup(name='multipledispatch',
       author_email='mrocklin@gmail.com',
       license='BSD',
       keywords='dispatch',
-      packages=['multipledispatch']
-      long_description=(open('README.me').read() if exists('README.md')
+      packages=['multipledispatch'],
+      long_description=(open('README.md').read() if exists('README.md')
                         else ''),
       zip_safe=False)
