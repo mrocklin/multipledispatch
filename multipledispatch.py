@@ -21,11 +21,10 @@ def resolve(funcs, types, **kwargs):
     if types in funcs:
         return funcs[types]
 
-    matches = dict()
     n = len(types)
-    for signature, func in funcs.items():
-        if len(signature) == n and all(map(issubclass, types, signature)):
-            matches[signature] = func
+    matches = dict((signature, func) for signature, func in funcs.items()
+                                     if len(signature) == n
+                                     and all(map(issubclass, types, signature)))
     if len(matches) == 1:
         return next(iter(matches.values()))
     if len(matches) > 1:
