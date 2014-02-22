@@ -48,7 +48,7 @@ def test_ambiguities():
     signatures = [[A], [B], [A, B], [B, A], [A, C]]
     expected = set([((A, B), (B, A))])
     result = ambiguities(signatures)
-    assert set(map(tuple, expected)) == set(map(tuple, result))
+    assert set(map(frozenset, expected)) == set(map(frozenset, result))
 
 
 def test_ordering():
