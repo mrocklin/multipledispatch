@@ -112,3 +112,17 @@ def test_competing_ambiguous():
 def test_minset():
     assert minset([0, 0, 1, 2, 3]) == set((0, 0))
     assert minset([0, 1, 2, 3 ,4], key=lambda i: int(i/2)) == set((0, 1))
+
+
+def test_caching_correct_behavior():
+    @dispatch(A)
+    def f(x):
+        return 1
+
+    assert f(C()) == 1
+
+    @dispatch(C)
+    def f(x):
+        return 2
+
+    assert f(C()) == 2
