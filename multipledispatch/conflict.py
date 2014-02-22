@@ -8,6 +8,10 @@ def consistent(a, b):
                            for aa, bb in zip(a, b)))
 
 
+def ambiguous(a, b):
+    return consistent(a, b) and not (supercedes(a, b) or supercedes(b, a))
+
+
 def remove_obsolete(signatures):
     return [a for a in signatures
               if not any(len(a) == len(b) and supercedes(b, a)

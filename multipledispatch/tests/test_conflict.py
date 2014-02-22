@@ -35,3 +35,10 @@ def test_super_signature():
     assert super_signature([[A], [B]]) == [B]
     assert super_signature([[A, B], [B, A]]) == [B, B]
     assert super_signature([[A, A, B], [A, B, A], [B, A, A]]) == [B, B, B]
+
+def test_ambiguous():
+    assert not ambiguous([A], [A])
+    assert not ambiguous([A], [B])
+    assert not ambiguous([B], [B])
+    assert not ambiguous([A, B], [B, B])
+    assert ambiguous([A, B], [B, A])
