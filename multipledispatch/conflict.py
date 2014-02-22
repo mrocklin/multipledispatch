@@ -1,26 +1,31 @@
 from .util import _toposort, groupby
 
 def supercedes(a, b):
+    """ A is consistent and strictly more specific than B """
     return len(a) == len(b) and all(map(issubclass, a, b))
 
 
 def consistent(a, b):
+    """ It is possible for an argument list to satisfy both A and B """
     return (len(a) == len(b) and
             all(issubclass(aa, bb) or issubclass(bb, aa)
                            for aa, bb in zip(a, b)))
 
 
 def ambiguous(a, b):
+    """ A is consistent with B but neither is strictly more specific """
     return consistent(a, b) and not (supercedes(a, b) or supercedes(b, a))
 
 
 def ambiguities(signatures):
+    """ All signature pairs such that A is ambiguous with B """
     return set([(tuple(a), tuple(b)) for a in signatures
                                      for b in signatures
                                      if a < b and ambiguous(a, b)])
 
 
 def super_signature(signatures):
+    """ A signature that would break ambiguities """
     n = len(signatures[0])
     assert all(len(s) == n for s in signatures)
 
@@ -39,6 +44,10 @@ def conflict(signatures):
 
 
 def edge(a, b, tie_breaker=hash):
+    """ A should be checked before B
+
+    Tie broken by tie_breaker, defaults to ``hash``
+    """
     if supercedes(a, b):
         if supercedes(b, a):
             return tie_breaker(a) > tie_breaker(b)
@@ -48,6 +57,10 @@ def edge(a, b, tie_breaker=hash):
 
 
 def ordering(signatures):
+    """ A sane ordering of signatures to check, first to last
+
+    Topoological sort of edges as given by ``edge`` and ``supercedes``
+    """
     signatures = map(tuple, signatures)
     edges = [(a, b) for a in signatures for b in signatures if edge(a, b)]
     edges = groupby(lambda x: x[0], edges)
