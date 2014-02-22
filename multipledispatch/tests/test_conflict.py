@@ -42,3 +42,10 @@ def test_ambiguous():
     assert not ambiguous([B], [B])
     assert not ambiguous([A, B], [B, B])
     assert ambiguous([A, B], [B, A])
+
+
+def test_ambiguities():
+    signatures = [[A], [B], [A, B], [B, A], [A, C]]
+    expected = set([((A, B), (B, A))])
+    result = ambiguities(signatures)
+    assert set(map(tuple, expected)) == set(map(tuple, result))

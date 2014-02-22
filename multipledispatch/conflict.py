@@ -12,6 +12,12 @@ def ambiguous(a, b):
     return consistent(a, b) and not (supercedes(a, b) or supercedes(b, a))
 
 
+def ambiguities(signatures):
+    return set([(tuple(a), tuple(b)) for a in signatures
+                                     for b in signatures
+                                     if a < b and ambiguous(a, b)])
+
+
 def remove_obsolete(signatures):
     return [a for a in signatures
               if not any(len(a) == len(b) and supercedes(b, a)
