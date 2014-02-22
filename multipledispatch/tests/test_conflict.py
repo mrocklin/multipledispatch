@@ -1,14 +1,26 @@
 from multipledispatch.conflict import *
 
+
 class A(object): pass
 class B(A): pass
 class C(object): pass
+
 
 def test_supercedes():
     assert supercedes([B], [A])
     assert supercedes([B, A], [A, A])
     assert not supercedes([B, A], [A, B])
     assert not supercedes([A], [B])
+
+
+def test_consistent():
+    assert consistent([A], [A])
+    assert consistent([B], [B])
+    assert not consistent([A], [C])
+    assert consistent([A, B], [A, B])
+    assert consistent([B, A], [A, B])
+    assert not consistent([B, A], [B])
+    assert not consistent([B, A], [B, C])
 
 
 def test_remove_obsolete():
