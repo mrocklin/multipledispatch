@@ -33,16 +33,6 @@ def super_signature(signatures):
                for i in range(n)]
 
 
-
-def conflict(signatures):
-    n = len(signatures[0])
-    assert len(set(map(len, signatures))) == n
-
-    edges = set((a, b) for a in signatures
-                       for b in signatures
-                       if any(issubclass(aa, bb) for aa, bb in zip(a, b)))
-
-
 def edge(a, b, tie_breaker=hash):
     """ A should be checked before B
 
