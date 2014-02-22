@@ -1,3 +1,5 @@
+from .util import _toposort, groupby
+
 def supercedes(a, b):
     return len(a) == len(b) and all(map(issubclass, a, b))
 
@@ -46,8 +48,6 @@ def edge(a, b, tie_breaker=hash):
 
 
 def ordering(signatures):
-    from toolz import groupby
-    from .util import _toposort
     signatures = map(tuple, signatures)
     edges = [(a, b) for a in signatures for b in signatures if edge(a, b)]
     edges = groupby(lambda x: x[0], edges)
