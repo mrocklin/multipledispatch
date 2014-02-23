@@ -23,10 +23,12 @@ def ambiguous(a, b):
 
 def ambiguities(signatures):
     """ All signature pairs such that A is ambiguous with B """
-    return set([(tuple(a), tuple(b)) for a in signatures for b in signatures
-               if a < b and ambiguous(a, b)
-               and not any(supercedes(c, a) and supercedes(c, b)
-                            for c in signatures)])
+    signatures = list(map(tuple, signatures))
+    return set([(a, b) for a in signatures for b in signatures
+                       if hash(a) < hash(b)
+                       and ambiguous(a, b)
+                       and not any(supercedes(c, a) and supercedes(c, b)
+                                    for c in signatures)])
 
 
 def super_signature(signatures):
@@ -56,7 +58,7 @@ def ordering(signatures):
 
     Topoological sort of edges as given by ``edge`` and ``supercedes``
     """
-    signatures = map(tuple, signatures)
+    signatures = list(map(tuple, signatures))
     edges = [(a, b) for a in signatures for b in signatures if edge(a, b)]
     edges = groupby(lambda x: x[0], edges)
     for s in signatures:
