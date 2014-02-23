@@ -1,5 +1,6 @@
 from multipledispatch import dispatch
 from multipledispatch.compatibility import raises
+from pytest import xfail
 
 
 def test_singledispatch():
@@ -121,3 +122,21 @@ def test_caching_correct_behavior():
         return 2
 
     assert f(C()) == 2
+
+
+"""
+Fails
+def test_methods():
+    class Foo(object):
+        @dispatch(int)
+        def f(self, x):
+            return x + 1
+
+        @dispatch(float)
+        def f(self, x):
+            return x - 1
+
+    F = Foo()
+    assert F.f(1) == 2
+    assert F.f(1.0) == 0.0
+"""
