@@ -54,6 +54,28 @@ class Dispatcher(object):
         return self.ordering
 
     def resolve(self, types):
+        """ Deterimine appropriate implementation for this type signature
+
+        This method is internal.  Users should call this object as a function.
+        Implementation resolution occurs within the ``__call__`` method.
+
+        >>> @dispatch(int)
+        ... def inc(x):
+        ...     return x + 1
+
+        >>> implementation = inc.resolve((int,))
+        >>> implementation(3)
+        4
+
+        >>> inc.resolve((float,))
+        Traceback (most recent call last):
+        ...
+        NotImplementedError
+
+        See Also:
+            ``multipledispatch.conflict`` - module to determine resolution order
+        """
+
         if types in self._cache:
             return self._cache[types]
         elif types in self.funcs:
