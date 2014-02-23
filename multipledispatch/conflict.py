@@ -1,5 +1,9 @@
 from .util import _toposort, groupby
 
+class AmbiguityWarning(Warning):
+    pass
+
+
 def supercedes(a, b):
     """ A is consistent and strictly more specific than B """
     return len(a) == len(b) and all(map(issubclass, a, b))

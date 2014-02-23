@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from warnings import warn
-from .conflict import ordering, ambiguities, super_signature
+from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 
 
 class Dispatcher(object):
@@ -15,7 +15,7 @@ class Dispatcher(object):
         self.ordering = ordering(self.funcs)
         amb = ambiguities(self.funcs)
         if amb:
-            warn(warning_text(self.name, amb))
+            warn(warning_text(self.name, amb), AmbiguityWarning)
         self._cache.clear()
 
     def __call__(self, *args, **kwargs):
