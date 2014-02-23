@@ -58,6 +58,8 @@ What this doesn't do
    def are_same_type(x, y):
        return True
 
+-  Respect namespaces
+
 Links
 -----
 
