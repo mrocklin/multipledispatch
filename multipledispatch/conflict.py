@@ -19,9 +19,11 @@ def ambiguous(a, b):
 
 def ambiguities(signatures):
     """ All signature pairs such that A is ambiguous with B """
-    return set([(tuple(a), tuple(b)) for a in signatures
-                                     for b in signatures
-                                     if a < b and ambiguous(a, b)])
+    return set([(tuple(a), tuple(b)) for a in signatures for b in signatures
+               if a < b and ambiguous(a, b)
+               and not any(supercedes(c, a) and supercedes(c, b)
+                            for c in signatures)])
+
 
 
 def super_signature(signatures):

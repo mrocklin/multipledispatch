@@ -44,6 +44,10 @@ def test_ambiguities():
     result = ambiguities(signatures)
     assert set(map(frozenset, expected)) == set(map(frozenset, result))
 
+    signatures = [[A], [B], [A, B], [B, A], [A, C], [B, B]]
+    expected = set()
+    result = ambiguities(signatures)
+    assert set(map(frozenset, expected)) == set(map(frozenset, result))
 
 def test_ordering():
     signatures = [[A, A], [A, B], [B, A], [B, B], [A, C]]
