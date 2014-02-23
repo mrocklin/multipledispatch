@@ -3,7 +3,7 @@ Multiple Dispatch
 
 |Build Status|
 
-A relatively sane multiple dispatch system for Python.
+A relatively sane approach to multiple dispatch in Python.
 
 Example
 -------
@@ -76,7 +76,7 @@ What this doesn't do
 Installation and Dependencies
 -----------------------------
 
-``multipledispatch`` is on the Python Package Index (PyPi):
+``multipledispatch`` is on the Python Package Index (PyPI):
 
 ::
 
@@ -96,6 +96,12 @@ library.
 It is, in short, a light weight dependency.
 
 
+License
+-------
+
+New BSD. See License_.
+
+
 Links
 -----
 
@@ -113,3 +119,4 @@ Links
 
 .. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.png
    :target: https://travis-ci.org/mrocklin/multipledispatch
+.. _License: https://github.com/pymultipledispatch/multipledispatch/blob/master/LICENSE.txt
