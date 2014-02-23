@@ -25,7 +25,6 @@ def ambiguities(signatures):
                             for c in signatures)])
 
 
-
 def super_signature(signatures):
     """ A signature that would break ambiguities """
     n = len(signatures[0])
