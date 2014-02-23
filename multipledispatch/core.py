@@ -51,6 +51,7 @@ def warning_text(name, amb):
                       + ')\ndef %s(...)'%name for s in amb])
     return text
 
+
 dispatchers = dict()
 
 
@@ -67,27 +68,3 @@ def dispatch(*types):
 
 def str_signature(sig):
     return ', '.join(cls.__name__ for cls in sig)
-
-
-def minset(seq, key=lambda x: x):
-    """ Find all minimum elements of sequence
-
-    >>> sorted(minset(['Cat', 'Dog', 'Camel', 'Mouse'], key=lambda x: x[0]))
-    ['Camel', 'Cat']
-    """
-    if not seq:
-        raise ValueError("Empty input")
-    seq = iter(seq)
-    first = next(seq)
-    best = set([first])
-    bestval = key(first)
-
-    for item in seq:
-        val = key(item)
-        if val < bestval:
-            bestval = val
-            best.clear()
-            best.add(item)
-        elif val == bestval:
-            best.add(item)
-    return best
