@@ -3,38 +3,50 @@ Multiple Dispatch
 
 |Build Status|
 
-Arbitrary decisions
--------------------
+A relatively sane multiple dispatch system for Python.
 
-We collect implementations based around the name of the function. This
-means that we ignore namespaces.
+Example
+-------
 
-When the choice between two implementations is ambiguous then we choose
-one pseudo-randomly and raise a warning.
+.. code-block:: python
+
+   >>> from multipledispatch import dispatch
+
+   >>> @dispatch(int, int)
+   ... def add(x, y):
+   ...     return x + y
+
+   >>> @dispatch(object, object)
+   ... def add(x, y):
+   ...     return "%s + %s" % (x, y)
+
+   >>> add(1, 2)
+   3
+
+   >>> add(1, 'hello')
+   '1 + hello'
 
 What this does
 --------------
 
--  Selects implementation from types of all non-keyword arguments
+-  Dispatches on all non-keyword arguments
 
 -  Supports inheritance
 
--  Supports union types ``(int, float)``
+-  Supports union types, e.g. ``(int, float)``
 
--  Supports builtin abstract classes like ``Iterator, Number, ...``
+-  Supports builtin abstract classes, e.g. ``Iterator, Number, ...``
 
 -  Caches for fast repeated lookup
 
--  Performs static analysis at function definition time to identify
-   possible ambiguities and provide suggestions to break those
-   ambiguities
+-  Identifies possible ambiguities at function definition time
 
 What this doesn't do
 --------------------
 
 -  Dispatch on class methods
 
-::
+.. code-block:: python
 
    class Foo(object):
        @dispatch(int)
@@ -43,7 +55,7 @@ What this doesn't do
 
 -  Vararg dispatch
 
-::
+.. code-block:: python
 
    @dispatch([int])
    def add(*args):
@@ -51,7 +63,7 @@ What this doesn't do
 
 -  Diagonal dispatch
 
-::
+.. code-block:: python
 
    a = arbitrary_type()
    @dispatch(a, a)
