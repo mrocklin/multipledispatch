@@ -3,6 +3,7 @@ Multiple Dispatch
 
 [![](https://travis-ci.org/mrocklin/multipledispatch.png)](https://travis-ci.org/mrocklin/multipledispatch)
 
+
 Arbitrary decisions
 -------------------
 
@@ -11,6 +12,46 @@ means that we ignore namespaces.
 
 When the choice between two implementations is ambiguous then we choose one
 pseudo-randomly and raise a warning.
+
+
+What this does
+--------------
+
+*   Selects implementation from types of all non-keyword arguments
+
+*   Supports inheritance
+
+*   Supports union types `(int, float)`
+
+*   Caches for fast repeated lookup
+
+*   Performs static analysis at function definition time to identify possible
+    ambiguities and provide suggestions to break those ambiguities
+
+
+What this doesn't do
+--------------------
+
+
+*   Dispatch on class methods
+
+    class Foo(object):
+        @dispatch(int)
+        def f(x):
+            ...
+
+*   Vararg dispatch
+
+    @dispatch([int])
+    def add(*args):
+        ...
+
+*   Diagonal dispatch
+
+    a = arbitrary_type()
+    @dispatch(a, a)
+    def are_same_type(x, y):
+        return True
 
 
 Links
