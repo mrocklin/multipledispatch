@@ -37,9 +37,9 @@ What this doesn't do
 ::
 
    class Foo(object):
-   @dispatch(int)
+       @dispatch(int)
        def f(x):
-       ...
+           ...
 
 -  Vararg dispatch
 
