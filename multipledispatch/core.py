@@ -4,6 +4,26 @@ from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 
 
 class Dispatcher(object):
+    """ Dispatch methods based on type signature
+
+    Use ``multipledispatch.dispatch`` to add implementations
+
+    Examples
+    --------
+
+    >>> @dispatch(int)
+    ... def f(x):
+    ...     return x + 1
+
+    >>> @dispatch(float)
+    ... def f(x):
+    ...     return x - 1
+
+    >>> f(3)
+    4
+    >>> f(3.0)
+    2.0
+    """
     __slots__ = 'name', 'funcs', 'ordering', '_cache'
 
     def __init__(self, name):
@@ -12,6 +32,7 @@ class Dispatcher(object):
         self._cache = dict()
 
     def add(self, signature, func):
+        """ Add new types/method pair to dispatcher """
         self.funcs[signature] = func
         self.ordering = ordering(self.funcs)
         amb = ambiguities(self.funcs)
@@ -23,7 +44,6 @@ class Dispatcher(object):
         types = tuple([type(arg) for arg in args])
         func = self.resolve(types)
         return func(*args, **kwargs)
-
 
     def resolve(self, types):
         if types in self._cache:
@@ -53,7 +73,7 @@ def dispatch(*types):
     Collects implementations based on the function name.  Ignores namespaces.
 
     If ambiguous type signatures occur a warning is raised when the function is
-    defined suggesting the additional method to break the dependency.
+    defined suggesting the additional method to break the ambiguity.
 
     Examples
     --------
