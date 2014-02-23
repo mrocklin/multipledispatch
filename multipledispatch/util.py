@@ -11,7 +11,7 @@ def _toposort(edges):
     outputs:
         L - an ordered list of nodes that satisfy the dependencies of edges
 
-    >>> _toposort({1: {2, 3}, 2: (3, )})
+    >>> _toposort({1: (2, 3), 2: (3, )})
     [1, 2, 3]
 
     Closely follows the wikipedia page [2]
