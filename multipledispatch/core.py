@@ -45,6 +45,14 @@ class Dispatcher(object):
         func = self.resolve(types)
         return func(*args, **kwargs)
 
+    def __str__(self):
+        return "<dispatched %s>" % self.name
+    __repr__ = __str__
+
+    @property
+    def supported_types(self):
+        return self.ordering
+
     def resolve(self, types):
         if types in self._cache:
             return self._cache[types]
