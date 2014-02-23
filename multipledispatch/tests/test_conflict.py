@@ -54,4 +54,4 @@ def test_ordering():
     signatures = [[A, A], [A, B], [B, A], [B, B], [A, C]]
     ord = ordering(signatures)
     assert ord[0] == (B, B) or ord[0] == (A, C)
-    assert ord[-1] == (A, A)
+    assert ord[-1] == (A, A) or ord[-1] == (A, C)
