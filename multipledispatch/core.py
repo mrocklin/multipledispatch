@@ -1,9 +1,10 @@
 from contextlib import contextmanager
 from warnings import warn
+from .conflict import ordering
 
 
 class Dispatcher(object):
-    __slots__ = 'name', 'funcs', '_cache'
+    __slots__ = 'name', 'funcs', 'ordering', '_cache'
     def __init__(self, name):
         self.name = name
         self.funcs = dict()
@@ -11,6 +12,7 @@ class Dispatcher(object):
 
     def add(self, signature, func):
         self.funcs[signature] = func
+        self.ordering = ordering(self.funcs)
         self._cache.clear()
 
     def __call__(self, *args, **kwargs):
@@ -27,29 +29,10 @@ class Dispatcher(object):
             return self.funcs[types]
 
         n = len(types)
-        matches = dict((signature, func) for signature, func in self.funcs.items()
-                                         if len(signature) == n
-                                         and all(map(issubclass, types, signature)))
-        if len(matches) == 1:
-            result = next(iter(matches.values()))
-            self._cache[types] = result
-            return result
-        if len(matches) > 1:
-            scores = dict((func, [typ.mro().index(sig)
-                                for typ, sig in zip(types, signature)])
-                            for signature, func in matches.items())
-            winners = [minset(scores, key=lambda func: scores[func][i])
-                        for i in range(len(types))]
-            intersection = set.intersection(*winners)
-            if len(intersection) == 1:  # One obvious best choice
-                result = next(iter(intersection))
-                self._cache[types] = result
-                return result
-            else:
-                warn("Multiple competing implementations found"
-                     "Using one at random.")
-                union = set.union(*winners)
-                result = next(iter(union))
+        for signature in self.ordering:
+            if all(len(signature) == n and issubclass(typ, sig)
+                    for typ, sig in zip(types, signature)):
+                result = self.funcs[signature]
                 self._cache[types] = result
                 return result
         raise NotImplementedError()
