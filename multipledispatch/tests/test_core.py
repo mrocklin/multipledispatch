@@ -124,6 +124,15 @@ def test_caching_correct_behavior():
     assert f(C()) == 2
 
 
+def test_union_types():
+    @dispatch((A, C))
+    def f(x):
+        return 1
+
+    assert f(A()) == 1
+    assert f(C()) == 1
+
+
 """
 Fails
 def test_methods():

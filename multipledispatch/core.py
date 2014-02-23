@@ -138,9 +138,29 @@ def dispatch(*types):
         name = func.__name__
         if name not in dispatchers:
             dispatchers[name] = Dispatcher(name)
-        dispatchers[name].add(types, func)
+        for typs in expand_tuples(types):
+            dispatchers[name].add(typs, func)
         return dispatchers[name]
     return _
+
+
+def expand_tuples(L):
+    """
+
+    >>> expand_tuples([1, (2, 3)])
+    [(1, 2), (1, 3)]
+
+    >>> expand_tuples([1, 2])
+    [(1, 2)]
+    """
+    if not L:
+        return [()]
+    elif not isinstance(L[0], tuple):
+        rest = expand_tuples(L[1:])
+        return [(L[0],) + t for t in rest]
+    else:
+        rest = expand_tuples(L[1:])
+        return [(item,) + t for t in rest for item in L[0]]
 
 
 def str_signature(sig):
