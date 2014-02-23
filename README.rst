@@ -72,6 +72,30 @@ What this doesn't do
 
 -  Respect namespaces
 
+
+Installation and Dependencies
+-----------------------------
+
+``multipledispatch`` is on the Python Package Index (PyPi):
+
+::
+
+    pip install multipledispatch
+
+or
+
+::
+
+    easy_install multipledispatch
+
+
+``multipledispatch`` supports Python 2.6+ and Python 3.2+ with a common
+codebase.  It is pure Python and requires no dependencies beyond the standard
+library.
+
+It is, in short, a light weight dependency.
+
+
 Links
 -----
 
