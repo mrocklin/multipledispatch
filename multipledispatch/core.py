@@ -32,7 +32,19 @@ class Dispatcher(object):
         self._cache = dict()
 
     def add(self, signature, func):
-        """ Add new types/method pair to dispatcher """
+        """ Add new types/method pair to dispatcher
+
+        >>> D = Dispatcher('add')
+        >>> D.add((int, int), lambda x, y: x + y)
+        >>> D.add((float, float), lambda x, y: x + y)
+
+        >>> D(1, 2)
+        3
+        >>> D(1, 2.0)
+        Traceback (most recent call last):
+        ...
+        NotImplementedError
+        """
         self.funcs[signature] = func
         self.ordering = ordering(self.funcs)
         amb = ambiguities(self.funcs)
