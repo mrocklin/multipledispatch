@@ -135,6 +135,19 @@ def test_union_types():
 
 """
 Fails
+def test_dispatch_on_dispatch():
+    @dispatch(A)
+    @dispatch(C)
+    def q(x):
+        return 1
+
+    assert q(A()) == 1
+    assert q(C()) == 1
+"""
+
+
+"""
+Fails
 def test_methods():
     class Foo(object):
         @dispatch(int)
