@@ -5,6 +5,7 @@ from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 
 class Dispatcher(object):
     __slots__ = 'name', 'funcs', 'ordering', '_cache'
+
     def __init__(self, name):
         self.name = name
         self.funcs = dict()
@@ -41,21 +42,35 @@ class Dispatcher(object):
         raise NotImplementedError()
 
 
-def warning_text(name, amb):
-    text = "\nAmbiguities exist in dispatched function %s\n\n"%(name)
-    text += "The following signatures may result in ambiguous behavior:\n"
-    for pair in amb:
-        text += "\t" + ', '.join('['+str_signature(s)+']' for s in pair) + "\n"
-    text += "\n\nConsider making the following additions:\n\n"
-    text += '\n\n'.join(['@dispatch(' + str_signature(super_signature(s))
-                      + ')\ndef %s(...)'%name for s in amb])
-    return text
-
-
 dispatchers = dict()
 
 
 def dispatch(*types):
+    """ Dispatch function on the types of the inputs
+
+    Supports dispatch on all non-keyword arguments.
+
+    Collects implementations based on the function name.  Ignores namespaces.
+
+    If ambiguous type signatures occur a warning is raised when the function is
+    defined suggesting the additional method to break the dependency.
+
+    Examples
+    --------
+
+    >>> @dispatch(int)
+    ... def f(x):
+    ...     return x + 1
+
+    >>> @dispatch(float)
+    ... def f(x):
+    ...     return x - 1
+
+    >>> f(3)
+    4
+    >>> f(3.0)
+    2.0
+    """
     types = tuple(types)
     def _(func):
         name = func.__name__
@@ -68,3 +83,14 @@ def dispatch(*types):
 
 def str_signature(sig):
     return ', '.join(cls.__name__ for cls in sig)
+
+
+def warning_text(name, amb):
+    text = "\nAmbiguities exist in dispatched function %s\n\n"%(name)
+    text += "The following signatures may result in ambiguous behavior:\n"
+    for pair in amb:
+        text += "\t" + ', '.join('['+str_signature(s)+']' for s in pair) + "\n"
+    text += "\n\nConsider making the following additions:\n\n"
+    text += '\n\n'.join(['@dispatch(' + str_signature(super_signature(s))
+                      + ')\ndef %s(...)'%name for s in amb])
+    return text

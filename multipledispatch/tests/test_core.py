@@ -1,6 +1,7 @@
 from multipledispatch import dispatch
 from multipledispatch.compatibility import raises
 
+
 def test_singledispatch():
     @dispatch(int)
     def f(x):
