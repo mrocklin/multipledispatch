@@ -6,7 +6,7 @@ Multiple Dispatch
 A relatively sane approach to multiple dispatch in Python.
 
 There are a few implementations of multiple dispatch already out there (see
-links below).  This implementation one is efficient, relatively complete, and
+links below).  This implementation is efficient, relatively complete, and
 performs static analysis to avoid common issues.
 
 Example
