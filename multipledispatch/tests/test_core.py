@@ -149,11 +149,11 @@ def test_dispatch_on_dispatch():
 
 def test_methods():
     class Foo(object):
-        @method_dispatch(float)
+        @dispatch(float)
         def f(self, x):
             return x - 1
 
-        @method_dispatch(int)
+        @dispatch(int)
         def f(self, x):
             return x + 1
 

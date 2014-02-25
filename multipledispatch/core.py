@@ -120,6 +120,11 @@ class MethodDispatcher(Dispatcher):
 dispatchers = dict()
 
 
+def ismethod(func):
+    spec = inspect.getargspec(func)
+    return spec and spec.args and spec.args[0] == 'self'
+
+
 def dispatch(*types):
     """ Dispatch function on the types of the inputs
 
@@ -148,6 +153,8 @@ def dispatch(*types):
     """
     types = tuple(types)
     def _(func):
+        if ismethod(func):
+            return method_dispatch(*types)(func)
         name = func.__name__
         if name not in dispatchers:
             dispatchers[name] = Dispatcher(name)
@@ -160,7 +167,7 @@ def dispatch(*types):
 def method_dispatch(*types):
     def _(func):
         name = func.__name__
-        dispatcher = inspect.currentframe().f_back.f_locals.get(name,
+        dispatcher = inspect.currentframe().f_back.f_back.f_locals.get(name,
                 MethodDispatcher(name))
         dispatcher.add(types, func)
         return dispatcher
