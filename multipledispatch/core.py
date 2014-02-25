@@ -64,6 +64,7 @@ class Dispatcher(object):
 
     @property
     def supported_types(self):
+        """ A topologically sorted list of type signatures """
         return self.ordering
 
     def resolve(self, types):
@@ -106,6 +107,11 @@ class Dispatcher(object):
 
 
 class MethodDispatcher(Dispatcher):
+    """ Dispatch methods based on type signature
+
+    See Also:
+        Dispatcher
+    """
     def __get__(self, instance, owner):
         self.obj = instance
         self.cls = owner
@@ -165,6 +171,11 @@ def dispatch(*types):
 
 
 def ismethod(func):
+    """ Is func a method?
+
+    Note that this has to work as the method is defined but before the class is
+    defined.  At this stage methods look like functions.
+    """
     spec = inspect.getargspec(func)
     return spec and spec.args and spec.args[0] == 'self'
 
@@ -198,6 +209,7 @@ def str_signature(sig):
 
 
 def warning_text(name, amb):
+    """ The text for ambiguity warnings """
     text = "\nAmbiguities exist in dispatched function %s\n\n"%(name)
     text += "The following signatures may result in ambiguous behavior:\n"
     for pair in amb:
