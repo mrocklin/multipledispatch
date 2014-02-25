@@ -1,7 +1,6 @@
 from multipledispatch import dispatch
 from multipledispatch.compatibility import raises
 from pytest import xfail
-from multipledispatch.core import method_dispatch
 
 
 def test_singledispatch():

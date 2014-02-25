@@ -120,11 +120,6 @@ class MethodDispatcher(Dispatcher):
 dispatchers = dict()
 
 
-def ismethod(func):
-    spec = inspect.getargspec(func)
-    return spec and spec.args and spec.args[0] == 'self'
-
-
 def dispatch(*types):
     """ Dispatch function on the types of the inputs
 
@@ -153,25 +148,25 @@ def dispatch(*types):
     """
     types = tuple(types)
     def _(func):
+        name = func.__name__
+
         if ismethod(func):
-            return method_dispatch(*types)(func)
-        name = func.__name__
-        if name not in dispatchers:
-            dispatchers[name] = Dispatcher(name)
-        for typs in expand_tuples(types):
-            dispatchers[name].add(typs, func)
-        return dispatchers[name]
-    return _
-
-
-def method_dispatch(*types):
-    def _(func):
-        name = func.__name__
-        dispatcher = inspect.currentframe().f_back.f_back.f_locals.get(name,
+            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
                 MethodDispatcher(name))
-        dispatcher.add(types, func)
+        else:
+            if name not in dispatchers:
+                dispatchers[name] = Dispatcher(name)
+            dispatcher = dispatchers[name]
+
+        for typs in expand_tuples(types):
+            dispatcher.add(typs, func)
         return dispatcher
     return _
+
+
+def ismethod(func):
+    spec = inspect.getargspec(func)
+    return spec and spec.args and spec.args[0] == 'self'
 
 
 def expand_tuples(L):
