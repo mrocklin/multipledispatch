@@ -1,7 +1,6 @@
 from multipledispatch import dispatch
 from multipledispatch.compatibility import raises
 from pytest import xfail
-from multipledispatch.core import method_dispatch
 
 
 def test_singledispatch():
@@ -157,6 +156,29 @@ def test_methods():
         def f(self, x):
             return x + 1
 
-    F = Foo()
-    assert F.f(1) == 2
-    assert F.f(1.0) == 0.0
+        @dispatch(int)
+        def g(self, x):
+            return x + 3
+
+
+    foo = Foo()
+    assert foo.f(1) == 2
+    assert foo.f(1.0) == 0.0
+    assert foo.g(1) == 4
+
+
+def test_methods_multiple_dispatch():
+    class Foo(object):
+        @dispatch(A, A)
+        def f(x, y):
+            return 1
+
+        @dispatch(A, C)
+        def f(x, y):
+            return 2
+
+
+    foo = Foo()
+    assert foo.f(A(), A()) == 1
+    assert foo.f(A(), C()) == 2
+    assert foo.f(C(), C()) == 2

@@ -64,6 +64,7 @@ class Dispatcher(object):
 
     @property
     def supported_types(self):
+        """ A topologically sorted list of type signatures """
         return self.ordering
 
     def resolve(self, types):
@@ -106,6 +107,11 @@ class Dispatcher(object):
 
 
 class MethodDispatcher(Dispatcher):
+    """ Dispatch methods based on type signature
+
+    See Also:
+        Dispatcher
+    """
     def __get__(self, instance, owner):
         self.obj = instance
         self.cls = owner
@@ -118,11 +124,6 @@ class MethodDispatcher(Dispatcher):
 
 
 dispatchers = dict()
-
-
-def ismethod(func):
-    spec = inspect.getargspec(func)
-    return spec and spec.args and spec.args[0] == 'self'
 
 
 def dispatch(*types):
@@ -153,25 +154,30 @@ def dispatch(*types):
     """
     types = tuple(types)
     def _(func):
+        name = func.__name__
+
         if ismethod(func):
-            return method_dispatch(*types)(func)
-        name = func.__name__
-        if name not in dispatchers:
-            dispatchers[name] = Dispatcher(name)
-        for typs in expand_tuples(types):
-            dispatchers[name].add(typs, func)
-        return dispatchers[name]
-    return _
-
-
-def method_dispatch(*types):
-    def _(func):
-        name = func.__name__
-        dispatcher = inspect.currentframe().f_back.f_back.f_locals.get(name,
+            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
                 MethodDispatcher(name))
-        dispatcher.add(types, func)
+        else:
+            if name not in dispatchers:
+                dispatchers[name] = Dispatcher(name)
+            dispatcher = dispatchers[name]
+
+        for typs in expand_tuples(types):
+            dispatcher.add(typs, func)
         return dispatcher
     return _
+
+
+def ismethod(func):
+    """ Is func a method?
+
+    Note that this has to work as the method is defined but before the class is
+    defined.  At this stage methods look like functions.
+    """
+    spec = inspect.getargspec(func)
+    return spec and spec.args and spec.args[0] == 'self'
 
 
 def expand_tuples(L):
@@ -203,6 +209,7 @@ def str_signature(sig):
 
 
 def warning_text(name, amb):
+    """ The text for ambiguity warnings """
     text = "\nAmbiguities exist in dispatched function %s\n\n"%(name)
     text += "The following signatures may result in ambiguous behavior:\n"
     for pair in amb:

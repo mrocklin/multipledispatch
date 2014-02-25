@@ -37,6 +37,8 @@ What this does
 
 -  Supports inheritance
 
+-  Supports instance methods
+
 -  Supports union types, e.g. ``(int, float)``
 
 -  Supports builtin abstract classes, e.g. ``Iterator, Number, ...``
@@ -49,15 +51,6 @@ What this does
 
 What this doesn't do
 --------------------
-
--  Dispatch on class methods
-
-.. code-block:: python
-
-   class Foo(object):
-       @dispatch(int)
-       def add(self, other):
-           ...
 
 -  Vararg dispatch
 
