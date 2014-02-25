@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from warnings import warn
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
+import inspect
 
 
 class Dispatcher(object):
@@ -104,6 +105,18 @@ class Dispatcher(object):
         raise NotImplementedError()
 
 
+class MethodDispatcher(Dispatcher):
+    def __get__(self, instance, owner):
+        self.obj = instance
+        self.cls = owner
+        return self
+
+    def __call__(self, *args, **kwargs):
+        types = tuple([type(arg) for arg in args])
+        func = self.resolve(types)
+        return func(self.obj, *args, **kwargs)
+
+
 dispatchers = dict()
 
 
@@ -141,6 +154,16 @@ def dispatch(*types):
         for typs in expand_tuples(types):
             dispatchers[name].add(typs, func)
         return dispatchers[name]
+    return _
+
+
+def method_dispatch(*types):
+    def _(func):
+        name = func.__name__
+        dispatcher = inspect.currentframe().f_back.f_locals.get(name,
+                MethodDispatcher(name))
+        dispatcher.add(types, func)
+        return dispatcher
     return _
 
 
