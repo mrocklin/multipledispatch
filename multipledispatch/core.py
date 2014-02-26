@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from warnings import warn
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 import inspect
+import sys
 
 
 class Dispatcher(object):
@@ -127,6 +128,30 @@ dispatchers = dict()
 
 
 def dispatch(*types):
+    """
+    Dispatch decorator with two modes of use:
+
+    @dispatch(int):
+    def f(x):
+        return 'int!'
+
+    @dispatch
+    def f(x: float):
+        return 'float!'
+    """
+    # if one argument as passed that is not callable and isn't a type, dispatch
+    # on annotations
+    if (len(types) == 1
+            and callable(types[0])
+            and not isinstance(types[0], type)):
+        fn = types[0]
+        return dispatch_on_annotations(fn)
+    # otherwise dispatch on types
+    else:
+        return dispatch_on_types(*types)
+
+
+def dispatch_on_types(*types):
     """ Dispatch function on the types of the inputs
 
     Supports dispatch on all non-keyword arguments.
@@ -155,7 +180,6 @@ def dispatch(*types):
     types = tuple(types)
     def _(func):
         name = func.__name__
-
         if ismethod(func):
             dispatcher = inspect.currentframe().f_back.f_locals.get(name,
                 MethodDispatcher(name))
@@ -170,13 +194,28 @@ def dispatch(*types):
     return _
 
 
+def dispatch_on_annotations(fn):
+    """
+    Extract types from fn's annotation (only works in Python 3+)
+    """
+    if sys.version_info.major >= 3:
+        argspec = inspect.getfullargspec(fn)
+        args = argspec.args[1:] if ismethod(fn) else argspec.args
+        return dispatch_on_types(*[argspec.annotations[a] for a in args])(fn)
+    else:
+        raise SyntaxError('Annotations require Python 3+.')
+
+
 def ismethod(func):
     """ Is func a method?
 
     Note that this has to work as the method is defined but before the class is
     defined.  At this stage methods look like functions.
     """
-    spec = inspect.getargspec(func)
+    try:
+        spec = inspect.getargspec(func)
+    except:
+        spec = inspect.getfullargspec(func)
     return spec and spec.args and spec.args[0] == 'self'
 
 
@@ -218,3 +257,4 @@ def warning_text(name, amb):
     text += '\n\n'.join(['@dispatch(' + str_signature(super_signature(s))
                       + ')\ndef %s(...)'%name for s in amb])
     return text
+
