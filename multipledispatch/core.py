@@ -62,11 +62,6 @@ class Dispatcher(object):
         return "<dispatched %s>" % self.name
     __repr__ = __str__
 
-    @property
-    def supported_types(self):
-        """ A topologically sorted list of type signatures """
-        return self.ordering
-
     def resolve(self, types):
         """ Deterimine appropriate implementation for this type signature
 
