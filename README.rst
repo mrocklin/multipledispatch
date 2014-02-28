@@ -49,6 +49,8 @@ What this does
 
 -  Provides hints to resolve ambiguities when they occur
 
+-  Optional namespace support with keyword arguments
+
 What this doesn't do
 --------------------
 
@@ -68,8 +70,6 @@ What this doesn't do
    @dispatch(a, a)
    def are_same_type(x, y):
        return True
-
--  Respect namespaces
 
 
 Installation and Dependencies
