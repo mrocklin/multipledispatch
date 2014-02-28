@@ -171,36 +171,36 @@ def test_dispatch_on_dispatch():
 def test_methods():
     class Foo(object):
         @dispatch(float)
-        def f(self, x):
+        def methodf(self, x):
             return x - 1
 
         @dispatch(int)
-        def f(self, x):
+        def methodf(self, x):
             return x + 1
 
         @dispatch(int)
-        def g(self, x):
+        def methodg(self, x):
             return x + 3
 
 
     foo = Foo()
-    assert foo.f(1) == 2
-    assert foo.f(1.0) == 0.0
-    assert foo.g(1) == 4
+    assert foo.methodf(1) == 2
+    assert foo.methodf(1.0) == 0.0
+    assert foo.methodg(1) == 4
 
 
 def test_methods_multiple_dispatch():
     class Foo(object):
         @dispatch(A, A)
-        def f(x, y):
+        def methodf(self, x, y):
             return 1
 
         @dispatch(A, C)
-        def f(x, y):
+        def methodf(self, x, y):
             return 2
 
 
     foo = Foo()
-    assert foo.f(A(), A()) == 1
-    assert foo.f(A(), C()) == 2
-    assert foo.f(C(), C()) == 2
+    assert foo.methodf(A(), A()) == 1
+    assert foo.methodf(A(), C()) == 2
+    assert foo.methodf(C(), C()) == 2
