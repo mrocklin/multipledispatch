@@ -151,6 +151,23 @@ def dispatch(*types, **kwargs):
     4
     >>> f(3.0)
     2.0
+
+    Specify an isolated namespace with the namespace keyword argument
+
+    >>> my_namespace = dict()
+    >>> @dispatch(int, namespace=my_namespace)
+    ... def foo(x):
+    ...     return x + 1
+
+    Dispatch on instance methods within classes
+
+    >>> class MyClass(object):
+    ...     @dispatch(list)
+    ...     def __init__(self, data):
+    ...         self.data = data
+    ...     @dispatch(int)
+    ...     def __init__(self, datum):
+    ...         self.data = [datum]
     """
     namespace = kwargs.get('namespace', global_namespace)
     types = tuple(types)
