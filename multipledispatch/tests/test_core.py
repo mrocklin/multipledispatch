@@ -155,6 +155,34 @@ def test_namespaces():
     assert foo2(0) == 2
 
 
+def test_varargs():
+    @dispatch([int])
+    def foo(*args):
+        return 'ints'
+
+    @dispatch([float])
+    def foo(*args):
+        return 'floats'
+
+    @dispatch([object])
+    def foo(*args):
+        return 'objects'
+
+    @dispatch(str)
+    def foo(x):
+        return 'one string'
+
+    @dispatch([str])
+    def foo(x, y, z):
+        return 'many strings'
+
+    assert foo(1, 2) == 'ints'
+    assert foo(1.0, 2.0) == 'floats'
+    assert foo(1, 2.0) == 'objects'
+    assert foo('hello') == 'one string'
+    assert foo('hello', 'world', '!') == 'many strings'
+
+
 """
 Fails
 def test_dispatch_on_dispatch():

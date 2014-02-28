@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from warnings import warn
-from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
+from .conflict import (ordering, ambiguities, super_signature,
+        AmbiguityWarning, issubclass_cmp)
 import inspect
 
 
@@ -25,11 +26,14 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = 'name', 'funcs', 'ordering', '_cache'
+    __slots__ = 'name', 'funcs', 'ordering', 'vararg_funcs', 'vararg_ordering', '_cache'
 
     def __init__(self, name):
         self.name = name
         self.funcs = dict()
+        self.ordering = list()
+        self.vararg_funcs = dict()
+        self.vararg_ordering = list()
         self._cache = dict()
 
     def add(self, signature, func):
@@ -51,6 +55,13 @@ class Dispatcher(object):
         amb = ambiguities(self.funcs)
         if amb:
             warn(warning_text(self.name, amb), AmbiguityWarning)
+        self._cache.clear()
+
+    def add_varargs(self, typ, func):
+        self.vararg_funcs[typ] = func
+        self.vararg_ordering = sorted(self.vararg_funcs,
+                                      cmp=issubclass_cmp,
+                                      reverse=True)
         self._cache.clear()
 
     def __call__(self, *args, **kwargs):
@@ -96,6 +107,11 @@ class Dispatcher(object):
             if all(len(signature) == n and issubclass(typ, sig)
                     for typ, sig in zip(types, signature)):
                 result = self.funcs[signature]
+                self._cache[types] = result
+                return result
+        for sig in self.vararg_ordering:
+            if all(issubclass(typ, sig) for typ in types):
+                result = self.vararg_funcs[sig]
                 self._cache[types] = result
                 return result
         raise NotImplementedError()
@@ -176,9 +192,11 @@ def dispatch(*types, **kwargs):
             if name not in namespace:
                 namespace[name] = Dispatcher(name)
             dispatcher = namespace[name]
-
-        for typs in expand_tuples(types):
-            dispatcher.add(typs, func)
+        if len(types) == 1 and isinstance(types[0], list):
+            dispatcher.add_varargs(types[0][0], func)
+        else:
+            for typs in expand_tuples(types):
+                dispatcher.add(typs, func)
         return dispatcher
     return _
 
