@@ -7,7 +7,7 @@ import inspect
 class Dispatcher(object):
     """ Dispatch methods based on type signature
 
-    Use ``multipledispatch.dispatch`` to add implementations
+    Use ``dispatch`` to add implementations
 
     Examples
     --------
