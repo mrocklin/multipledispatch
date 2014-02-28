@@ -66,3 +66,7 @@ def ordering(signatures):
             edges[s] = []
     edges = dict((k, [b for a, b in v]) for k, v in edges.items())
     return _toposort(edges)
+
+
+def issubclass_cmp(x, y):
+    return 1 if issubclass(x, y) else -1 if issubclass(y, x) else 0

@@ -55,3 +55,8 @@ def test_ordering():
     ord = ordering(signatures)
     assert ord[0] == (B, B) or ord[0] == (A, C)
     assert ord[-1] == (A, A) or ord[-1] == (A, C)
+
+
+def test_issubclass_cmp():
+    assert sorted([object, A, B], cmp=issubclass_cmp) == \
+           sorted([B, A, object], cmp=issubclass_cmp) == [object, A, B]
