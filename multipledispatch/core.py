@@ -123,10 +123,10 @@ class MethodDispatcher(Dispatcher):
         return func(self.obj, *args, **kwargs)
 
 
-dispatchers = dict()
+global_namespace = dict()
 
 
-def dispatch(*types):
+def dispatch(*types, **kwargs):
     """ Dispatch function on the types of the inputs
 
     Supports dispatch on all non-keyword arguments.
@@ -152,6 +152,7 @@ def dispatch(*types):
     >>> f(3.0)
     2.0
     """
+    namespace = kwargs.get('namespace', global_namespace)
     types = tuple(types)
     def _(func):
         name = func.__name__
@@ -160,9 +161,9 @@ def dispatch(*types):
             dispatcher = inspect.currentframe().f_back.f_locals.get(name,
                 MethodDispatcher(name))
         else:
-            if name not in dispatchers:
-                dispatchers[name] = Dispatcher(name)
-            dispatcher = dispatchers[name]
+            if name not in namespace:
+                namespace[name] = Dispatcher(name)
+            dispatcher = namespace[name]
 
         for typs in expand_tuples(types):
             dispatcher.add(typs, func)
