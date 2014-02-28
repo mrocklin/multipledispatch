@@ -25,12 +25,13 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = 'name', 'funcs', 'ordering', '_cache'
+    __slots__ = 'name', 'funcs', 'ordering', '_cache', 'instance'
 
     def __init__(self, name):
         self.name = name
         self.funcs = dict()
         self._cache = dict()
+        self.instance = None
 
     def add(self, signature, func):
         """ Add new types/method pair to dispatcher
@@ -56,7 +57,15 @@ class Dispatcher(object):
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
         func = self.resolve(types)
-        return func(*args, **kwargs)
+        # check if the Dispatcher has an instance attribute.
+        # If so, it is being called as a bound method
+        if self.instance is not None:
+            result = func(self.instance, *args, **kwargs)
+            # set instance to None to reset the Dispatcher
+            self.instance = None
+            return result
+        else:
+            return func(*args, **kwargs)
 
     def __str__(self):
         return "<dispatched %s>" % self.name
@@ -100,22 +109,13 @@ class Dispatcher(object):
                 return result
         raise NotImplementedError()
 
-
-class MethodDispatcher(Dispatcher):
-    """ Dispatch methods based on type signature
-
-    See Also:
-        Dispatcher
-    """
-    def __get__(self, instance, owner):
-        self.obj = instance
-        self.cls = owner
+    def __get__(self, instance, typ):
+        """
+        This is only called if the Dispatcher is decorating a method. In that
+        case, the instance attribute is set.
+        """
+        self.instance = instance
         return self
-
-    def __call__(self, *args, **kwargs):
-        types = tuple([type(arg) for arg in args])
-        func = self.resolve(types)
-        return func(self.obj, *args, **kwargs)
 
 
 global_namespace = dict()
@@ -169,28 +169,15 @@ def dispatch(*types, **kwargs):
     def _(func):
         name = func.__name__
 
-        if ismethod(func):
-            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
-                MethodDispatcher(name))
-        else:
-            if name not in namespace:
-                namespace[name] = Dispatcher(name)
-            dispatcher = namespace[name]
+        if name not in namespace:
+            namespace[name] = Dispatcher(name)
+        dispatcher = namespace[name]
 
         for typs in expand_tuples(types):
             dispatcher.add(typs, func)
         return dispatcher
     return _
 
-
-def ismethod(func):
-    """ Is func a method?
-
-    Note that this has to work as the method is defined but before the class is
-    defined.  At this stage methods look like functions.
-    """
-    spec = inspect.getargspec(func)
-    return spec and spec.args and spec.args[0] == 'self'
 
 
 def expand_tuples(L):
