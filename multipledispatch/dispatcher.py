@@ -30,15 +30,15 @@ class Dispatcher(object):
         self.funcs = dict()
         self._cache = dict()
 
-    def extend(self, *types):
-        """ Extend dispatcher with new implementation
+    def register(self, *types):
+        """ register dispatcher with new implementation
 
         >>> f = Dispatcher('f')
-        >>> @f.extend(int)
+        >>> @f.register(int)
         ... def f(x):
         ...     return x + 1
 
-        >>> @f.extend(float)
+        >>> @f.register(float)
         ... def f(x):
         ...     return x - 1
 

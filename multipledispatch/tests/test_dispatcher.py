@@ -16,11 +16,11 @@ def test_dispatcher():
 def test_dispatcher_as_decorator():
     f = Dispatcher('f')
 
-    @f.extend(int)
+    @f.register(int)
     def inc(x):
         return x + 1
 
-    @f.extend(float)
+    @f.register(float)
     def inc(x):
         return x - 1
 
