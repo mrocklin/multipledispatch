@@ -11,3 +11,18 @@ def test_dispatcher():
 
     assert f(1) == 2
     assert f(1.0) == 0.0
+
+
+def test_dispatcher_as_decorator():
+    f = Dispatcher('f')
+
+    @f.extend(int)
+    def inc(x):
+        return x + 1
+
+    @f.extend(float)
+    def inc(x):
+        return x - 1
+
+    assert f(1) == 2
+    assert f(1.0) == 0.0

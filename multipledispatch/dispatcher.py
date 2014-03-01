@@ -30,6 +30,29 @@ class Dispatcher(object):
         self.funcs = dict()
         self._cache = dict()
 
+    def extend(self, *types):
+        """ Extend dispatcher with new implementation
+
+        >>> f = Dispatcher('f')
+        >>> @f.extend(int)
+        ... def f(x):
+        ...     return x + 1
+
+        >>> @f.extend(float)
+        ... def f(x):
+        ...     return x - 1
+
+        >>> f(1)
+        2
+
+        >>> f(1.0)
+        0.0
+        """
+        def _(func):
+            self.add(types, func)
+            return self
+        return _
+
     def add(self, signature, func):
         """ Add new types/method pair to dispatcher
 
