@@ -54,7 +54,7 @@ Internally `Dispatcher.resolve` selects the function implementation.
 ```
 
 For notational convenience dispatchers leverage Python's decorator syntax to
-register functions they we define them.
+register functions as we define them.
 
 ```Python
 f = Dispatcher('f')
@@ -75,7 +75,7 @@ implemented by `functools.singledispatch` in Python 3.4.
 Namespaces and `dispatch`
 -------------------------
 
-The the `dispatch` decorator hides the creation and manipulation of
+The `dispatch` decorator hides the creation and manipulation of
 `Dispatcher` objects from the user.
 
 ```Python
@@ -99,20 +99,21 @@ future reference.
 ```Python
 # This creates and stores a new Dispatcher('g')
 # namespace['g'] = Dispatcher('g')
+# namespace['g'].add((int,), g)
 @dispatch(int)
 def g(x):
     return x ** 2
 ```
 
-This new `Dispatcher` is stored a *namespace*, which is simply a dictionary
-that maps function names like `'g'` to dispatcher objects like
+We store this new `Dispatcher` in a *namespace*.  A namespace is simply a
+dictionary that maps function names like `'g'` to dispatcher objects like
 `Dispatcher('g')`.
 
 By default `dispatch` uses the global namespace in
-`multipledispatch.core.global_namespace`.  If this global namespace is used
-unwisely by several projects then conflicts may arise, causing difficult to
-track down bugs.  Users who desire additional security can establish their own
-namespaces simply by creating a dictionary.
+`multipledispatch.core.global_namespace`.  If several projects use this global
+namespace unwisely then conflicts may arise, causing difficult to track down
+bugs.  Users who desire additional security establish their own namespaces
+simply by creating a dictionary.
 
 ```Python
 my_namespace = dict()
@@ -123,7 +124,7 @@ def f(x):
 ```
 
 To establish a namespace for an entire project we suggest the use of
-`functools.partial` to bind your namespace to a new `dispatch` decorator.
+`functools.partial` to bind the new namespace to the `dispatch` decorator.
 
 ```Python
 from multipledispatch import dispatch
