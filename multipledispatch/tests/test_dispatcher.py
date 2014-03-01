@@ -1,4 +1,4 @@
-from multipledispatch.dispatcher import Dispatcher
+from multipledispatch.dispatcher import Dispatcher, MethodDispatcher
 
 def test_dispatcher():
     f = Dispatcher('f')
@@ -26,3 +26,20 @@ def test_dispatcher_as_decorator():
 
     assert f(1) == 2
     assert f(1.0) == 0.0
+
+
+def test_register_instance_method():
+    f = MethodDispatcher('f')
+
+    class Test(object):
+        @f.register(list)
+        def __init__(self, data):
+            self.data = data
+
+        @f.register(object)
+        def __init__(self, datum):
+            self.data = [datum]
+
+    a = Test(3)
+    b = Test([3])
+    assert a.data == b.data
