@@ -9,7 +9,7 @@ Types
                   A mapping of type signatures to function implementations
 
     namespace  :: {str: Dispatcher}
-                  A mapping from function names, like 'add' to Dispatchers
+                  A mapping from function names, like 'add', to Dispatchers
 
 Dispatchers
 -----------
@@ -24,7 +24,7 @@ f = Dispatcher('f')
 ```
 
 At the lowest level we build normal Python functions and then add them to the
-`Dispatcher`
+`Dispatcher`.
 
 ```Python
 def inc(x):
@@ -43,7 +43,7 @@ f.add((float,), dec)  # f decrements floats
 0.0
 ```
 
-Internally the function selection mechanism occurs in `Dispatcher.resolve`
+Internally `Dispatcher.resolve` selects the function implementation.
 
 ```Python
 >>> f.resolve((int,))
@@ -53,8 +53,8 @@ Internally the function selection mechanism occurs in `Dispatcher.resolve`
 <function __main__.dec>
 ```
 
-For notational convenience dispatcher's can use Python's decorator syntax to
-register functions at definition time
+For notational convenience dispatchers leverage Python's decorator syntax to
+register functions they we define them.
 
 ```Python
 f = Dispatcher('f')
@@ -75,8 +75,8 @@ implemented by `functools.singledispatch` in Python 3.4.
 Namespaces and `dispatch`
 -------------------------
 
-The creation and manipulation of `Dispatcher` objects is hidden from the user
-by the `dispatch` decorator.
+The the `dispatch` decorator hides the creation and manipulation of
+`Dispatcher` objects from the user.
 
 ```Python
 # f = Dispatcher('f')  # no need to create Dispatcher ahead of time
@@ -92,26 +92,27 @@ def f(x):
 
 The `dispatch` decorator uses the name of the function to select the
 appropriate `Dispatcher` object to which it adds the new
-signature/implementation.  If we have never before dispatched on an object with
-this name then `dispatch` creates a new `Dispatcher` object and stores it
-for future use.
+signature/function.  When it encounters a new function name it creates a new
+`Dispatcher` object and stores it the name/Dispatcher pair in a namespace for
+future reference.
 
 ```Python
 # This creates and stores a new Dispatcher('g')
+# namespace['g'] = Dispatcher('g')
 @dispatch(int)
 def g(x):
     return x ** 2
 ```
 
 This new `Dispatcher` is stored a *namespace*, which is simply a dictionary
-that maps function names like `'f'` to dispatcher objects like
-`Dispatcher('f')`.
+that maps function names like `'g'` to dispatcher objects like
+`Dispatcher('g')`.
 
 By default `dispatch` uses the global namespace in
-`multipledispatch.core.global_namespace`.  If used unwisely by several projects
-then this global namespace may cause conflicts and difficult to track down
-bugs.  Users who desire additional security can establish their own namespaces
-simply by creating a dictionary.
+`multipledispatch.core.global_namespace`.  If this global namespace is used
+unwisely by several projects then conflicts may arise, causing difficult to
+track down bugs.  Users who desire additional security can establish their own
+namespaces simply by creating a dictionary.
 
 ```Python
 my_namespace = dict()
@@ -122,11 +123,11 @@ def f(x):
 ```
 
 To establish a namespace for an entire project we suggest the use of
-`functools.partial`
+`functools.partial` to bind your namespace to a new `dispatch` decorator.
 
 ```Python
-from functools import partial
 from multipledispatch import dispatch
+from functools import partial
 
 my_namespace = dict()
 dispatch = partial(dispatch, namespace=my_namespace)
