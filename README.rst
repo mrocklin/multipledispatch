@@ -122,6 +122,6 @@ Links
    :target: https://pypi.python.org/pypi/multipledispatch/
 .. |Downloads| image:: https://pypip.in/d/multipledispatch/badge.png
    :target: https://pypi.python.org/pypi/multipledispatch/
-.. |Coverage Status| image:: https://coveralls.io/repos/pymultipledispatch/multipledispatch/badge.png
-   :target: https://coveralls.io/r/pymultipledispatch/multipledispatch
-.. _License: https://github.com/pymultipledispatch/multipledispatch/blob/master/LICENSE.txt
+.. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.png
+   :target: https://coveralls.io/r/mrocklin/multipledispatch
+.. _License: https://github.com/mrocklin/multipledispatch/blob/master/LICENSE.txt
