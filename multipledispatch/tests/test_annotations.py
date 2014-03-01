@@ -1,6 +1,5 @@
 from multipledispatch import dispatch
 from multipledispatch.compatibility import raises
-from pytest import xfail
 
 
 def test_singledispatch():
