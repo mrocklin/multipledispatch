@@ -141,17 +141,18 @@ def dispatch(*types):
     """
     # if one argument as passed that is not callable and isn't a type, dispatch
     # on annotations
+    frame = inspect.currentframe().f_back
     if (len(types) == 1
             and callable(types[0])
             and not isinstance(types[0], type)):
         fn = types[0]
-        return dispatch_on_annotations(fn)
+        return dispatch_on_annotations(fn, frame=frame)
     # otherwise dispatch on types
     else:
-        return dispatch_on_types(*types)
+        return dispatch_on_types(*types, frame=frame)
 
 
-def dispatch_on_types(*types):
+def dispatch_on_types(*types, **kwargs):
     """ Dispatch function on the types of the inputs
 
     Supports dispatch on all non-keyword arguments.
@@ -178,10 +179,11 @@ def dispatch_on_types(*types):
     2.0
     """
     types = tuple(types)
+    frame = kwargs.get('frame', None)
     def _(func):
         name = func.__name__
         if ismethod(func):
-            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
+            dispatcher = frame.f_locals.get(name,
                 MethodDispatcher(name))
         else:
             if name not in dispatchers:
@@ -194,14 +196,15 @@ def dispatch_on_types(*types):
     return _
 
 
-def dispatch_on_annotations(fn):
+def dispatch_on_annotations(fn, **kwargs):
     """
     Extract types from fn's annotation (only works in Python 3+)
     """
     if sys.version_info.major >= 3:
         argspec = inspect.getfullargspec(fn)
         args = argspec.args[1:] if ismethod(fn) else argspec.args
-        return dispatch_on_types(*[argspec.annotations[a] for a in args])(fn)
+        types = [argspec.annotations[a] for a in args]
+        return dispatch_on_types(*types, **kwargs)(fn)
     else:
         raise SyntaxError('Annotations require Python 3+.')
 
