@@ -118,9 +118,6 @@ class Dispatcher(object):
         return self
 
 
-global_namespace = dict()
-
-
 def dispatch(*types, **kwargs):
     """ Dispatch function on the types of the inputs
 
@@ -164,21 +161,24 @@ def dispatch(*types, **kwargs):
     ...     def __init__(self, datum):
     ...         self.data = [datum]
     """
-    namespace = kwargs.get('namespace', global_namespace)
+    namespace = kwargs.get('namespace', None)
     types = tuple(types)
+
     def _(func):
         name = func.__name__
-
-        if name not in namespace:
-            namespace[name] = Dispatcher(name)
-        dispatcher = namespace[name]
-
+        frame = inspect.currentframe()
+        if namespace is not None:
+            if name not in namespace:
+                namespace[name] = frame.f_locals.get(
+                    name, Dispatcher(name))
+            dispatcher = namespace[name]
+        else:
+            dispatcher = frame.f_back.f_locals.get(name, Dispatcher(name))
+        del frame
         for typs in expand_tuples(types):
             dispatcher.add(typs, func)
         return dispatcher
     return _
-
-
 
 def expand_tuples(L):
     """
