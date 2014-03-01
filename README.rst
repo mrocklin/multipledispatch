@@ -1,7 +1,7 @@
 Multiple Dispatch
 =================
 
-|Build Status|
+|Build Status| |Coverage Status| |Version Status| |Downloads|
 
 A relatively sane approach to multiple dispatch in Python.
 
@@ -118,4 +118,10 @@ Links
 
 .. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.png
    :target: https://travis-ci.org/mrocklin/multipledispatch
+.. |Version Status| image:: https://pypip.in/v/multipledispatch/badge.png
+   :target: https://pypi.python.org/pypi/multipledispatch/
+.. |Downloads| image:: https://pypip.in/d/multipledispatch/badge.png
+   :target: https://pypi.python.org/pypi/multipledispatch/
+.. |Coverage Status| image:: https://coveralls.io/repos/pymultipledispatch/multipledispatch/badge.png
+   :target: https://coveralls.io/r/pymultipledispatch/multipledispatch
 .. _License: https://github.com/pymultipledispatch/multipledispatch/blob/master/LICENSE.txt
