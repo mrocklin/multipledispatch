@@ -204,3 +204,36 @@ def test_methods_multiple_dispatch():
     assert foo.methodf(A(), A()) == 1
     assert foo.methodf(A(), C()) == 2
     assert foo.methodf(C(), C()) == 2
+
+
+def test_methods_functions_collision():
+
+    class Foo(object):
+        @orig_dispatch(int)
+        def f(self, x):
+            return x + 1
+
+        @orig_dispatch(float)
+        def f(self, x):
+            return x - 1
+
+    @orig_dispatch(int)
+    def f(x):
+        return x + 10
+
+    foo = Foo()
+    assert foo.f(1) == 2
+    assert foo.f(1.0) == 0
+    assert f(1) == 11
+
+    class Foo(object):
+        @dispatch(int)
+        def f(self, x):
+            return x + 1
+
+    @dispatch(int)
+    def f(x):
+        return x + 10
+
+    foo = Foo()
+    assert raises(TypeError, lambda: foo.f(1))
