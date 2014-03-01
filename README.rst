@@ -5,9 +5,9 @@ Multiple Dispatch
 
 A relatively sane approach to multiple dispatch in Python.
 
-There exists several implementations of multiple dispatch (see links below).
-This implementation is efficient, relatively complete, and performs static
-analysis to avoid common issues.
+This implementation of multiple dispatch is efficient, mostly complete,
+performs static analysis to avoid conflicts, and provides optional namespace
+support.  It looks good too.
 
 Example
 -------
@@ -49,7 +49,7 @@ What this does
 
 -  Provides hints to resolve ambiguities when they occur
 
--  Optional namespace support with keyword arguments
+-  Supports namespaces with optional keyword arguments
 
 What this doesn't do
 --------------------
