@@ -93,7 +93,7 @@ def f(x):
 The `dispatch` decorator uses the name of the function to select the
 appropriate `Dispatcher` object to which it adds the new
 signature/function.  When it encounters a new function name it creates a new
-`Dispatcher` object and stores it the name/Dispatcher pair in a namespace for
+`Dispatcher` object and stores name/Dispatcher pair in a namespace for
 future reference.
 
 ```Python
@@ -112,7 +112,7 @@ dictionary that maps function names like `'g'` to dispatcher objects like
 By default `dispatch` uses the global namespace in
 `multipledispatch.core.global_namespace`.  If several projects use this global
 namespace unwisely then conflicts may arise, causing difficult to track down
-bugs.  Users who desire additional security establish their own namespaces
+bugs.  Users who desire additional security may establish their own namespaces
 simply by creating a dictionary.
 
 ```Python
@@ -133,7 +133,7 @@ from functools import partial
 my_namespace = dict()
 dispatch = partial(dispatch, namespace=my_namespace)
 
-@dispatch(int)  # Uses my_namespace rather than global namespace
+@dispatch(int)  # Uses my_namespace rather than the global namespace
 def f(x):
     return x + 1
 ```
