@@ -106,8 +106,7 @@ Links
 
 -  `Five-minute Multimethods in Python by
    Guido <http://www.artima.com/weblogs/viewpost.jsp?thread=101605>`__
--  ```multimethods`` package on
-   PyPI <https://pypi.python.org/pypi/multimethods>`__
+-  `multimethods package on PyPI <https://pypi.python.org/pypi/multimethods>`__
 -  `Clojure Protocols <http://clojure.org/protocols>`__
 -  `Julia methods
    docs <http://julia.readthedocs.org/en/latest/manual/methods/>`__
