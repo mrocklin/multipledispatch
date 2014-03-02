@@ -63,14 +63,11 @@ the following example we build a function to flatten nested iterables.
 ```Python
 @dispatch(Iterable)
 def flatten(L):
-    return [flatten(x) for x in L]
+    return sum([flatten(x) for x in L], [])
 
 @dispatch(object)
 def flatten(x):
-    return x
-
->>> flatten(1)
-1
+    return [x]
 
 >>> flatten([1, 2, 3])
 [1, 2, 3]
@@ -175,3 +172,26 @@ Consider making the following additions:
 def f(...)
   warn(warning_text(self.name, amb), AmbiguityWarning)
 ```
+
+This warning occurs when you write the function and guides you to create an
+implementation to break the ambiguity.  In tihs case, a function with signature
+`(float, float)` is more specific than either options 2 or 3 and so resolves
+the issue.  To avoid this warning you should implement this new function
+*before* the others.
+
+```Python
+@dispatch(float, float)
+def f(x, y):
+    ...
+
+@dispatch(float, object)
+def f(x, y):
+    ...
+
+@dispatch(object, float)
+def f(x, y):
+    ...
+```
+
+If you do not resolve ambiguities by creating more specific functions then one
+of the competing functions will be selected pseudo-randomly.
