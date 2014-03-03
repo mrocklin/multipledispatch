@@ -1,6 +1,5 @@
 from multipledispatch import dispatch
 from multipledispatch.compatibility import raises
-from pytest import xfail
 
 
 def test_singledispatch():
@@ -174,7 +173,7 @@ def test_methods_multiple_dispatch():
             return 1
 
         @dispatch
-        def f(x: A, y: A):
+        def f(x: A, y: C):
             return 2
 
 
