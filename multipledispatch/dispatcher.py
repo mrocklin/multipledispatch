@@ -115,8 +115,7 @@ class Dispatcher(object):
 
         n = len(types)
         for signature in self.ordering:
-            if all(len(signature) == n and issubclass(typ, sig)
-                    for typ, sig in zip(types, signature)):
+            if len(signature) == n and all(map(issubclass, types, signature)):
                 result = self.funcs[signature]
                 self._cache[types] = result
                 return result
