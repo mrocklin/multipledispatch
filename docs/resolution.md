@@ -170,7 +170,6 @@ Consider making the following additions:
 
 @dispatch(float, float)
 def f(...)
-  warn(warning_text(self.name, amb), AmbiguityWarning)
 ```
 
 This warning occurs when you write the function and guides you to create an
