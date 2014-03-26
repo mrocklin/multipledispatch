@@ -173,7 +173,7 @@ def f(...)
 ```
 
 This warning occurs when you write the function and guides you to create an
-implementation to break the ambiguity.  In tihs case, a function with signature
+implementation to break the ambiguity.  In this case, a function with signature
 `(float, float)` is more specific than either options 2 or 3 and so resolves
 the issue.  To avoid this warning you should implement this new function
 *before* the others.
