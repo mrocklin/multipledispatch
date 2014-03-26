@@ -1,4 +1,5 @@
-from multipledispatch.conflict import *
+from multipledispatch.conflict import (supercedes, ordering, ambiguities,
+        ambiguous, super_signature, consistent)
 
 
 class A(object): pass
