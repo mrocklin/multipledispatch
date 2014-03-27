@@ -31,6 +31,8 @@ tuple.
         """ Apply ``f`` to each element in a list or tuple """
         return [f(y) for y in x]
 
+.. code::
+
     >>> f([1, 2, 3])
     [2, 3, 4]
 
@@ -70,6 +72,8 @@ iterables.
     def flatten(x):
         return [x]
 
+.. code::
+
     >>> flatten([1, 2, 3])
     [1, 2, 3]
 
@@ -96,6 +100,8 @@ strings.
     def flatten(s):
         return s
 
+.. code::
+
     >>> flatten([1, 'hello', 3])
     [1, 'hello', 3]
 
@@ -118,6 +124,8 @@ All of these rules apply when we introduce multiple inputs.
         """ Square the right hand side if it is a float """
         return x + y**2
 
+.. code::
+
     >>> f(1, 10)
     11
 
@@ -136,6 +144,8 @@ are equally valid
     def f(x, y):
         """ Square left hand side if it is a float """
         return x**2 + y
+
+.. code::
 
     >>> f(2.0, 10.0)
     ?
