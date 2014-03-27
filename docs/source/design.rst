@@ -32,14 +32,14 @@ to the ``Dispatcher``.
 
 .. code::
 
-    def inc(x):
-        return x + 1
+    >>> def inc(x):
+    ...     return x + 1
 
-    def dec(x):
-        return x - 1
+    >>> def dec(x):
+    ...     return x - 1
 
-    f.add((int,), inc)    # f increments integers
-    f.add((float,), dec)  # f decrements floats
+    >>> f.add((int,), inc)    # f increments integers
+    >>> f.add((float,), dec)  # f decrements floats
 
     >>> f(1)
     2
