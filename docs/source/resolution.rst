@@ -21,8 +21,8 @@ Multiple dispatch selects the function from the types of the inputs.
 Union Types
 -----------
 
-Similarly to ``isinstance`` you specify multiple valid types with a
-tuple.
+Similarly to the builtin ``isinstance`` operation you specify multiple valid
+types with a tuple.
 
 .. code::
 
