@@ -9,6 +9,9 @@ This implementation of multiple dispatch is efficient, mostly complete,
 performs static analysis to avoid conflicts, and provides optional namespace
 support.  It looks good too.
 
+See the documentation at http://multiple-dispatch.readthedocs.org/
+
+
 Example
 -------
 
