@@ -3,7 +3,7 @@ Method Resolution
 
 Multiple dispatch selects the function from the types of the inputs.
 
-.. code:: Python
+.. code::
 
     @dispatch(int)
     def f(x):           # increment integers
@@ -24,7 +24,7 @@ Union Types
 Similarly to ``isinstance`` you specify multiple valid types with a
 tuple.
 
-.. code:: Python
+.. code::
 
     @dispatch((list, tuple))
     def f(x):
@@ -43,7 +43,7 @@ Abstract Types
 You can also use abstract classes like ``Iterable`` and ``Number`` in
 place of union types like ``(list, tuple)`` or ``(int, float)``.
 
-.. code:: Python
+.. code::
 
     from collections import Iterable
 
@@ -60,7 +60,7 @@ If multiple valid implementations exist then we use the most specific
 one. In the following example we build a function to flatten nested
 iterables.
 
-.. code:: Python
+.. code::
 
     @dispatch(Iterable)
     def flatten(L):
@@ -81,7 +81,7 @@ iterables.
 
 Because strings are iterable they too will be flattened
 
-.. code:: Python
+.. code::
 
     >>> flatten([1, 'hello', 3])
     [1, 'h', 'e', 'l', 'l', 'o', 3]
@@ -90,7 +90,7 @@ We avoid this by specializing ``flatten`` to ``str``. Because ``str`` is
 more specific than ``Iterable`` this function takes precedence for
 strings.
 
-.. code:: Python
+.. code::
 
     @dispatch(str)
     def flatten(s):
@@ -107,7 +107,7 @@ Multiple Inputs
 
 All of these rules apply when we introduce multiple inputs.
 
-.. code:: Python
+.. code::
 
     @dispatch(object, object)
     def f(x, y):
@@ -130,7 +130,7 @@ Ambiguities
 However ambiguities arise when different implementations of a function
 are equally valid
 
-.. code:: Python
+.. code::
 
     @dispatch(float, object)
     def f(x, y):
@@ -179,7 +179,7 @@ signature ``(float, float)`` is more specific than either options 2 or 3
 and so resolves the issue. To avoid this warning you should implement
 this new function *before* the others.
 
-.. code:: Python
+.. code::
 
     @dispatch(float, float)
     def f(x, y):
