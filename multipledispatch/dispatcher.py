@@ -76,7 +76,11 @@ class Dispatcher(object):
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
-        func = self.resolve(types)
+        if types in self._cache:
+            func = self._cache[types]
+        else:
+            func = self.resolve(types)
+            self._cache[types] = func
         return func(*args, **kwargs)
 
     def __str__(self):
@@ -107,17 +111,13 @@ class Dispatcher(object):
             ``multipledispatch.conflict`` - module to determine resolution order
         """
 
-        if types in self._cache:
-            return self._cache[types]
-        elif types in self.funcs:
-            self._cache[types] = self.funcs[types]
+        if types in self.funcs:
             return self.funcs[types]
 
         n = len(types)
         for signature in self.ordering:
             if len(signature) == n and all(map(issubclass, types, signature)):
                 result = self.funcs[signature]
-                self._cache[types] = result
                 return result
         raise NotImplementedError()
 
