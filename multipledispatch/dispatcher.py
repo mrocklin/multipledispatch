@@ -76,9 +76,9 @@ class Dispatcher(object):
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
-        if types in self._cache:
+        try:
             func = self._cache[types]
-        else:
+        except KeyError:
             func = self.resolve(types)
             self._cache[types] = func
         return func(*args, **kwargs)
