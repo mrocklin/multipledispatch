@@ -13,6 +13,8 @@ Multiple dispatch selects the function from the types of the inputs.
     def f(x):           # decrement floats
         return x - 1
 
+.. code::
+
     >>> f(1)            # 1 is an int, so increment
     2
     >>> f(1.0)          # 1.0 is a float, so decrement
