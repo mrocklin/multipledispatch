@@ -1,0 +1,7 @@
+0.1.0 - first release
+0.2.0 - static analysis
+0.3.0 - dispatch on instance methods
+0.4.0 - support for namespaces
+        register methods a la singledispatch 
+        documentation
+        Faster caching performance
