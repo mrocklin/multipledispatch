@@ -119,7 +119,7 @@ Links
 
 .. _`Five-minute Multimethods in Python by Guido`:
   http://www.artima.com/weblogs/viewpost.jsp?thread=101605
-.. _`multimethods package on PyPI`_ :
+.. _`multimethods package on PyPI`:
   https://pypi.python.org/pypi/multimethods
 .. _`singledispatch in Python 3.4's functools`:
   http://docs.python.org/3.4/library/functools.htm://docs.python.org/3.4/library/functools.html#functools.singledispatch
@@ -129,9 +129,9 @@ Links
   http://julia.readthedocs.org/en/latest/manual/methods/
 .. _`Karpinksi notebook: *The Design Impact of Multiple Dispatch*`:
   http://nbviewer.ipython.org/gist/StefanKarpinski/b8fe9dbb36c1427b9f22
-.. _`Wikipedia article:
+.. _`Wikipedia article`:
   http://en.wikipedia.org/wiki/Multiple_dispatch
-.. _`PEP 3124 - *Overloading, Generic Functions, Interfaces, and Adaptation`:
+.. _`PEP 3124 - *Overloading, Generic Functions, Interfaces, and Adaptation*`:
   http://legacy.python.org/dev/peps/pep-3124/
 
 .. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.png
