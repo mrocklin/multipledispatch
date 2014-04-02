@@ -122,7 +122,7 @@ Links
 .. _`multimethods package on PyPI`:
   https://pypi.python.org/pypi/multimethods
 .. _`singledispatch in Python 3.4's functools`:
-  http://docs.python.org/3.4/library/functools.htm://docs.python.org/3.4/library/functools.html#functools.singledispatch
+  http://docs.python.org/3.4/library/functools.html#functools.singledispatch
 .. _`Clojure Protocols`:
   http://clojure.org/protocols
 .. _`Julia methods docs`:
