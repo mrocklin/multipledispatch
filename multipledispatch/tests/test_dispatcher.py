@@ -43,3 +43,21 @@ def test_register_instance_method():
     a = Test(3)
     b = Test([3])
     assert a.data == b.data
+
+
+def test_on_ambiguity():
+    f = Dispatcher('f')
+
+    identity = lambda x: x
+
+    ambiguities = [False]
+    def on_ambiguity(dispatcher, amb):
+        ambiguities[0] = True
+
+
+    f.add((object, object), identity, on_ambiguity=on_ambiguity)
+    assert not ambiguities[0]
+    f.add((object, float), identity, on_ambiguity=on_ambiguity)
+    assert not ambiguities[0]
+    f.add((float, object), identity, on_ambiguity=on_ambiguity)
+    assert ambiguities[0]

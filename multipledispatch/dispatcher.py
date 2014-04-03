@@ -1,6 +1,24 @@
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from warnings import warn
 
+
+def ambiguity_warn(dispatcher, ambiguities):
+    """ Raise warning when ambiguity is detected
+
+    Parameters
+    ----------
+    dispatcher : Dispatcher
+        The dispatcher on which the ambiguity was detected
+    ambiguities : set
+        Set of type signature pairs that are ambiguous within this dispatcher
+
+    See Also:
+        Dispatcher.add
+        warning_text
+    """
+    warn(warning_text(dispatcher.name, ambiguities), AmbiguityWarning)
+
+
 class Dispatcher(object):
     """ Dispatch methods based on type signature
 
@@ -30,7 +48,7 @@ class Dispatcher(object):
         self.funcs = dict()
         self._cache = dict()
 
-    def register(self, *types):
+    def register(self, *types, **kwargs):
         """ register dispatcher with new implementation
 
         >>> f = Dispatcher('f')
@@ -49,11 +67,11 @@ class Dispatcher(object):
         0.0
         """
         def _(func):
-            self.add(types, func)
+            self.add(types, func, **kwargs)
             return self
         return _
 
-    def add(self, signature, func):
+    def add(self, signature, func, on_ambiguity=ambiguity_warn):
         """ Add new types/method pair to dispatcher
 
         >>> D = Dispatcher('add')
@@ -66,12 +84,16 @@ class Dispatcher(object):
         Traceback (most recent call last):
         ...
         NotImplementedError
+
+        When ``add`` detects a warning it calls the ``on_ambiguity`` callback
+        with a dispatcher/itself, and a set of ambiguous type signature pairs
+        as inputs.  See ``ambiguity_warn`` for an example.
         """
         self.funcs[signature] = func
         self.ordering = ordering(self.funcs)
         amb = ambiguities(self.funcs)
         if amb:
-            warn(warning_text(self.name, amb), AmbiguityWarning)
+            on_ambiguity(self, amb)
         self._cache.clear()
 
     def __call__(self, *args, **kwargs):
@@ -146,7 +168,6 @@ def str_signature(sig):
     'int, float'
     """
     return ', '.join(cls.__name__ for cls in sig)
-
 
 def warning_text(name, amb):
     """ The text for ambiguity warnings """
