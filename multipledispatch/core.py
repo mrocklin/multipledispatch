@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from warnings import warn
 import inspect
-from .dispatcher import Dispatcher, MethodDispatcher
+from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
 
 
 global_namespace = dict()
@@ -51,6 +51,8 @@ def dispatch(*types, **kwargs):
     ...         self.data = [datum]
     """
     namespace = kwargs.get('namespace', global_namespace)
+    on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
+
     types = tuple(types)
     def _(func):
         name = func.__name__
@@ -64,7 +66,7 @@ def dispatch(*types, **kwargs):
             dispatcher = namespace[name]
 
         for typs in expand_tuples(types):
-            dispatcher.add(typs, func)
+            dispatcher.add(typs, func, on_ambiguity=on_ambiguity)
         return dispatcher
     return _
 
