@@ -83,7 +83,7 @@ class Dispatcher(object):
         >>> D(1, 2.0)
         Traceback (most recent call last):
         ...
-        NotImplementedError
+        NotImplementedError: Could not find signature for add: <int, float>
 
         When ``add`` detects a warning it calls the ``on_ambiguity`` callback
         with a dispatcher/itself, and a set of ambiguous type signature pairs
@@ -127,7 +127,7 @@ class Dispatcher(object):
         >>> inc.resolve((float,))
         Traceback (most recent call last):
         ...
-        NotImplementedError
+        NotImplementedError: Could not find signature for inc: <float>
 
         See Also:
             ``multipledispatch.conflict`` - module to determine resolution order
@@ -141,7 +141,8 @@ class Dispatcher(object):
             if len(signature) == n and all(map(issubclass, types, signature)):
                 result = self.funcs[signature]
                 return result
-        raise NotImplementedError()
+        raise NotImplementedError('Could not find signature for %s: <%s>' %
+                                  (self.name, str_signature(types)))
 
 
 class MethodDispatcher(Dispatcher):
