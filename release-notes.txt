@@ -7,3 +7,4 @@
         Faster caching performance
 0.4.1 - expose ambiguity response via callback
         Improve NotImplemented error messages to include missing signature
+0.4.2 - Dispatcher is serializable
