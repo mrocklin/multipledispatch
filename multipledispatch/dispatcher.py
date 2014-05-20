@@ -144,6 +144,16 @@ class Dispatcher(object):
         raise NotImplementedError('Could not find signature for %s: <%s>' %
                                   (self.name, str_signature(types)))
 
+    def __getstate__(self):
+        return {'name': self.name,
+                'funcs': self.funcs}
+
+    def __setstate__(self, d):
+        self.name = d['name']
+        self.funcs = d['funcs']
+        self.ordering = ordering(self.funcs)
+        self._cache = dict()
+
 
 class MethodDispatcher(Dispatcher):
     """ Dispatch methods based on type signature
