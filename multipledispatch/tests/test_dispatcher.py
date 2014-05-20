@@ -1,9 +1,16 @@
 from multipledispatch.dispatcher import Dispatcher, MethodDispatcher
 
+
+def inc(x):
+    return x + 1
+
+
+def dec(x):
+    return x - 1
+
+
 def test_dispatcher():
     f = Dispatcher('f')
-    inc = lambda x: x + 1
-    dec = lambda x: x - 1
     f.add((int,), inc)
     f.add((float,), dec)
 
@@ -61,3 +68,12 @@ def test_on_ambiguity():
     assert not ambiguities[0]
     f.add((float, object), identity, on_ambiguity=on_ambiguity)
     assert ambiguities[0]
+
+
+def test_serializable():
+    f = Dispatcher('f')
+    f.add((int,), inc)
+
+    print(dir(f))
+    import pickle
+    assert isinstance(pickle.dumps(f), str)
