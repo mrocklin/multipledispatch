@@ -152,6 +152,7 @@ class Dispatcher(object):
         self.name = d['name']
         self.funcs = d['funcs']
         self.ordering = ordering(self.funcs)
+        self._cache = dict()
 
 
 class MethodDispatcher(Dispatcher):
