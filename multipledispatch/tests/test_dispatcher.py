@@ -81,7 +81,7 @@ def test_serializable():
     f.add((object,), identity)
 
     import pickle
-    assert isinstance(pickle.dumps(f), str)
+    assert isinstance(pickle.dumps(f), (str, bytes))
 
     g = pickle.loads(pickle.dumps(f))
 
