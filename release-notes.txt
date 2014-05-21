@@ -8,3 +8,5 @@
 0.4.1 - expose ambiguity response via callback
         Improve NotImplemented error messages to include missing signature
 0.4.2 - Dispatcher is serializable
+0.4.3 - Dispatcher.register handles union types
+        (previously only @dispatch covered this)
