@@ -207,3 +207,6 @@ this new function *before* the others.
 
 If you do not resolve ambiguities by creating more specific functions
 then one of the competing functions will be selected pseudo-randomly.
+By default the selection is dependent on hash, so it will be consistent
+during the interpreter session, but it might change from session to
+session.
