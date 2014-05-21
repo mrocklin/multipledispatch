@@ -24,6 +24,14 @@ def test_dispatcher():
     assert f(1.0) == 0.0
 
 
+def test_union_types():
+    f = Dispatcher('f')
+    f.register((int, float))(inc)
+
+    assert f(1) == 2
+    assert f(1.0) == 2.0
+
+
 def test_dispatcher_as_decorator():
     f = Dispatcher('f')
 
