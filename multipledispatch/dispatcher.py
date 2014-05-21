@@ -1,5 +1,6 @@
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from warnings import warn
+from .utils import expand_tuples
 
 
 def ambiguity_warn(dispatcher, ambiguities):
@@ -89,6 +90,12 @@ class Dispatcher(object):
         with a dispatcher/itself, and a set of ambiguous type signature pairs
         as inputs.  See ``ambiguity_warn`` for an example.
         """
+        # Handle union types
+        if any(isinstance(typ, tuple) for typ in signature):
+            for typs in expand_tuples(signature):
+                self.add(typs, func, on_ambiguity)
+            return
+
         self.funcs[signature] = func
         self.ordering = ordering(self.funcs)
         amb = ambiguities(self.funcs)

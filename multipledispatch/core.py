@@ -65,8 +65,7 @@ def dispatch(*types, **kwargs):
                 namespace[name] = Dispatcher(name)
             dispatcher = namespace[name]
 
-        for typs in expand_tuples(types):
-            dispatcher.add(typs, func, on_ambiguity=on_ambiguity)
+        dispatcher.add(types, func, on_ambiguity=on_ambiguity)
         return dispatcher
     return _
 
@@ -79,22 +78,3 @@ def ismethod(func):
     """
     spec = inspect.getargspec(func)
     return spec and spec.args and spec.args[0] == 'self'
-
-
-def expand_tuples(L):
-    """
-
-    >>> expand_tuples([1, (2, 3)])
-    [(1, 2), (1, 3)]
-
-    >>> expand_tuples([1, 2])
-    [(1, 2)]
-    """
-    if not L:
-        return [()]
-    elif not isinstance(L[0], tuple):
-        rest = expand_tuples(L[1:])
-        return [(L[0],) + t for t in rest]
-    else:
-        rest = expand_tuples(L[1:])
-        return [(item,) + t for t in rest for item in L[0]]
