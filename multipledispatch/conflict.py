@@ -1,4 +1,4 @@
-from .util import _toposort, groupby
+from .utils import _toposort, groupby
 
 class AmbiguityWarning(Warning):
     pass
