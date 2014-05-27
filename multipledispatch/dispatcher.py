@@ -96,6 +96,15 @@ class Dispatcher(object):
                 self.add(typs, func, on_ambiguity)
             return
 
+        for typ in signature:
+            if not isinstance(typ, type):
+                str_sig = ', '.join(c.__name__ if isinstance(c, type)
+                                               else str(c) for c in signature)
+                raise TypeError("Tried to dispatch on non-type: %s\n"
+                                "In signature: <%s>\n"
+                                "In function: %s" %
+                                (typ, str_sig, self.name))
+
         self.funcs[signature] = func
         self.ordering = ordering(self.funcs)
         amb = ambiguities(self.funcs)

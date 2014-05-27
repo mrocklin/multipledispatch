@@ -1,4 +1,5 @@
 from multipledispatch.dispatcher import Dispatcher, MethodDispatcher
+from multipledispatch.utils import raises
 
 
 def identity(x):
@@ -96,3 +97,8 @@ def test_serializable():
     assert g(1) == 2
     assert g(1.0) == 0.0
     assert g('hello') == 'hello'
+
+
+def test_raise_error_on_non_class():
+    f = Dispatcher('f')
+    assert raises(TypeError, lambda: f.add((1,), inc))
