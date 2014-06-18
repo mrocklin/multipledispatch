@@ -102,3 +102,22 @@ def test_serializable():
 def test_raise_error_on_non_class():
     f = Dispatcher('f')
     assert raises(TypeError, lambda: f.add((1,), inc))
+
+
+def test_docstring():
+
+    def foo(x):
+        """ A docstring 1234 """
+        pass
+
+    def bar(x):
+        pass
+
+    f = Dispatcher('f')
+    f.add((int,), foo)
+    f.add((float,), bar)
+
+    assert foo.__doc__ in f.__doc__
+
+
+

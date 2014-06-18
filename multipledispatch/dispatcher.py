@@ -171,6 +171,14 @@ class Dispatcher(object):
         self._cache = dict()
 
 
+    @property
+    def __doc__(self):
+        docs = set([func.__doc__ for func in self.funcs.values()
+                                 if func.__doc__])
+        if len(docs) == 1:
+            return list(docs)[0]
+
+
 class MethodDispatcher(Dispatcher):
     """ Dispatch methods based on type signature
 
