@@ -106,18 +106,27 @@ def test_raise_error_on_non_class():
 
 def test_docstring():
 
-    def foo(x):
-        """ A docstring 1234 """
-        pass
+    def one(x, y):
+        """ Docstring number one """
+        return x + y
 
-    def bar(x):
-        pass
+    def two(x, y):
+        """ Docstring number two """
+        return x + y
+
+    def three(x, y):
+        return x + y
 
     f = Dispatcher('f')
-    f.add((int,), foo)
-    f.add((float,), bar)
+    f.add((object, object), one)
+    f.add((int, int), two)
+    f.add((float, float), three)
 
-    assert foo.__doc__ in f.__doc__
+    assert one.__doc__.strip() in f.__doc__
+    assert two.__doc__.strip() in f.__doc__
+    assert f.__doc__.find(one.__doc__.strip()) < \
+            f.__doc__.find(two.__doc__.strip())
+    assert 'object, object' in f.__doc__
 
 
 

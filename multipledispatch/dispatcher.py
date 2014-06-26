@@ -173,10 +173,26 @@ class Dispatcher(object):
 
     @property
     def __doc__(self):
-        docs = set([func.__doc__ for func in self.funcs.values()
-                                 if func.__doc__])
-        if len(docs) == 1:
-            return list(docs)[0]
+        doc = " Multiply dispatched method: %s\n\n" % self.name
+
+        docs = []
+        other = []
+        for sig in self.ordering[::-1]:
+            func = self.funcs[sig]
+            if func.__doc__:
+                s = 'Inputs: <%s>\n' % str_signature(sig)
+                s += '-' * len(s) + '\n'
+                s += func.__doc__.strip()
+                docs.append(s)
+            else:
+                other.append(str_signature(sig))
+
+        doc += '\n\n'.join(docs)
+
+        doc += '\n\nOther signatures:\n    '
+        doc += '\n\    '.join(other)
+
+        return doc
 
 
 class MethodDispatcher(Dispatcher):
