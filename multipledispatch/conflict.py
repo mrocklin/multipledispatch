@@ -34,7 +34,7 @@ def ambiguities(signatures):
 def mro(typ):
     """ Return method resolution order of type
 
-    >>> mro(float)
+    >>> mro(float) # doctest: +SKIP
     [<type 'float'>, <type 'object'>]
     """
     try:
