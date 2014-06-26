@@ -32,10 +32,16 @@ def ambiguities(signatures):
 
 
 def mro(typ):
+    """ Return method resolution order of type
+
+    >>> mro(float)
+    [<type 'float'>, <type 'object'>]
+    """
     try:
         return typ.mro()
     except TypeError:
         return list(typ.__mro__)
+
 
 def super_signature(signatures):
     """ A signature that would break ambiguities """
