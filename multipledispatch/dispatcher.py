@@ -189,8 +189,9 @@ class Dispatcher(object):
 
         doc += '\n\n'.join(docs)
 
-        doc += '\n\nOther signatures:\n    '
-        doc += '\n\    '.join(other)
+        if other:
+            doc += '\n\nOther signatures:\n    '
+            doc += '\n\    '.join(other)
 
         return doc
 
