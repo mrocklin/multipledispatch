@@ -171,6 +171,31 @@ class Dispatcher(object):
         self._cache = dict()
 
 
+    @property
+    def __doc__(self):
+        doc = " Multiply dispatched method: %s\n\n" % self.name
+
+        docs = []
+        other = []
+        for sig in self.ordering[::-1]:
+            func = self.funcs[sig]
+            if func.__doc__:
+                s = 'Inputs: <%s>\n' % str_signature(sig)
+                s += '-' * len(s) + '\n'
+                s += func.__doc__.strip()
+                docs.append(s)
+            else:
+                other.append(str_signature(sig))
+
+        doc += '\n\n'.join(docs)
+
+        if other:
+            doc += '\n\nOther signatures:\n    '
+            doc += '\n\    '.join(other)
+
+        return doc
+
+
 class MethodDispatcher(Dispatcher):
     """ Dispatch methods based on type signature
 

@@ -102,3 +102,31 @@ def test_serializable():
 def test_raise_error_on_non_class():
     f = Dispatcher('f')
     assert raises(TypeError, lambda: f.add((1,), inc))
+
+
+def test_docstring():
+
+    def one(x, y):
+        """ Docstring number one """
+        return x + y
+
+    def two(x, y):
+        """ Docstring number two """
+        return x + y
+
+    def three(x, y):
+        return x + y
+
+    f = Dispatcher('f')
+    f.add((object, object), one)
+    f.add((int, int), two)
+    f.add((float, float), three)
+
+    assert one.__doc__.strip() in f.__doc__
+    assert two.__doc__.strip() in f.__doc__
+    assert f.__doc__.find(one.__doc__.strip()) < \
+            f.__doc__.find(two.__doc__.strip())
+    assert 'object, object' in f.__doc__
+
+
+
