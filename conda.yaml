@@ -1,0 +1,21 @@
+package:
+    name: multipledispatch 
+    version: "0.4.4"
+
+build:
+    number: {{environ.get('BINSTAR_BUILD', 1)}}
+    script: 
+      - cd $RECIPE_DIR
+      - $PYTHON setup.py install 
+
+requirements:
+    build:
+      - setuptools
+      - python
+
+    run:
+      - python
+
+about:
+    home: http://multiple-dispatch.readthedocs.org/
+    license: BSD

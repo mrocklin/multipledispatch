@@ -1,0 +1,14 @@
+package: multipledispatch
+platform:
+  - linux-64
+  - linux-32
+  - osx-64
+engine:
+  - python=2
+  - python=3
+script:
+  - touch build.sh
+  - conda build .
+build_targets:
+  files: conda
+  channels: main
