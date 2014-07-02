@@ -10,3 +10,5 @@
 0.4.2 - Dispatcher is serializable
 0.4.3 - Dispatcher.register handles union types
         (previously only @dispatch covered this)
+0.4.4 - Docstrings
+        Better error handling on bad type inputs
