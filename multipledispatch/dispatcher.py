@@ -2,6 +2,12 @@ from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from warnings import warn
 from .utils import expand_tuples
 
+try:
+    from . import _dispatcher
+    _USE_FAST = True
+except ImportError:
+    _USE_FAST = False
+
 
 def ambiguity_warn(dispatcher, ambiguities):
     """ Raise warning when ambiguity is detected
@@ -221,6 +227,7 @@ def str_signature(sig):
     """
     return ', '.join(cls.__name__ for cls in sig)
 
+
 def warning_text(name, amb):
     """ The text for ambiguity warnings """
     text = "\nAmbiguities exist in dispatched function %s\n\n"%(name)
@@ -231,3 +238,8 @@ def warning_text(name, amb):
     text += '\n\n'.join(['@dispatch(' + str_signature(super_signature(s))
                       + ')\ndef %s(...)'%name for s in amb])
     return text
+
+
+if _USE_FAST:
+    Dispatcher.__call__ = _dispatcher.__call__
+    Dispatcher.resolve = _dispatcher.resolve
