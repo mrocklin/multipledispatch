@@ -205,11 +205,18 @@ class MethodDispatcher(Dispatcher):
     """
     def __get__(self, instance, owner):
         self.__name__ = str(self)
-        asmethod = types.MethodType(self, None, owner)
-        setattr(owner, self.name, asmethod)
-        if instance is None:
-            return getattr(owner, self.name)
-        return getattr(instance, self.name)
+        try:
+            asmethod = types.MethodType(self, instance, owner)
+        except TypeError:
+            # Python3 is slightly different
+            if instance is None:
+                # no unbound methods
+                asmethod = self
+            else:
+                asmethod = types.MethodType(self, instance)
+        if instance is not None:
+            setattr(instance, self.name, asmethod)
+        return asmethod
 
     def __call__(self, obj, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
