@@ -1,3 +1,4 @@
+import types
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from warnings import warn
 from .utils import expand_tuples
@@ -203,14 +204,17 @@ class MethodDispatcher(Dispatcher):
         Dispatcher
     """
     def __get__(self, instance, owner):
-        self.obj = instance
-        self.cls = owner
-        return self
+        self.__name__ = str(self)
+        asmethod = types.MethodType(self, None, owner)
+        setattr(owner, self.name, asmethod)
+        if instance is None:
+            return getattr(owner, self.name)
+        return getattr(instance, self.name)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, obj, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
         func = self.resolve(types)
-        return func(self.obj, *args, **kwargs)
+        return func(obj, *args, **kwargs)
 
 
 def str_signature(sig):

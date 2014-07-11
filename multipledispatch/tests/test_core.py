@@ -190,6 +190,21 @@ def test_methods():
 
 def test_methods_multiple_dispatch():
     class Foo(object):
+        @dispatch(A)
+        def f(self, y):
+            return 1
+
+        @dispatch(C)
+        def f(self, y):
+            return 2
+
+    foo = Foo()
+    assert foo.f(A()) == 1
+    assert foo.f(C()) == 2
+
+
+def test_methods_multiple_dispatch_fail():
+    class Foo(object):
         @dispatch(A, A)
         def f(x, y):
             return 1
@@ -198,8 +213,35 @@ def test_methods_multiple_dispatch():
         def f(x, y):
             return 2
 
+        @dispatch(int)
+        def f(x, y):  # 'x' as self
+            return 1 + y
 
     foo = Foo()
-    assert foo.f(A(), A()) == 1
-    assert foo.f(A(), C()) == 2
-    assert foo.f(C(), C()) == 2
+    raises(TypeError, lambda: foo.f(A(), A()))
+    raises(TypeError, lambda: foo.f(A(), C()))
+    raises(TypeError, lambda: foo.f(C(), C()))
+    assert foo.f(2) == 3
+
+
+def test_function_with_self():
+    @dispatch(A, A)
+    def f(self, x):
+        return 1
+
+    @dispatch(A, C)
+    def f(self, x):
+        return 2
+
+    @dispatch(C, A)
+    def f(self, x):
+        return 3
+
+    @dispatch(C, C)
+    def f(self, x):
+        return 4
+
+    assert f(A(), A()) == 1
+    assert f(A(), C()) == 2
+    assert f(C(), A()) == 3
+    assert f(C(), C()) == 4
