@@ -204,19 +204,11 @@ class MethodDispatcher(Dispatcher):
         Dispatcher
     """
     def __get__(self, instance, owner):
-        self.__name__ = str(self)
-        try:
-            asmethod = types.MethodType(self, instance, owner)
-        except TypeError:
-            # Python3 is slightly different
-            if instance is None:
-                # no unbound methods
-                asmethod = self
-            else:
-                asmethod = types.MethodType(self, instance)
-        if instance is not None:
-            setattr(instance, self.name, asmethod)
-        return asmethod
+        dispatcher = self
+        def method(self, *args, **kwargs):
+            return dispatcher(self, *args, **kwargs)
+        method.__name__ = self.name
+        return method.__get__(instance, owner)
 
     def __call__(self, obj, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
