@@ -245,3 +245,30 @@ def test_function_with_self():
     assert f(A(), C()) == 2
     assert f(C(), A()) == 3
     assert f(C(), C()) == 4
+
+
+def test_method_dispatch_is_safe():
+    class Foo(object):
+        def __init__(self, x):
+            self.x = x
+
+        @dispatch(int)
+        def f(self, y):
+            return self.x + y
+
+        @dispatch(float)
+        def f(self, y):
+            return self.x - y
+
+    foo1 = Foo(1)
+    foo2 = Foo(2)
+    assert foo1.f(1) == 2
+    assert foo1.f(1.0) == 0.0
+    assert foo2.f(1) == 3
+    assert foo2.f(1.0) == 1.0
+    f1 = foo1.f
+    f2 = foo2.f
+    assert f1(1) == 2
+    assert f1(1.0) == 0.0
+    assert f2(1) == 3
+    assert f2(1.0) == 1.0

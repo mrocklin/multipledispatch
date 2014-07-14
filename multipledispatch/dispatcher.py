@@ -1,4 +1,3 @@
-import types
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from warnings import warn
 from .utils import expand_tuples
