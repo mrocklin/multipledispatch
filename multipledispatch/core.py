@@ -57,7 +57,7 @@ def dispatch(*types, **kwargs):
     def _(func):
         name = func.__name__
 
-        if ismethod(func):
+        if ismethod(func) and isinclass():
             dispatcher = inspect.currentframe().f_back.f_locals.get(name,
                 MethodDispatcher(name))
         else:
@@ -76,4 +76,13 @@ def ismethod(func):
     Note that this has to work as the method is defined but before the class is
     defined.  At this stage methods look like functions.
     """
-    return '__module__' in inspect.currentframe().f_back.f_back.f_locals
+    spec = inspect.getargspec(func)
+    return spec and spec.args and spec.args[0] == 'self'
+
+
+def isinclass(n=1):
+    """ Is the nth previous frame in a class definition?"""
+    frame = inspect.currentframe().f_back  # escape from current function
+    for _ in range(n):
+        frame = getattr(frame, 'f_back')
+    return '__module__' in frame.f_locals

@@ -218,10 +218,11 @@ def test_methods_multiple_dispatch_fail():
             return 1 + y
 
     foo = Foo()
-    raises(TypeError, lambda: foo.f(A(), A()))
-    raises(TypeError, lambda: foo.f(A(), C()))
-    raises(TypeError, lambda: foo.f(C(), C()))
-    assert foo.f(2) == 3
+    # We require the 'self' argument to be used to infer methods
+    assert foo.f(A(), A()) == 1
+    assert foo.f(A(), C()) == 2
+    assert foo.f(C(), C()) == 2
+    assert raises(TypeError, lambda: foo.f(2))
 
 
 def test_function_with_self():
