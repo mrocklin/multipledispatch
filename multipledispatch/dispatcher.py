@@ -3,6 +3,101 @@ from warnings import warn
 from .utils import expand_tuples
 
 
+def str_signature(sig):
+    """ String representation of type signature
+
+    >>> str_signature((int, float))
+    'int, float'
+    """
+    return ', '.join(cls.__name__ for cls in sig)
+
+
+try:
+    import platform
+    USE_CYTHON = platform.python_implementation() == 'CPython'
+    if USE_CYTHON:
+        from ._dispatcher import DispatcherBase, MethodDispatcherBase
+except ImportError:
+    USE_CYTHON = False
+
+
+if not USE_CYTHON:
+    class DispatcherBase(object):
+        __slots__ = 'name', 'funcs', 'ordering', '_cache'
+
+        def __call__(self, *args, **kwargs):
+            types = tuple([type(arg) for arg in args])
+            try:
+                func = self._cache[types]
+            except KeyError:
+                func = self.resolve(types)
+                self._cache[types] = func
+            return func(*args, **kwargs)
+
+        def resolve(self, types):
+            """ Deterimine appropriate implementation for this type signature
+
+            This method is internal.  Users should call this object as a function.
+            Implementation resolution occurs within the ``__call__`` method.
+
+            >>> from multipledispatch import dispatch
+            >>> @dispatch(int)
+            ... def inc(x):
+            ...     return x + 1
+
+            >>> implementation = inc.resolve((int,))
+            >>> implementation(3)
+            4
+
+            >>> inc.resolve((float,))
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: Could not find signature for inc: <float>
+
+            See Also:
+                ``multipledispatch.conflict`` - module to determine resolution order
+            """
+
+            if types in self.funcs:
+                return self.funcs[types]
+
+            n = len(types)
+            for signature in self.ordering:
+                if len(signature) == n and all(map(issubclass, types, signature)):
+                    result = self.funcs[signature]
+                    return result
+            raise NotImplementedError('Could not find signature for %s: <%s>' %
+                                      (self.name, str_signature(types)))
+
+        def __getstate__(self):
+            return {'name': self.name,
+                    'funcs': self.funcs}
+
+        def __setstate__(self, d):
+            self.name = d['name']
+            self.funcs = d['funcs']
+            self.ordering = ordering(self.funcs)
+            self._cache = dict()
+
+
+    class MethodDispatcherBase(DispatcherBase):
+        __slots__ = 'obj', 'cls'
+
+        def __get__(self, instance, owner):
+            self.obj = instance
+            self.cls = owner
+            return self
+
+        def __call__(self, *args, **kwargs):
+            types = tuple([type(arg) for arg in args])
+            try:
+                func = self._cache[types]
+            except KeyError:
+                func = self.resolve(types)
+                self._cache[types] = func
+            return func(self.obj, *args, **kwargs)
+
+
 def ambiguity_warn(dispatcher, ambiguities):
     """ Raise warning when ambiguity is detected
 
@@ -20,7 +115,7 @@ def ambiguity_warn(dispatcher, ambiguities):
     warn(warning_text(dispatcher.name, ambiguities), AmbiguityWarning)
 
 
-class Dispatcher(object):
+class Dispatcher(DispatcherBase):
     """ Dispatch methods based on type signature
 
     Use ``dispatch`` to add implementations
@@ -42,7 +137,7 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = 'name', 'funcs', 'ordering', '_cache'
+    __slots__ = ()
 
     def __init__(self, name):
         self.name = name
@@ -112,64 +207,9 @@ class Dispatcher(object):
             on_ambiguity(self, amb)
         self._cache.clear()
 
-    def __call__(self, *args, **kwargs):
-        types = tuple([type(arg) for arg in args])
-        try:
-            func = self._cache[types]
-        except KeyError:
-            func = self.resolve(types)
-            self._cache[types] = func
-        return func(*args, **kwargs)
-
     def __str__(self):
         return "<dispatched %s>" % self.name
     __repr__ = __str__
-
-    def resolve(self, types):
-        """ Deterimine appropriate implementation for this type signature
-
-        This method is internal.  Users should call this object as a function.
-        Implementation resolution occurs within the ``__call__`` method.
-
-        >>> from multipledispatch import dispatch
-        >>> @dispatch(int)
-        ... def inc(x):
-        ...     return x + 1
-
-        >>> implementation = inc.resolve((int,))
-        >>> implementation(3)
-        4
-
-        >>> inc.resolve((float,))
-        Traceback (most recent call last):
-        ...
-        NotImplementedError: Could not find signature for inc: <float>
-
-        See Also:
-            ``multipledispatch.conflict`` - module to determine resolution order
-        """
-
-        if types in self.funcs:
-            return self.funcs[types]
-
-        n = len(types)
-        for signature in self.ordering:
-            if len(signature) == n and all(map(issubclass, types, signature)):
-                result = self.funcs[signature]
-                return result
-        raise NotImplementedError('Could not find signature for %s: <%s>' %
-                                  (self.name, str_signature(types)))
-
-    def __getstate__(self):
-        return {'name': self.name,
-                'funcs': self.funcs}
-
-    def __setstate__(self, d):
-        self.name = d['name']
-        self.funcs = d['funcs']
-        self.ordering = ordering(self.funcs)
-        self._cache = dict()
-
 
     @property
     def __doc__(self):
@@ -196,30 +236,14 @@ class Dispatcher(object):
         return doc
 
 
-class MethodDispatcher(Dispatcher):
+class MethodDispatcher(MethodDispatcherBase, Dispatcher):
     """ Dispatch methods based on type signature
 
     See Also:
         Dispatcher
     """
-    def __get__(self, instance, owner):
-        self.obj = instance
-        self.cls = owner
-        return self
+    __slots__ = ()
 
-    def __call__(self, *args, **kwargs):
-        types = tuple([type(arg) for arg in args])
-        func = self.resolve(types)
-        return func(self.obj, *args, **kwargs)
-
-
-def str_signature(sig):
-    """ String representation of type signature
-
-    >>> str_signature((int, float))
-    'int, float'
-    """
-    return ', '.join(cls.__name__ for cls in sig)
 
 def warning_text(name, amb):
     """ The text for ambiguity warnings """
