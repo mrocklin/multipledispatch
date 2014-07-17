@@ -84,15 +84,11 @@ cdef class MethodDispatcherBase(DispatcherBase):
         return self
 
     def __call__(self, *args, **kwargs):
-        # types = tuple([type(arg) for arg in args])
-        # func = self.resolve(types)
-        # return func(self.obj, *args, **kwargs)
-
         cdef PyObject *obj
         cdef object val
         cdef Py_ssize_t i, N = PyTuple_GET_SIZE(args)
-        types = PyTuple_New(N)
-        selfargs = PyTuple_New(N + 1)
+        types = PyTuple_New(N)  # = tuple([type(arg) for arg in args])
+        selfargs = PyTuple_New(N + 1)  # = (self.obj,) + args
         Py_INCREF(self.obj)
         PyTuple_SET_ITEM(selfargs, 0, self.obj)
         for i in range(N):
@@ -103,5 +99,10 @@ cdef class MethodDispatcherBase(DispatcherBase):
             Py_INCREF(val)
             PyTuple_SET_ITEM(types, i, val)
 
-        val = self.resolve(types)
-        return PyObject_Call(val, selfargs, kwargs)
+        obj = PyDict_GetItem(self._cache, types)
+        if obj is not NULL:
+            return PyObject_Call(<object>obj, selfargs, kwargs)
+        else:
+            val = self.resolve(types)
+            PyDict_SetItem(self._cache, types, val)
+            return PyObject_Call(val, selfargs, kwargs)

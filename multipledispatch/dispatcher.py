@@ -90,7 +90,11 @@ if not USE_CYTHON:
 
         def __call__(self, *args, **kwargs):
             types = tuple([type(arg) for arg in args])
-            func = self.resolve(types)
+            try:
+                func = self._cache[types]
+            except KeyError:
+                func = self.resolve(types)
+                self._cache[types] = func
             return func(self.obj, *args, **kwargs)
 
 
