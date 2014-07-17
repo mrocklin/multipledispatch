@@ -1,1 +1,4 @@
 *.pyc
+*.swp
+*.so
+*.html

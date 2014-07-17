@@ -14,7 +14,7 @@ def str_signature(sig):
 
 try:
     import platform
-    USE_CYTHON = platform.python_implementation() != 'PyPy'
+    USE_CYTHON = platform.python_implementation() == 'CPython'
     if USE_CYTHON:
         from ._dispatcher import DispatcherBase, MethodDispatcherBase
 except ImportError:
