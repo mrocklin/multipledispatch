@@ -37,10 +37,7 @@ def mro(typ):
     >>> mro(float) # doctest: +SKIP
     [<type 'float'>, <type 'object'>]
     """
-    try:
-        return typ.mro()
-    except TypeError:
-        return list(typ.__mro__)
+    return type.mro(typ)
 
 
 def super_signature(signatures):
