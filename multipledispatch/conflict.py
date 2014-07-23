@@ -31,21 +31,12 @@ def ambiguities(signatures):
                                     for c in signatures)])
 
 
-def mro(typ):
-    """ Return method resolution order of type
-
-    >>> mro(float) # doctest: +SKIP
-    [<type 'float'>, <type 'object'>]
-    """
-    return type.mro(typ)
-
-
 def super_signature(signatures):
     """ A signature that would break ambiguities """
     n = len(signatures[0])
     assert all(len(s) == n for s in signatures)
 
-    return [max([mro(sig[i]) for sig in signatures], key=len)[0]
+    return [max([type.mro(sig[i]) for sig in signatures], key=len)[0]
                for i in range(n)]
 
 

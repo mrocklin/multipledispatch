@@ -1,5 +1,5 @@
 from multipledispatch.conflict import (supercedes, ordering, ambiguities,
-        ambiguous, super_signature, consistent, mro)
+        ambiguous, super_signature, consistent)
 
 
 class A(object): pass
@@ -56,8 +56,3 @@ def test_ordering():
     ord = ordering(signatures)
     assert ord[0] == (B, B) or ord[0] == (A, C)
     assert ord[-1] == (A, A) or ord[-1] == (A, C)
-
-
-def test_mro():
-    assert mro(type)
-    assert mro(float)
