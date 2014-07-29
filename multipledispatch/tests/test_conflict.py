@@ -56,3 +56,7 @@ def test_ordering():
     ord = ordering(signatures)
     assert ord[0] == (B, B) or ord[0] == (A, C)
     assert ord[-1] == (A, A) or ord[-1] == (A, C)
+
+
+def test_type_mro():
+    assert super_signature([[object], [type]]) == [type]
