@@ -1,4 +1,5 @@
-from multipledispatch.dispatcher import Dispatcher, MethodDispatcher
+from multipledispatch.dispatcher import (Dispatcher, MethodDispatcher,
+        halt_method_resolution, restart_method_resolution)
 from multipledispatch.utils import raises
 
 
@@ -129,4 +130,26 @@ def test_docstring():
     assert 'object, object' in f.__doc__
 
 
+def test_halt_method_resolution():
+    g = [0]
+    def on_ambiguity(a, b):
+        g[0] += 1
 
+    f = Dispatcher('f')
+
+    halt_method_resolution()
+
+    def func(*args):
+        pass
+
+    f.add((int, object), func)
+    f.add((object, int), func)
+
+    assert g == [0]
+
+    restart_method_resolution(on_ambiguity=on_ambiguity)
+
+    assert g == [1]
+
+    print(list(f.ordering))
+    assert set(f.ordering) == set([(int, object), (object, int)])

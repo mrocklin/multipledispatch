@@ -1,5 +1,5 @@
-from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from warnings import warn
+from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
 
 
@@ -18,6 +18,22 @@ def ambiguity_warn(dispatcher, ambiguities):
         warning_text
     """
     warn(warning_text(dispatcher.name, ambiguities), AmbiguityWarning)
+
+
+_unresolved_dispatchers = set()
+_resolve = [True]
+
+
+def halt_method_resolution():
+    _resolve[0] = False
+
+
+def restart_method_resolution(on_ambiguity=ambiguity_warn):
+    _resolve[0] = True
+    while _unresolved_dispatchers:
+        dispatcher = _unresolved_dispatchers.pop()
+        dispatcher.reorder(on_ambiguity=on_ambiguity)
+
 
 
 class Dispatcher(object):
@@ -106,11 +122,18 @@ class Dispatcher(object):
                                 (typ, str_sig, self.name))
 
         self.funcs[signature] = func
-        self.ordering = ordering(self.funcs)
-        amb = ambiguities(self.funcs)
-        if amb:
-            on_ambiguity(self, amb)
+        self.reorder(on_ambiguity=on_ambiguity)
         self._cache.clear()
+
+    def reorder(self, on_ambiguity=ambiguity_warn):
+        if _resolve[0]:
+            self.ordering = ordering(self.funcs)
+            amb = ambiguities(self.funcs)
+            if amb:
+                on_ambiguity(self, amb)
+        else:
+            _unresolved_dispatchers.add(self)
+
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
