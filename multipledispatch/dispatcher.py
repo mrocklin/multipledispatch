@@ -24,11 +24,11 @@ _unresolved_dispatchers = set()
 _resolve = [True]
 
 
-def halt_method_resolution():
+def halt_ordering():
     _resolve[0] = False
 
 
-def restart_method_resolution(on_ambiguity=ambiguity_warn):
+def restart_ordering(on_ambiguity=ambiguity_warn):
     _resolve[0] = True
     while _unresolved_dispatchers:
         dispatcher = _unresolved_dispatchers.pop()

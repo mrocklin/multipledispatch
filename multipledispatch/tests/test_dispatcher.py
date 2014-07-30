@@ -1,5 +1,5 @@
 from multipledispatch.dispatcher import (Dispatcher, MethodDispatcher,
-        halt_method_resolution, restart_method_resolution)
+        halt_ordering, restart_ordering)
 from multipledispatch.utils import raises
 
 
@@ -137,7 +137,7 @@ def test_halt_method_resolution():
 
     f = Dispatcher('f')
 
-    halt_method_resolution()
+    halt_ordering()
 
     def func(*args):
         pass
@@ -147,7 +147,7 @@ def test_halt_method_resolution():
 
     assert g == [0]
 
-    restart_method_resolution(on_ambiguity=on_ambiguity)
+    restart_ordering(on_ambiguity=on_ambiguity)
 
     assert g == [1]
 
