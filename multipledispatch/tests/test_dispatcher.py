@@ -153,3 +153,8 @@ def test_halt_method_resolution():
 
     print(list(f.ordering))
     assert set(f.ordering) == set([(int, object), (object, int)])
+
+
+def test_no_implementations():
+    f = Dispatcher('f')
+    assert raises(NotImplementedError, lambda: f('hello'))

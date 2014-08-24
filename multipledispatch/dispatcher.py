@@ -64,6 +64,7 @@ class Dispatcher(object):
         self.name = name
         self.funcs = dict()
         self._cache = dict()
+        self.ordering = []
 
     def register(self, *types, **kwargs):
         """ register dispatcher with new implementation
