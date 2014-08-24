@@ -190,6 +190,21 @@ def test_methods():
 
 def test_methods_multiple_dispatch():
     class Foo(object):
+        @dispatch(A)
+        def f(self, y):
+            return 1
+
+        @dispatch(C)
+        def f(self, y):
+            return 2
+
+    foo = Foo()
+    assert foo.f(A()) == 1
+    assert foo.f(C()) == 2
+
+
+def test_methods_multiple_dispatch_fail():
+    class Foo(object):
         @dispatch(A, A)
         def f(x, y):
             return 1
@@ -198,8 +213,63 @@ def test_methods_multiple_dispatch():
         def f(x, y):
             return 2
 
+        @dispatch(int)
+        def f(x, y):  # 'x' as self
+            return 1 + y
 
     foo = Foo()
+    # We require the 'self' argument to be used to infer methods
     assert foo.f(A(), A()) == 1
     assert foo.f(A(), C()) == 2
     assert foo.f(C(), C()) == 2
+    assert raises(TypeError, lambda: foo.f(2))
+
+
+def test_function_with_self():
+    @dispatch(A, A)
+    def f(self, x):
+        return 1
+
+    @dispatch(A, C)
+    def f(self, x):
+        return 2
+
+    @dispatch(C, A)
+    def f(self, x):
+        return 3
+
+    @dispatch(C, C)
+    def f(self, x):
+        return 4
+
+    assert f(A(), A()) == 1
+    assert f(A(), C()) == 2
+    assert f(C(), A()) == 3
+    assert f(C(), C()) == 4
+
+
+def test_method_dispatch_is_safe():
+    class Foo(object):
+        def __init__(self, x):
+            self.x = x
+
+        @dispatch(int)
+        def f(self, y):
+            return self.x + y
+
+        @dispatch(float)
+        def f(self, y):
+            return self.x - y
+
+    foo1 = Foo(1)
+    foo2 = Foo(2)
+    assert foo1.f(1) == 2
+    assert foo1.f(1.0) == 0.0
+    assert foo2.f(1) == 3
+    assert foo2.f(1.0) == 1.0
+    f1 = foo1.f
+    f2 = foo2.f
+    assert f1(1) == 2
+    assert f1(1.0) == 0.0
+    assert f2(1) == 3
+    assert f2(1.0) == 1.0

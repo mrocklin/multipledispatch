@@ -227,14 +227,16 @@ class MethodDispatcher(Dispatcher):
         Dispatcher
     """
     def __get__(self, instance, owner):
-        self.obj = instance
-        self.cls = owner
-        return self
+        dispatcher = self
+        def method(self, *args, **kwargs):
+            return dispatcher(self, *args, **kwargs)
+        method.__name__ = self.name
+        return method.__get__(instance, owner)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, obj, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
         func = self.resolve(types)
-        return func(self.obj, *args, **kwargs)
+        return func(obj, *args, **kwargs)
 
 
 def str_signature(sig):
