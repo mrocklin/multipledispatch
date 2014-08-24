@@ -118,7 +118,9 @@ def test_docstring():
     def three(x, y):
         return x + y
 
-    f = Dispatcher('f')
+    master_doc = 'Doc of the multimethod itself'
+
+    f = Dispatcher('f', doc=master_doc)
     f.add((object, object), one)
     f.add((int, int), two)
     f.add((float, float), three)
@@ -128,6 +130,7 @@ def test_docstring():
     assert f.__doc__.find(one.__doc__.strip()) < \
             f.__doc__.find(two.__doc__.strip())
     assert 'object, object' in f.__doc__
+    assert master_doc in f.__doc__
 
 
 def test_halt_method_resolution():

@@ -58,13 +58,14 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = 'name', 'funcs', 'ordering', '_cache'
+    __slots__ = 'name', 'funcs', 'ordering', '_cache', 'doc'
 
-    def __init__(self, name):
+    def __init__(self, name, doc=None):
         self.name = name
         self.funcs = dict()
         self._cache = dict()
         self.ordering = []
+        self.doc = doc
 
     def register(self, *types, **kwargs):
         """ register dispatcher with new implementation
@@ -197,9 +198,11 @@ class Dispatcher(object):
 
     @property
     def __doc__(self):
-        doc = " Multiply dispatched method: %s\n\n" % self.name
+        docs = ["Multiply dispatched method: %s" % self.name]
 
-        docs = []
+        if self.doc:
+            docs.append(self.doc)
+
         other = []
         for sig in self.ordering[::-1]:
             func = self.funcs[sig]
@@ -211,13 +214,10 @@ class Dispatcher(object):
             else:
                 other.append(str_signature(sig))
 
-        doc += '\n\n'.join(docs)
-
         if other:
-            doc += '\n\nOther signatures:\n    '
-            doc += '\n\    '.join(other)
+            docs.append('Other signatures:\n    ' + '\n    '.join(other))
 
-        return doc
+        return '\n\n'.join(docs)
 
 
 class MethodDispatcher(Dispatcher):
