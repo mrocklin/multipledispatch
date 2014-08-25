@@ -47,14 +47,14 @@ to the ``Dispatcher``.
     >>> f(1.0)
     0.0
 
-Internally ``Dispatcher.resolve`` selects the function implementation.
+Internally ``Dispatcher.dispatch`` selects the function implementation.
 
 .. code::
 
-    >>> f.resolve((int,))
+    >>> f.dispatch(int)
     <function __main__.inc>
 
-    >>> f.resolve((float,))
+    >>> f.dispatch(float)
     <function __main__.dec>
 
 For notational convenience dispatchers leverage Python's decorator

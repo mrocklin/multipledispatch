@@ -21,6 +21,7 @@ def test_dispatcher():
     f.add((float,), dec)
 
     assert f.resolve((int,)) == inc
+    assert f.dispatch(int) is inc
 
     assert f(1) == 2
     assert f(1.0) == 0.0
@@ -177,3 +178,22 @@ def test_register_stacking():
 
     assert raises(NotImplementedError, lambda: f('hello'))
     assert rev('hello') == 'olleh'
+
+
+def test_dispatch_method():
+    f = Dispatcher('f')
+
+    @f.register(list)
+    def rev(x):
+        return x[::-1]
+
+    @f.register(int, int)
+    def add(x, y):
+        return x + y
+
+    class MyList(list):
+        pass
+
+    assert f.dispatch(list) is rev
+    assert f.dispatch(MyList) is rev
+    assert f.dispatch(int, int) is add
