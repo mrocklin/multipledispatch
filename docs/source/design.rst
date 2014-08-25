@@ -72,8 +72,19 @@ syntax to register functions as we define them.
     def dec(x):
         return x - 1
 
-This is equivalent to the form above. It also adheres to the standard
-implemented by ``functools.singledispatch`` in Python 3.4.
+This is equivalent to the form above.
+It adheres to the standard implemented by ``functools.singledispatch`` in
+Python 3.4 (although the "functional form" of ``register`` is not supported).
+
+As in ``singledispatch``, the ``register`` decorator returns the
+undecorated function, which enables decorator stacking.
+
+.. code::
+
+    @f.register(str)
+    @f.register(tuple)
+    def rev(x):
+        return x[::-1]
 
 
 The Dispatcher creates a detailed docstring automatically.
@@ -95,6 +106,7 @@ provide it when creating the ``Dispatcher``.
     ...     return x - 1
 
     >>> @f.register(str)
+    ... @f.register(tuple)
     ... def rev(x):
     ...     # no docstring
     ...     return x[::-1]
@@ -114,6 +126,7 @@ provide it when creating the ``Dispatcher``.
 
     Other signatures:
         str
+        tuple
 
 Namespaces and ``dispatch``
 ---------------------------

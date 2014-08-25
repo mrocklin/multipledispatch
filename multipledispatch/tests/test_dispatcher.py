@@ -50,15 +50,16 @@ def test_dispatcher_as_decorator():
 
 
 def test_register_instance_method():
-    f = MethodDispatcher('f')
 
     class Test(object):
-        @f.register(list)
-        def __init__(self, data):
+        __init__ = MethodDispatcher('f')
+
+        @__init__.register(list)
+        def _init_list(self, data):
             self.data = data
 
-        @f.register(object)
-        def __init__(self, datum):
+        @__init__.register(object)
+        def _init_obj(self, datum):
             self.data = [datum]
 
     a = Test(3)
@@ -161,3 +162,18 @@ def test_halt_method_resolution():
 def test_no_implementations():
     f = Dispatcher('f')
     assert raises(NotImplementedError, lambda: f('hello'))
+
+
+def test_register_stacking():
+    f = Dispatcher('f')
+
+    @f.register(list)
+    @f.register(tuple)
+    def rev(x):
+        return x[::-1]
+
+    assert f((1, 2, 3)) == (3, 2, 1)
+    assert f([1, 2, 3]) == [3, 2, 1]
+
+    assert raises(NotImplementedError, lambda: f('hello'))
+    assert rev('hello') == 'olleh'

@@ -72,22 +72,30 @@ class Dispatcher(object):
 
         >>> f = Dispatcher('f')
         >>> @f.register(int)
-        ... def f(x):
+        ... def inc(x):
         ...     return x + 1
 
         >>> @f.register(float)
-        ... def f(x):
+        ... def dec(x):
         ...     return x - 1
+
+        >>> @f.register(list)
+        ... @f.register(tuple)
+        ... def reverse(x):
+        ...     return x[::-1]
 
         >>> f(1)
         2
 
         >>> f(1.0)
         0.0
+
+        >>> f([1, 2, 3])
+        [3, 2, 1]
         """
         def _(func):
             self.add(types, func, **kwargs)
-            return self
+            return func
         return _
 
     def add(self, signature, func, on_ambiguity=ambiguity_warn):
