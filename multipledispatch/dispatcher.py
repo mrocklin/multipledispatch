@@ -151,6 +151,10 @@ class Dispatcher(object):
             func = self._cache[types]
         except KeyError:
             func = self.dispatch(*types)
+            if not func:
+                raise NotImplementedError(
+                        'Could not find signature for %s: <%s>' %
+                        (self.name, str_signature(types)))
             self._cache[types] = func
         return func(*args, **kwargs)
 
@@ -173,10 +177,11 @@ class Dispatcher(object):
         >>> implementation(3)
         4
 
-        >>> inc.dispatch(float)
-        Traceback (most recent call last):
-        ...
-        NotImplementedError: Could not find signature for inc: <float>
+        >>> print(inc.dispatch(float))
+        None
+
+        See Also:
+            ``multipledispatch.conflict`` - module to determine resolution order
         """
 
         if types in self.funcs:
@@ -187,8 +192,7 @@ class Dispatcher(object):
             if len(signature) == n and all(map(issubclass, types, signature)):
                 result = self.funcs[signature]
                 return result
-        raise NotImplementedError('Could not find signature for %s: <%s>' %
-                                  (self.name, str_signature(types)))
+        return None
 
     def resolve(self, types):
         """ Deterimine appropriate implementation for this type signature
@@ -250,6 +254,9 @@ class MethodDispatcher(Dispatcher):
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
         func = self.dispatch(*types)
+        if not func:
+            raise NotImplementedError('Could not find signature for %s: <%s>' %
+                                      (self.name, str_signature(types)))
         return func(self.obj, *args, **kwargs)
 
 

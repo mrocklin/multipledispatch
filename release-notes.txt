@@ -12,3 +12,4 @@
         (previously only @dispatch covered this)
 0.4.4 - Docstrings
         Better error handling on bad type inputs
+0.4.5 - halt_reordering function to stop reordering after each declaration
