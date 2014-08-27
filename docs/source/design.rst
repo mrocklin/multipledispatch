@@ -75,6 +75,46 @@ syntax to register functions as we define them.
 This is equivalent to the form above. It also adheres to the standard
 implemented by ``functools.singledispatch`` in Python 3.4.
 
+
+The Dispatcher creates a detailed docstring automatically.
+To add a description of the multimethod itself,
+provide it when creating the ``Dispatcher``.
+
+.. code::
+
+    >>> f = Dispatcher('f', doc="Do something to the argument")
+
+    >>> @f.register(int)
+    ... def inc(x):
+    ...     "Integers are incremented"
+    ...     return x + 1
+
+    >>> @f.register(float)
+    ... def dec(x):
+    ...     "Floats are decremented"
+    ...     return x - 1
+
+    >>> @f.register(str)
+    ... def rev(x):
+    ...     # no docstring
+    ...     return x[::-1]
+
+    >>> print(f.__doc__)
+    Multiply dispatched method: f
+
+    Do something to the argument
+
+    Inputs: <float>
+    ----------------
+    Floats are decremented
+
+    Inputs: <int>
+    --------------
+    Integers are incremented
+
+    Other signatures:
+        str
+
 Namespaces and ``dispatch``
 ---------------------------
 
