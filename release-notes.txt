@@ -13,3 +13,6 @@
 0.4.4 - Docstrings
         Better error handling on bad type inputs
 0.4.5 - halt_reordering function to stop reordering after each declaration
+0.4.6 - Rename Dispatcher.resolve to Dispatcher.dispatch to adhere to
+        singledispatch api.  Also change to variadic args
+        .dispatch returns None rather than raising an error on null result
