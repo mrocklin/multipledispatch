@@ -1,5 +1,5 @@
 from multipledispatch.dispatcher import (Dispatcher, MethodDispatcher,
-        halt_ordering, restart_ordering)
+        halt_ordering, restart_ordering, MDNotImplementedError)
 from multipledispatch.utils import raises
 
 
@@ -197,3 +197,22 @@ def test_dispatch_method():
     assert f.dispatch(list) is rev
     assert f.dispatch(MyList) is rev
     assert f.dispatch(int, int) is add
+
+
+def test_not_implemented():
+    f = Dispatcher('f')
+
+    @f.register(object)
+    def _(x):
+        return 'default'
+
+    @f.register(int)
+    def _(x):
+        if x % 2 == 0:
+            return 'even'
+        else:
+            raise MDNotImplementedError()
+
+    assert f('hello') == 'default' # default behavior
+    assert f(2) == 'even'          # specialized behavior
+    assert f(3) == 'default'       # fall bac to default behavior

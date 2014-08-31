@@ -2,6 +2,9 @@ from warnings import warn
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
 
+class MDNotImplementedError(NotImplementedError):
+    """ A NotImplementedError for multiple dispatch """
+
 
 def ambiguity_warn(dispatcher, ambiguities):
     """ Raise warning when ambiguity is detected
@@ -156,7 +159,22 @@ class Dispatcher(object):
                         'Could not find signature for %s: <%s>' %
                         (self.name, str_signature(types)))
             self._cache[types] = func
-        return func(*args, **kwargs)
+        try:
+            return func(*args, **kwargs)
+
+        except MDNotImplementedError:
+            funcs = self.dispatch_iter(*types)
+            next(funcs) # burn first
+            for func in funcs:
+                try:
+                    return func(*args, **kwargs)
+                except MDNotImplementedError:
+                    pass
+            raise NotImplementedError("Matching functions for %s, "
+                    "signature %s: <%s> found, but none completed successfully"
+                    % (self.name, str_signature(types)))
+
+
 
     def __str__(self):
         return "<dispatched %s>" % self.name
@@ -193,6 +211,13 @@ class Dispatcher(object):
                 result = self.funcs[signature]
                 return result
         return None
+
+    def dispatch_iter(self, *types):
+        n = len(types)
+        for signature in self.ordering:
+            if len(signature) == n and all(map(issubclass, types, signature)):
+                result = self.funcs[signature]
+                yield result
 
     def resolve(self, types):
         """ Deterimine appropriate implementation for this type signature
