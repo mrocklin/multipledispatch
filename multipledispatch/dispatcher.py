@@ -205,12 +205,10 @@ class Dispatcher(object):
         if types in self.funcs:
             return self.funcs[types]
 
-        n = len(types)
-        for signature in self.ordering:
-            if len(signature) == n and all(map(issubclass, types, signature)):
-                result = self.funcs[signature]
-                return result
-        return None
+        try:
+            return next(self.dispatch_iter(*types))
+        except StopIteration:
+            return None
 
     def dispatch_iter(self, *types):
         n = len(types)
