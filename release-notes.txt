@@ -16,3 +16,5 @@
 0.4.6 - Rename Dispatcher.resolve to Dispatcher.dispatch to adhere to
         singledispatch api.  Also change to variadic args
         .dispatch returns None rather than raising an error on null result
+0.4.7 - MDNotImplementedError allows Dispatchers to continue on to the
+        next-most-specific implementation
