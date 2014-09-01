@@ -170,8 +170,8 @@ class Dispatcher(object):
                     return func(*args, **kwargs)
                 except MDNotImplementedError:
                     pass
-            raise NotImplementedError("Matching functions for %s, "
-                    "signature %s: <%s> found, but none completed successfully"
+            raise NotImplementedError("Matching functions for "
+                    "%s: <%s> found, but none completed successfully"
                     % (self.name, str_signature(types)))
 
 

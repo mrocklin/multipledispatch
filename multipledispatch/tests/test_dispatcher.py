@@ -216,3 +216,14 @@ def test_not_implemented():
     assert f('hello') == 'default' # default behavior
     assert f(2) == 'even'          # specialized behavior
     assert f(3) == 'default'       # fall bac to default behavior
+    assert raises(NotImplementedError, lambda: f(1, 2))
+
+
+def test_not_implemented_error():
+    f = Dispatcher('f')
+
+    @f.register(float)
+    def _(a):
+        raise MDNotImplementedError()
+
+    assert raises(NotImplementedError, lambda: f(1.0))
