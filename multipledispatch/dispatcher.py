@@ -263,11 +263,17 @@ class Dispatcher(object):
 
         return '\n\n'.join(docs)
 
-    def help(self, *args):
+    def _help(self, *args):
         return self.dispatch(*map(type, args)).__doc__
 
-    def source(self, *args):
+    def help(self, *args):
+        print self._help(*args)
+
+    def _source(self, *args):
         return source(self.dispatch(*map(type, args)))
+
+    def source(self, *args):
+        print self._source(*args)
 
 
 def source(func):
