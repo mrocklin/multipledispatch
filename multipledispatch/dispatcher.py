@@ -266,13 +266,15 @@ class Dispatcher(object):
     def _help(self, *args):
         return self.dispatch(*map(type, args)).__doc__
 
-    def help(self, *args):
+    def help(self, *args, **kwargs):
+        """ Print docstring for the function corresponding to inputs """
         print self._help(*args)
 
     def _source(self, *args):
         return source(self.dispatch(*map(type, args)))
 
-    def source(self, *args):
+    def source(self, *args, **kwargs):
+        """ Print source code for the function corresponding to inputs """
         print self._source(*args)
 
 
