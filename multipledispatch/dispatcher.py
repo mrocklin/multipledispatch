@@ -1,4 +1,5 @@
 from warnings import warn
+import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
 
@@ -261,6 +262,18 @@ class Dispatcher(object):
             docs.append('Other signatures:\n    ' + '\n    '.join(other))
 
         return '\n\n'.join(docs)
+
+    def help(self, *args):
+        return self.dispatch(*map(type, args)).__doc__
+
+    def source(self, *args):
+        return source(self.dispatch(*map(type, args)))
+
+
+def source(func):
+    s = 'File: %s\n\n' % inspect.getsourcefile(func)
+    s = s + inspect.getsource(func)
+    return s
 
 
 class MethodDispatcher(Dispatcher):
