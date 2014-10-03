@@ -135,6 +135,49 @@ def test_docstring():
     assert master_doc in f.__doc__
 
 
+def test_help():
+    def one(x, y):
+        """ Docstring number one """
+        return x + y
+
+    def two(x, y):
+        """ Docstring number two """
+        return x + y
+
+    def three(x, y):
+        """ Docstring number three """
+        return x + y
+
+    master_doc = 'Doc of the multimethod itself'
+
+    f = Dispatcher('f', doc=master_doc)
+    f.add((object, object), one)
+    f.add((int, int), two)
+    f.add((float, float), three)
+
+    assert f._help(1, 1) == two.__doc__
+    assert f._help(1.0, 2.0) == three.__doc__
+
+
+def test_source():
+    def one(x, y):
+        """ Docstring number one """
+        return x + y
+
+    def two(x, y):
+        """ Docstring number two """
+        return x - y
+
+    master_doc = 'Doc of the multimethod itself'
+
+    f = Dispatcher('f', doc=master_doc)
+    f.add((int, int), one)
+    f.add((float, float), two)
+
+    assert 'x + y' in f._source(1, 1)
+    assert 'x - y' in f._source(1.0, 1.0)
+
+
 def test_halt_method_resolution():
     g = [0]
     def on_ambiguity(a, b):
