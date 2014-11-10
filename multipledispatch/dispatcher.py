@@ -271,7 +271,10 @@ class Dispatcher(object):
         print(self._help(*args))
 
     def _source(self, *args):
-        return source(self.dispatch(*map(type, args)))
+        func = self.dispatch(*map(type, args))
+        if not func:
+            raise TypeError("No function found")
+        return source(func)
 
     def source(self, *args, **kwargs):
         """ Print source code for the function corresponding to inputs """

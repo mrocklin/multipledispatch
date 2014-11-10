@@ -178,6 +178,12 @@ def test_source():
     assert 'x - y' in f._source(1.0, 1.0)
 
 
+def test_source_raises_on_missing_function():
+    f = Dispatcher('f')
+
+    assert raises(TypeError, lambda: f.source(1))
+
+
 def test_halt_method_resolution():
     g = [0]
     def on_ambiguity(a, b):
