@@ -1,5 +1,5 @@
 from multipledispatch import dispatch
-from multipledispatch.compatibility import raises
+from multipledispatch.utils import raises
 
 
 def test_singledispatch():
