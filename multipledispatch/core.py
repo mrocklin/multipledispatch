@@ -1,6 +1,8 @@
 from contextlib import contextmanager
-from warnings import warn
 import inspect
+from warnings import warn
+import sys
+
 from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
 
 
@@ -8,6 +10,29 @@ global_namespace = dict()
 
 
 def dispatch(*types, **kwargs):
+    """
+    Dispatch decorator with two modes of use:
+    @dispatch(int):
+    def f(x):
+        return 'int!'
+    @dispatch
+    def f(x: float):
+        return 'float!'
+    """
+    # if one argument as passed that is not callable and isn't a type, dispatch
+    # on annotations
+    frame = inspect.currentframe().f_back
+    if (len(types) == 1
+            and callable(types[0])
+            and not isinstance(types[0], type)):
+        fn = types[0]
+        return dispatch_on_annotations(fn, frame=frame)
+    # otherwise dispatch on types
+    else:
+        return dispatch_on_types(*types, frame=frame, **kwargs)
+
+
+def dispatch_on_types(*types, **kwargs):
     """ Dispatch function on the types of the inputs
 
     Supports dispatch on all non-keyword arguments.
