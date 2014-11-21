@@ -10,32 +10,10 @@ global_namespace = dict()
 
 
 def dispatch(*types, **kwargs):
-    """
-    Dispatch decorator with two modes of use:
-    @dispatch(int):
-    def f(x):
-        return 'int!'
-    @dispatch
-    def f(x: float):
-        return 'float!'
-    """
-    # if one argument as passed that is not callable and isn't a type, dispatch
-    # on annotations
-    frame = inspect.currentframe().f_back
-    if (len(types) == 1
-            and callable(types[0])
-            and not isinstance(types[0], type)):
-        fn = types[0]
-        return dispatch_on_annotations(fn, frame=frame)
-    # otherwise dispatch on types
-    else:
-        return dispatch_on_types(*types, frame=frame, **kwargs)
-
-
-def dispatch_on_types(*types, **kwargs):
     """ Dispatch function on the types of the inputs
 
-    Supports dispatch on all non-keyword arguments.
+    For Python 2 and 3, supports dispatch on all non-keyword arguments. For
+    Python 3+ only, supports dispatch on annotations.
 
     Collects implementations based on the function name.  Ignores namespaces.
 
@@ -74,6 +52,37 @@ def dispatch_on_types(*types, **kwargs):
     ...     @dispatch(int)
     ...     def __init__(self, datum):
     ...         self.data = [datum]
+
+    Example usage for Python 3 would be:
+
+        @dispatch
+        def f(x: int):
+            return x + 3
+
+    and
+
+        @dispatch
+        def f(x: float):
+            return x + 3.14
+
+    where for f(3) and f(3.0), these would return 6 and 6.14, respectively.
+    """
+    # if one argument as passed that is not callable and isn't a type, dispatch
+    # on annotations
+    frame = inspect.currentframe().f_back
+    if (len(types) == 1
+            and callable(types[0])
+            and not isinstance(types[0], type)):
+        fn = types[0]
+        return dispatch_on_annotations(fn, frame=frame)
+    # otherwise dispatch on types
+    else:
+        return dispatch_on_types(*types, frame=frame, **kwargs)
+
+
+def dispatch_on_types(*types, **kwargs):
+    """
+    Dispatch based on the types that are provided as arguments.
     """
     namespace = kwargs.get('namespace', global_namespace)
     on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
@@ -97,7 +106,8 @@ def dispatch_on_types(*types, **kwargs):
 
 def dispatch_on_annotations(fn, **kwargs):
     """
-    Extract types from fn's annotation (only works in Python 3+)
+    Dispatch types that are calculated from from fn's annotation (only works
+    in Python 3+).
     """
     if sys.version_info.major >= 3:
         argspec = inspect.getfullargspec(fn)
