@@ -1,3 +1,7 @@
-*.pyc
+*.py[co]
 *.idea
 *.egg-info
+.venv*
+build
+dist
+*.sw[po]
