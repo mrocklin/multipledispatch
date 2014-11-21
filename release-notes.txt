@@ -1,0 +1,20 @@
+0.1.0 - first release
+0.2.0 - static analysis
+0.3.0 - dispatch on instance methods
+0.4.0 - support for namespaces
+        register methods a la singledispatch 
+        documentation
+        Faster caching performance
+0.4.1 - expose ambiguity response via callback
+        Improve NotImplemented error messages to include missing signature
+0.4.2 - Dispatcher is serializable
+0.4.3 - Dispatcher.register handles union types
+        (previously only @dispatch covered this)
+0.4.4 - Docstrings
+        Better error handling on bad type inputs
+0.4.5 - halt_reordering function to stop reordering after each declaration
+0.4.6 - Rename Dispatcher.resolve to Dispatcher.dispatch to adhere to
+        singledispatch api.  Also change to variadic args
+        .dispatch returns None rather than raising an error on null result
+0.4.7 - MDNotImplementedError allows Dispatchers to continue on to the
+        next-most-specific implementation

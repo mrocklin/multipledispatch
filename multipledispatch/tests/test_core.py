@@ -1,5 +1,13 @@
 from multipledispatch import dispatch
-from multipledispatch.compatibility import raises
+from multipledispatch.utils import raises
+from functools import partial
+
+
+test_namespace = dict()
+
+
+orig_dispatch = dispatch
+dispatch = partial(dispatch, namespace=test_namespace)
 
 
 def test_singledispatch():
@@ -130,6 +138,22 @@ def test_union_types():
 
     assert f(A()) == 1
     assert f(C()) == 1
+
+
+def test_namespaces():
+    ns1 = dict()
+    ns2 = dict()
+
+    def foo(x):
+        return 1
+    foo1 = orig_dispatch(int, namespace=ns1)(foo)
+
+    def foo(x):
+        return 2
+    foo2 = orig_dispatch(int, namespace=ns2)(foo)
+
+    assert foo1(0) == 1
+    assert foo2(0) == 2
 
 
 """

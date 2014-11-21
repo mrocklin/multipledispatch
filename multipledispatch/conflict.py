@@ -1,4 +1,4 @@
-from .util import _toposort, groupby
+from .utils import _toposort, groupby
 
 class AmbiguityWarning(Warning):
     pass
@@ -36,7 +36,7 @@ def super_signature(signatures):
     n = len(signatures[0])
     assert all(len(s) == n for s in signatures)
 
-    return [max([sig[i].mro() for sig in signatures], key=len)[0]
+    return [max([type.mro(sig[i]) for sig in signatures], key=len)[0]
                for i in range(n)]
 
 

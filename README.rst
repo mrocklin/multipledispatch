@@ -1,13 +1,16 @@
 Multiple Dispatch
 =================
 
-|Build Status|
+|Build Status| |Coverage Status| |Version Status| |Downloads|
 
 A relatively sane approach to multiple dispatch in Python.
 
-There exists several implementations of multiple dispatch (see links below).
-This implementation is efficient, relatively complete, and performs static
-analysis to avoid common issues.
+This implementation of multiple dispatch is efficient, mostly complete,
+performs static analysis to avoid conflicts, and provides optional namespace
+support.  It looks good too.
+
+See the documentation at http://multiple-dispatch.readthedocs.org/
+
 
 Example
 -------
@@ -49,6 +52,8 @@ What this does
 
 -  Provides hints to resolve ambiguities when they occur
 
+-  Supports namespaces with optional keyword arguments
+
 What this doesn't do
 --------------------
 
@@ -68,8 +73,6 @@ What this doesn't do
    @dispatch(a, a)
    def are_same_type(x, y):
        return True
-
--  Respect namespaces
 
 
 Installation and Dependencies
@@ -104,18 +107,39 @@ New BSD. See License_.
 Links
 -----
 
--  `Five-minute Multimethods in Python by
-   Guido <http://www.artima.com/weblogs/viewpost.jsp?thread=101605>`__
--  ```multimethods`` package on
-   PyPI <https://pypi.python.org/pypi/multimethods>`__
--  `Clojure Protocols <http://clojure.org/protocols>`__
--  `Julia methods
-   docs <http://julia.readthedocs.org/en/latest/manual/methods/>`__
--  `Karpinksi notebook: *The Design Impact of Multiple
-   Dispatch* <http://nbviewer.ipython.org/gist/StefanKarpinski/b8fe9dbb36c1427b9f22>`__
--  `Wikipedia
-   article <http://en.wikipedia.org/wiki/Multiple_dispatch>`__
+-  `Five-minute Multimethods in Python by Guido`_
+-  `multimethods package on PyPI`_
+-  `singledispatch in Python 3.4's functools`_
+-  `Clojure Protocols`_
+-  `Julia methods docs`_
+-  `Karpinksi notebook: *The Design Impact of Multiple Dispatch*`_
+-  `Wikipedia article`_
+-  `PEP 3124 - *Overloading, Generic Functions, Interfaces, and Adaptation*`_
+
+
+.. _`Five-minute Multimethods in Python by Guido`:
+  http://www.artima.com/weblogs/viewpost.jsp?thread=101605
+.. _`multimethods package on PyPI`:
+  https://pypi.python.org/pypi/multimethods
+.. _`singledispatch in Python 3.4's functools`:
+  http://docs.python.org/3.4/library/functools.html#functools.singledispatch
+.. _`Clojure Protocols`:
+  http://clojure.org/protocols
+.. _`Julia methods docs`:
+  http://julia.readthedocs.org/en/latest/manual/methods/
+.. _`Karpinksi notebook: *The Design Impact of Multiple Dispatch*`:
+  http://nbviewer.ipython.org/gist/StefanKarpinski/b8fe9dbb36c1427b9f22
+.. _`Wikipedia article`:
+  http://en.wikipedia.org/wiki/Multiple_dispatch
+.. _`PEP 3124 - *Overloading, Generic Functions, Interfaces, and Adaptation*`:
+  http://legacy.python.org/dev/peps/pep-3124/
 
 .. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.png
    :target: https://travis-ci.org/mrocklin/multipledispatch
-.. _License: https://github.com/pymultipledispatch/multipledispatch/blob/master/LICENSE.txt
+.. |Version Status| image:: https://pypip.in/v/multipledispatch/badge.png
+   :target: https://pypi.python.org/pypi/multipledispatch/
+.. |Downloads| image:: https://pypip.in/d/multipledispatch/badge.png
+   :target: https://pypi.python.org/pypi/multipledispatch/
+.. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.png
+   :target: https://coveralls.io/r/mrocklin/multipledispatch
+.. _License: https://github.com/mrocklin/multipledispatch/blob/master/LICENSE.txt

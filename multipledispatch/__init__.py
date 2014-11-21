@@ -1,3 +1,5 @@
 from .core import dispatch
+from .dispatcher import (Dispatcher, halt_ordering, restart_ordering,
+    MDNotImplementedError)
 
-__version__ = '0.2.0'
+__version__ = '0.4.7'

@@ -6,8 +6,14 @@ python:
     - "3.3"
     - "pypy"
 
+install:
+    - pip install coverage --use-mirrors
 
-script: nosetests --with-doctest
+script:
+    - nosetests --with-doctest
+
+after_success:
+    - if [[ $TRAVIS_PYTHON_VERSION != 'pypy' ]]; then pip install coveralls --use-mirrors ; coveralls ; fi
 
 notifications:
   email: false
