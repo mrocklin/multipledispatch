@@ -123,7 +123,7 @@ def dispatch_on_annotations(fn, **kwargs):
 
     This should only ever be called by Python 3.4.
     """
-    if sys.version_info.major >= 3:
+    if sys.version_info[0] >= 3:
         types = get_types_from_annotations(fn)
         return dispatch_on_types(*types, **kwargs)(fn)
     else:

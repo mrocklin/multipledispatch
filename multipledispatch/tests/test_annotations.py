@@ -9,7 +9,7 @@ from multipledispatch.utils import raises
 
 
 def test_dispatch_on_annotations():
-    if sys.version_info.major < 3:
+    if sys.version_info[0] < 3:
         def f(x):
             return x
 
