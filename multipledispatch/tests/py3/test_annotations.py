@@ -1,5 +1,19 @@
+from multipledispatch import core
 from multipledispatch import dispatch
 from multipledispatch.utils import raises
+
+
+def test_get_types_from_annotations():
+    def f(x: int):
+        return x
+
+    def g(x: int, y: float, z: str):
+        return (x, y, z)
+
+    assert [x.__name__ for x in core.get_types_from_annotations(f)] == [
+        'int']
+    assert [x.__name__ for x in core.get_types_from_annotations(g)] == [
+        'int', 'float', 'str']
 
 
 def test_multipledispatch():
