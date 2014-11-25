@@ -10,10 +10,26 @@ def test_get_types_from_annotations():
     def g(x: int, y: float, z: str):
         return (x, y, z)
 
+    def h(x):
+        return x
+
     assert [x.__name__ for x in core.get_types_from_annotations(f)] == [
         'int']
     assert [x.__name__ for x in core.get_types_from_annotations(g)] == [
         'int', 'float', 'str']
+    assert [x.__name__ for x in core.get_types_from_annotations(h)] == []
+
+
+def test_dispatch_on_annotations():
+    def f(x: int, y: float, z: str):
+        return (x, y, z)
+
+    def g(x, y, z):
+        return (x, y, z)
+
+    anns = core.dispatch_on_annotations(f).funcs.keys()
+    types = core.dispatch_on_types((int, float, str))(f).funcs.keys()
+    assert anns == types
 
 
 def test_multipledispatch():
