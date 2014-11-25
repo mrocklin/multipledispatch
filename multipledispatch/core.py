@@ -53,19 +53,28 @@ def dispatch(*types, **kwargs):
     ...     def __init__(self, datum):
     ...         self.data = [datum]
 
-    Example usage for Python 3 would be:
+    Example usage for Python 3 as compared with Python 2 would be:
 
-        @dispatch
-        def f(x: int):
-            return x + 3
+    >>> import sys
+    >>> if sys.version_info.major >= 3:
+    ...     @dispatch
+    ...     def f(x: int):
+    ...         return x + 3
+    ...     @dispatch
+    ...     def f(x: float):
+    ...         return x + 3.0
+    ... else:
+    ...     @dispatch(int)
+    ...     def f(x):
+    ...         return x + 3
+    ...     @dispatch(float)
+    ...     def f(x):
+    ...         return x + 3.0
 
-    and
-
-        @dispatch
-        def f(x: float):
-            return x + 3.14
-
-    where for f(3) and f(3.0), these would return 6 and 6.14, respectively.
+    >>> f(3)
+    6
+    >>> f(3.0)
+    6.0
     """
     # if one argument as passed that is not callable and isn't a type, dispatch
     # on annotations
