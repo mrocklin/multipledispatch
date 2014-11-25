@@ -87,11 +87,10 @@ def dispatch_on_types(*types, **kwargs):
     on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
 
     types = tuple(types)
-    frame = kwargs.get('frame', None)
     def _(func):
         name = func.__name__
         if ismethod(func):
-            dispatcher = frame.f_locals.get(name,
+            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
                 MethodDispatcher(name))
         else:
             if name not in namespace:
