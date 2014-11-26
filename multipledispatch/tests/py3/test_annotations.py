@@ -1,3 +1,9 @@
+""" A Python 3.x-only annotation test module
+
+This module is intended to be used only from Python 3.x, as it
+contains code that is invalid syntax for Python 2.x, and thus
+can't be loaded as part of any Python 2.x test suite.
+"""
 from multipledispatch import core
 from multipledispatch import dispatch
 from multipledispatch.utils import raises
