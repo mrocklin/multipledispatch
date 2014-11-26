@@ -90,7 +90,7 @@ def dispatch_on_types(*types, **kwargs):
     types = tuple(types)
     def _(func):
         name = func.__name__
-        if ismethod(func):
+        if compat.ismethod(func):
             frame = inspect.currentframe()
             dispatcher = compat.get_method_dispatcher(name, frame, kwargs)
         else:
@@ -110,7 +110,7 @@ def get_types_from_annotations(fn):
     This should only ever be called by Python 3.4.
     """
     argspec = inspect.getfullargspec(fn)
-    if ismethod(fn):
+    if compat.ismethod(fn):
         args = argspec.args[1:]
     else:
         args = argspec.args
@@ -128,16 +128,3 @@ def dispatch_on_annotations(fn, **kwargs):
         return dispatch_on_types(*types, **kwargs)(fn)
     else:
         raise SyntaxError('Annotations require Python 3+.')
-
-
-def ismethod(func):
-    """ Is func a method?
-
-    Note that this has to work as the method is defined but before the class is
-    defined.  At this stage methods look like functions.
-    """
-    try:
-        spec = inspect.getargspec(func)
-    except:
-        spec = inspect.getfullargspec(func)
-    return spec and spec.args and spec.args[0] == 'self'

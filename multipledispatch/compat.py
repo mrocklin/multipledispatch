@@ -4,6 +4,7 @@ This module provides fully separable and thus testable functions which
 codify some of the differences between Python 2 and Python 3 in the
 multipledispatch library.
 """
+import inspect
 import sys
 
 from .dispatcher import MethodDispatcher
@@ -27,3 +28,24 @@ def get_f_locals_py2(frame):
 
 def get_f_locals_py3(kwarg_dict):
     return kwarg_dict.get('frame', None).f_locals
+
+
+def ismethod(func):
+    """ Is func a method?
+
+    Note that this has to work as the method is defined but before the class is
+    defined. At this stage methods look like functions.
+    """
+    if sys.version_info[0] >= 3:
+        spec = get_argspec_py3(func)
+    else:
+        spec = get_argspec_py2(func)
+    return spec and spec.args and spec.args[0] == 'self'
+
+
+def get_argspec_py2(func):
+    return inspect.getargspec(func)
+
+
+def get_argspec_py3(func):
+    return inspect.getfullargspec(func)

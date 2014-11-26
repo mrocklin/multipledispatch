@@ -1,5 +1,6 @@
-import sys
+from collections import namedtuple
 import inspect
+import sys
 
 from multipledispatch import compat
 from multipledispatch import dispatch
@@ -10,6 +11,10 @@ class F(object):
 
     def f(self, x):
         return x
+
+
+def f(x):
+    return x
 
 
 obj = F()
@@ -36,6 +41,7 @@ def test_get_method_dispatcher_custom():
 
     assert isinstance(result, CustomDispatcher)
 
+
 def test_get_f_locals():
     frame = inspect.currentframe().f_back
     kw_dict = {"frame": frame}
@@ -46,3 +52,20 @@ def test_get_f_locals():
         result = compat.get_f_locals_py2(frame)
 
     assert type(result) == dict
+
+
+def test_is_method():
+    assert not compat.ismethod(f)
+    assert compat.ismethod(obj.f)
+
+
+def test_get_argspec():
+    if sys.version_info[0] >= 3:
+        results = (compat.get_argspec_py3(f),
+                   compat.get_argspec_py3(obj.f))
+        klass = inspect.FullArgSpec
+    else:
+        results = (compat.get_argspec_py2(f),
+                   compat.get_argspec_py2(obj.f))
+        klass = inspect.ArgSpec
+    print([isinstance(x, klass) for x in results])
