@@ -3,7 +3,8 @@ import inspect
 from warnings import warn
 import sys
 
-from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
+from . import compat
+from .dispatcher import Dispatcher, ambiguity_warn
 
 
 global_namespace = dict()
@@ -90,8 +91,8 @@ def dispatch_on_types(*types, **kwargs):
     def _(func):
         name = func.__name__
         if ismethod(func):
-            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
-                MethodDispatcher(name))
+            frame = inspect.currentframe()
+            dispatcher = compat.get_method_dispatcher(name, frame, kwargs)
         else:
             if name not in namespace:
                 namespace[name] = Dispatcher(name)
