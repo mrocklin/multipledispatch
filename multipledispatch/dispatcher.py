@@ -62,10 +62,10 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = 'name', 'funcs', 'ordering', '_cache', 'doc'
+    __slots__ = '__name__', 'name', 'funcs', 'ordering', '_cache', 'doc'
 
     def __init__(self, name, doc=None):
-        self.name = name
+        self.name = self.__name__ = name
         self.funcs = dict()
         self._cache = dict()
         self.ordering = []
