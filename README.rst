@@ -74,6 +74,11 @@ What this doesn't do
    def are_same_type(x, y):
        return True
 
+-  Efficient update: The addition of a new signature requires a full resolve of
+   the whole function.  This becomes troublesome after you get to a few hundred
+   type signatures.  It can be mitigated by halting and restarting ordering see
+   (``halt_ordering`` and ``restart_ordering`` functions for more information.)
+
 
 Installation and Dependencies
 -----------------------------
