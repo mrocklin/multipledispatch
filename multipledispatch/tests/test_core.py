@@ -2,7 +2,9 @@ from multipledispatch import dispatch
 from multipledispatch.utils import raises
 from functools import partial
 
+
 test_namespace = dict()
+
 
 orig_dispatch = dispatch
 dispatch = partial(dispatch, namespace=test_namespace)

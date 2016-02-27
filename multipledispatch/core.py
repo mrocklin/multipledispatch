@@ -1,7 +1,10 @@
 from contextlib import contextmanager
-from warnings import warn
 import inspect
-from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
+from warnings import warn
+import sys
+
+from . import compat
+from .dispatcher import Dispatcher, ambiguity_warn
 
 
 global_namespace = dict()
@@ -10,7 +13,8 @@ global_namespace = dict()
 def dispatch(*types, **kwargs):
     """ Dispatch function on the types of the inputs
 
-    Supports dispatch on all non-keyword arguments.
+    For Python 2 and 3, supports dispatch on all non-keyword arguments. For
+    Python 3+ only, supports dispatch on annotations.
 
     Collects implementations based on the function name.  Ignores namespaces.
 
@@ -49,6 +53,36 @@ def dispatch(*types, **kwargs):
     ...     @dispatch(int)
     ...     def __init__(self, datum):
     ...         self.data = [datum]
+
+    Example usage for Python 3 (which can't be entered as doctests,
+    since Python 2 would fail tp parse it):
+
+    @dispatch
+    def f(x: int):
+        return x + 3
+
+    @dispatch
+    def f(x: float):
+        return x + 3.0
+
+    Calling these functions as f(3) and f(3.0) would return 6 and 6.0,
+    respectively.
+    """
+    # if one argument as passed that is not callable and isn't a type, dispatch
+    # on annotations
+    frame = inspect.currentframe().f_back
+    if (len(types) == 1
+            and callable(types[0])
+            and not isinstance(types[0], type)):
+        fn = types[0]
+        return dispatch_on_annotations(fn, frame=frame)
+    # otherwise dispatch on types
+    else:
+        return dispatch_on_types(*types, frame=frame, **kwargs)
+
+
+def dispatch_on_types(*types, **kwargs):
+    """ Dispatch based on the types that are provided as arguments.
     """
     namespace = kwargs.get('namespace', global_namespace)
     on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
@@ -56,10 +90,9 @@ def dispatch(*types, **kwargs):
     types = tuple(types)
     def _(func):
         name = func.__name__
-
-        if ismethod(func):
-            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
-                MethodDispatcher(name))
+        if compat.ismethod(func):
+            frame = inspect.currentframe()
+            dispatcher = compat.get_method_dispatcher(name, frame, kwargs)
         else:
             if name not in namespace:
                 namespace[name] = Dispatcher(name)
@@ -70,11 +103,28 @@ def dispatch(*types, **kwargs):
     return _
 
 
-def ismethod(func):
-    """ Is func a method?
+def get_types_from_annotations(fn):
+    """ This function has been separated out in order to make testing cleaner.
+    It is intended only for use by dispatch_on_annotations.
 
-    Note that this has to work as the method is defined but before the class is
-    defined.  At this stage methods look like functions.
+    This should only ever be called by Python 3.4.
     """
-    spec = inspect.getargspec(func)
-    return spec and spec.args and spec.args[0] == 'self'
+    argspec = inspect.getfullargspec(fn)
+    if compat.ismethod(fn):
+        args = argspec.args[1:]
+    else:
+        args = argspec.args
+    anns = argspec.annotations
+    return [anns.get(a) for a in args if anns.get(a)]
+
+
+def dispatch_on_annotations(fn, **kwargs):
+    """ Dispatch types that are calculated from from fn's annotation.
+
+    This should only ever be called by Python 3.4.
+    """
+    if sys.version_info[0] >= 3:
+        types = get_types_from_annotations(fn)
+        return dispatch_on_types(*types, **kwargs)(fn)
+    else:
+        raise SyntaxError('Annotations require Python 3+.')
