@@ -77,14 +77,17 @@ def dispatch(func=None, **kwargs):
 def get_types(parameters):
     types = []
     for arg in parameters.values():
-        if not arg.annotation:
-            types.append(object)
-        elif isinstance(arg.annotation, type):
-            types.append(arg.annotation)
-        elif isinstance(arg.annotation, tuple) and all([isinstance(typ, type) for typ in arg.annotation]):
-            types.append(arg.annotation)
+        if arg.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            if not arg.annotation:
+                types.append(object)
+            elif isinstance(arg.annotation, type):
+                types.append(arg.annotation)
+            elif isinstance(arg.annotation, tuple) and all([isinstance(typ, type) for typ in arg.annotation]):
+                types.append(arg.annotation)
+            else:
+                raise AnnotationMustBeTypeError('{}\'s annotation must be a type, but got {}'.format(arg.name, arg.annotation))
         else:
-            raise AnnotationMustBeTypeError('{}\'s annotation must be a type, but got {}'.format(arg.name, arg.annotation))
+            continue
     return tuple(types)
 
 def ismethod(func):
