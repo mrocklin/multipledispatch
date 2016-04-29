@@ -5,12 +5,12 @@ Multiple dispatch selects the function from the types of the inputs.
 
 .. code::
 
-    @dispatch(int)
-    def f(x):           # increment integers
+    @dispatch
+    def f(x: int):           # increment integers
         return x + 1
 
-    @dispatch(float)
-    def f(x):           # decrement floats
+    @dispatch
+    def f(x: float):           # decrement floats
         return x - 1
 
 .. code::
@@ -28,8 +28,8 @@ types with a tuple.
 
 .. code::
 
-    @dispatch((list, tuple))
-    def f(x):
+    @dispatch
+    def f(x: (list, tuple)):
         """ Apply ``f`` to each element in a list or tuple """
         return [f(y) for y in x]
 
@@ -51,9 +51,8 @@ place of union types like ``(list, tuple)`` or ``(int, float)``.
 
     from collections import Iterable
 
-    # @dispatch((list, tuple))
-    @dispatch(Iterable)
-    def f(x):
+    @dispatch
+    def f(x: Iterable):
         """ Apply ``f`` to each element in an Iterable """
         return [f(y) for y in x]
 
@@ -66,11 +65,11 @@ iterables.
 
 .. code::
 
-    @dispatch(Iterable)
-    def flatten(L):
+    @dispatch
+    def flatten(L: Iterable):
         return sum([flatten(x) for x in L], [])
 
-    @dispatch(object)
+    @dispatch
     def flatten(x):
         return [x]
 
@@ -98,8 +97,8 @@ strings.
 
 .. code::
 
-    @dispatch(str)
-    def flatten(s):
+    @dispatch
+    def flatten(s: str):
         return s
 
 .. code::
@@ -117,12 +116,12 @@ All of these rules apply when we introduce multiple inputs.
 
 .. code::
 
-    @dispatch(object, object)
+    @dispatch
     def f(x, y):
         return x + y
 
-    @dispatch(object, float)
-    def f(x, y):
+    @dispatch
+    def f(x, y: float):
         """ Square the right hand side if it is a float """
         return x + y**2
 
@@ -142,8 +141,8 @@ are equally valid
 
 .. code::
 
-    @dispatch(float, object)
-    def f(x, y):
+    @dispatch
+    def f(x: float, y):
         """ Square left hand side if it is a float """
         return x**2 + y
 
@@ -193,16 +192,16 @@ this new function *before* the others.
 
 .. code::
 
-    @dispatch(float, float)
-    def f(x, y):
+    @dispatch
+    def f(x: float, y: float):
         ...
 
-    @dispatch(float, object)
-    def f(x, y):
+    @dispatch
+    def f(x: float, y):
         ...
 
-    @dispatch(object, float)
-    def f(x, y):
+    @dispatch
+    def f(x, y: float):
         ...
 
 If you do not resolve ambiguities by creating more specific functions

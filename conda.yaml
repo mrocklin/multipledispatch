@@ -1,6 +1,6 @@
 package:
-    name: multipledispatch 
-    version: "0.4.6"
+    name: multipledispatch2
+    version: "0.1.0"
 
 build:
     number: {{environ.get('BINSTAR_BUILD', 1)}}

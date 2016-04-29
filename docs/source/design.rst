@@ -138,12 +138,12 @@ The ``dispatch`` decorator hides the creation and manipulation of
 
     # f = Dispatcher('f')  # no need to create Dispatcher ahead of time
 
-    @dispatch(int)
-    def f(x):
+    @dispatch
+    def f(x: int):
         return x + 1
 
-    @dispatch(float)
-    def f(x):
+    @dispatch
+    def f(x: float):
         return x - 1
 
 The ``dispatch`` decorator uses the name of the function to select the
@@ -157,8 +157,8 @@ for future reference.
     # This creates and stores a new Dispatcher('g')
     # namespace['g'] = Dispatcher('g')
     # namespace['g'].add((int,), g)
-    @dispatch(int)
-    def g(x):
+    @dispatch
+    def g(x: int):
         return x ** 2
 
 We store this new ``Dispatcher`` in a *namespace*. A namespace is simply
@@ -175,8 +175,8 @@ their own namespaces simply by creating a dictionary.
 
     my_namespace = dict()
 
-    @dispatch(int, namespace=my_namespace)
-    def f(x):
+    @dispatch(namespace=my_namespace)
+    def f(x: int):
         return x + 1
 
 To establish a namespace for an entire project we suggest the use of
@@ -191,7 +191,7 @@ decorator.
     my_namespace = dict()
     dispatch = partial(dispatch, namespace=my_namespace)
 
-    @dispatch(int)  # Uses my_namespace rather than the global namespace
-    def f(x):
+    @dispatch  # Uses my_namespace rather than the global namespace
+    def f(x: int):
         return x + 1
 

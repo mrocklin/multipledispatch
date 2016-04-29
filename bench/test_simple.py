@@ -1,14 +1,14 @@
-from multipledispatch import dispatch
+from multipledispatch2 import dispatch
 
-@dispatch(int)
-def isint(x):
+@dispatch
+def isint(x: int) -> bool:
     return True
 
-@dispatch(object)
-def isint(x):
+@dispatch
+def isint(x) -> bool:
     return False
 
 def test_simple():
-    for i in xrange(100000):
+    for i in range(100000):
         isint(5)
         isint('a')
