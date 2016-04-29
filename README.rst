@@ -1,29 +1,24 @@
-Multiple Dispatch
+Multiple Dispatch 2
 =================
 
 |Build Status| |Coverage Status| |Version Status| |Downloads|
 
-A relatively sane approach to multiple dispatch in Python.
+This is a fork from `mroklin's multipledispatch<https://github.com/mrocklin/multipledispatch>`_, which is designed to fully support python 3's type annotation.
 
-This implementation of multiple dispatch is efficient, mostly complete,
-performs static analysis to avoid conflicts, and provides optional namespace
-support.  It looks good too.
-
-See the documentation at http://multiple-dispatch.readthedocs.org/
-
+And it only supports python 3.3+.
 
 Example
 -------
 
 .. code-block:: python
 
-   >>> from multipledispatch import dispatch
+   >>> from multipledispatch2 import dispatch
 
-   >>> @dispatch(int, int)
-   ... def add(x, y):
+   >>> @dispatch
+   ... def add(x: int, y: int) -> int:
    ...     return x + y
 
-   >>> @dispatch(object, object)
+   >>> @dispatch
    ... def add(x, y):
    ...     return "%s + %s" % (x, y)
 
@@ -61,8 +56,10 @@ What this doesn't do
 
 .. code-block:: python
 
-   @dispatch([int])
-   def add(*args):
+   import typing
+
+   @dispatch
+   def add(*args: typing.Iterable[int]):
        ...
 
 -  Diagonal dispatch
@@ -70,8 +67,8 @@ What this doesn't do
 .. code-block:: python
 
    a = arbitrary_type()
-   @dispatch(a, a)
-   def are_same_type(x, y):
+   @dispatch
+   def are_same_type(x: a, y: a) -> bool:
        return True
 
 -  Efficient update: The addition of a new signature requires a full resolve of
@@ -83,21 +80,20 @@ What this doesn't do
 Installation and Dependencies
 -----------------------------
 
-``multipledispatch`` is on the Python Package Index (PyPI):
+``multipledispatch2`` is on the Python Package Index (PyPI):
 
 ::
 
-    pip install multipledispatch
+    pip install multipledispatch2
 
 or
 
 ::
 
-    easy_install multipledispatch
+    easy_install multipledispatch2
 
 
-``multipledispatch`` supports Python 2.6+ and Python 3.2+ with a common
-codebase.  It is pure Python and requires no dependencies beyond the standard
+``multipledispatch2`` is only supports Python 3.3+.  It is pure Python and requires no dependencies beyond the standard
 library.
 
 It is, in short, a light weight dependency.
@@ -120,7 +116,7 @@ Links
 -  `Karpinksi notebook: *The Design Impact of Multiple Dispatch*`_
 -  `Wikipedia article`_
 -  `PEP 3124 - *Overloading, Generic Functions, Interfaces, and Adaptation*`_
-
+-  `PEP 0484 - *Type Hints*`_
 
 .. _`Five-minute Multimethods in Python by Guido`:
   http://www.artima.com/weblogs/viewpost.jsp?thread=101605
@@ -138,6 +134,8 @@ Links
   http://en.wikipedia.org/wiki/Multiple_dispatch
 .. _`PEP 3124 - *Overloading, Generic Functions, Interfaces, and Adaptation*`:
   http://legacy.python.org/dev/peps/pep-3124/
+.. _`PEP 0484 - *Type Hints*`:
+  https://www.python.org/dev/peps/pep-0484/
 
 .. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.png
    :target: https://travis-ci.org/mrocklin/multipledispatch
@@ -148,3 +146,4 @@ Links
 .. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.png
    :target: https://coveralls.io/r/mrocklin/multipledispatch
 .. _License: https://github.com/mrocklin/multipledispatch/blob/master/LICENSE.txt
+
