@@ -58,7 +58,8 @@ def dispatch(func=None, **kwargs):
     def _(func):
         name = func.__name__
 
-        if ismethod(func):
+        method = ismethod(func)
+        if method:
             dispatcher = inspect.currentframe().f_back.f_locals.get(name,
                 MethodDispatcher(name))
         else:
@@ -66,7 +67,7 @@ def dispatch(func=None, **kwargs):
                 namespace[name] = Dispatcher(name)
             dispatcher = namespace[name]
 
-        dispatcher.add(get_types(inspect.signature(func).parameters), func, on_ambiguity=on_ambiguity)
+        dispatcher.add(get_types(inspect.signature(func).parameters, method=method), func, on_ambiguity=on_ambiguity)
         return dispatcher
 
     if func:
@@ -74,11 +75,14 @@ def dispatch(func=None, **kwargs):
     else:
         return _
 
-def get_types(parameters):
+def get_types(parameters, method):
     types = []
-    for arg in parameters.values():
+    for idx, arg in enumerate(parameters.values()):
+        if idx == 0 and method:
+            continue
+
         if arg.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            if not arg.annotation:
+            if arg.annotation is inspect._empty:
                 types.append(object)
             elif isinstance(arg.annotation, type):
                 types.append(arg.annotation)
