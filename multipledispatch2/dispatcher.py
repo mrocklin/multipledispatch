@@ -1,7 +1,7 @@
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
-from .utils import expand_tuples
+from .utils import expand_tuples, issubclass_
 
 class MDNotImplementedError(NotImplementedError):
     """ A NotImplementedError for multiple dispatch """
@@ -103,6 +103,12 @@ class Dispatcher:
         return _
 
     def add(self, signature, func, on_ambiguity=ambiguity_warn):
+        # Handle the union types
+        for typs in expand_tuples(signature):
+            self.add_(typs, func, on_ambiguity)
+        return
+
+    def add_(self, signature, func, on_ambiguity=ambiguity_warn):
         """ Add new types/method pair to dispatcher
 
         >>> D = Dispatcher('add')
@@ -120,12 +126,8 @@ class Dispatcher:
         with a dispatcher/itself, and a set of ambiguous type signature pairs
         as inputs.  See ``ambiguity_warn`` for an example.
         """
-        # Handle union types
-        if any(isinstance(typ, tuple) for typ in signature):
-            for typs in expand_tuples(signature):
-                self.add(typs, func, on_ambiguity)
-            return
 
+#        signature = tuple(tuple(typ) if isinstance(typ, list) else typ for typ in signature)
         self.funcs[signature] = func
         self.reorder(on_ambiguity=on_ambiguity)
         self._cache.clear()
@@ -205,7 +207,7 @@ class Dispatcher:
     def dispatch_iter(self, *types):
         n = len(types)
         for signature in self.ordering:
-            if len(signature) == n and all(map(issubclass, types, signature)):
+            if len(signature) == n and all(map(issubclass_, types, signature)):
                 result = self.funcs[signature]
                 yield result
 

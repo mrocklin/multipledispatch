@@ -84,15 +84,16 @@ def get_types(parameters, method):
         if arg.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             if arg.annotation is inspect._empty:
                 types.append(object)
-            elif isinstance(arg.annotation, type):
-                types.append(arg.annotation)
-            elif isinstance(arg.annotation, tuple) and all([isinstance(typ, type) for typ in arg.annotation]):
+            elif ensure_types(arg.annotation):
                 types.append(arg.annotation)
             else:
                 raise AnnotationMustBeTypeError('{}\'s annotation must be a type, but got {}'.format(arg.name, arg.annotation))
         else:
             continue
     return tuple(types)
+
+def ensure_types(tp):
+    return isinstance(tp, type) or ((isinstance(tp, tuple) or isinstance(tp, list)) and all(ensure_types(typ) for typ in tp))
 
 def ismethod(func):
     """ Is func a method?

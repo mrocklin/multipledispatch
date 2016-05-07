@@ -17,13 +17,29 @@ def expand_tuples(L):
     """
     if not L:
         return [()]
-    elif not isinstance(L[0], tuple):
+    elif not isinstance(L[0], tuple) and not isinstance(L[0], list):
         rest = expand_tuples(L[1:])
         return [(L[0],) + t for t in rest]
-    else:
+    elif isinstance(L[0], list):
         rest = expand_tuples(L[1:])
-        return [(item,) + t for t in rest for item in L[0]]
+        return [(item,) + t for t in rest for item in expand_tuples(L[0])]
+    elif isinstance(L[0], tuple):
+        rest = expand_tuples(L[1:])
+        return [final_item for t in rest for item in L[0] for final_item in expand_tuples((item,) + t)]
+    else:
+        pass
 
+def issubclass_(class1, class2):
+    if isinstance(class1, type) and isinstance(class2, type):
+        return issubclass(class1, class2)
+    elif isinstance(class1, type) and isinstance(class2, tuple):
+        return all([issubclass_(class1, typ) for typ in class2])
+    elif isinstance(class1, tuple) and isinstance(class2, type):
+        return any([issubclass_(typ, class2)for typ in class1])
+    elif isinstance(class1, tuple) and isinstance(class2, tuple):
+        return all([any([issubclass_(typ1, typ2) for typ1 in class1]) for typ2 in class2])
+    else:
+        return False
 
 # Taken from theano/theano/gof/sched.py
 # Avoids licensing issues because this was written by Matthew Rocklin
