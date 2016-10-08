@@ -1,3 +1,5 @@
+import warnings
+
 from multipledispatch.dispatcher import (Dispatcher, MethodDispatcher,
         halt_ordering, restart_ordering, MDNotImplementedError)
 from multipledispatch.utils import raises
@@ -20,7 +22,9 @@ def test_dispatcher():
     f.add((int,), inc)
     f.add((float,), dec)
 
-    assert f.resolve((int,)) == inc
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        assert f.resolve((int,)) == inc
     assert f.dispatch(int) is inc
 
     assert f(1) == 2
