@@ -76,5 +76,9 @@ def ismethod(func):
     Note that this has to work as the method is defined but before the class is
     defined.  At this stage methods look like functions.
     """
-    spec = inspect.getargspec(func)
-    return spec and spec.args and spec.args[0] == 'self'
+    if hasattr(inspect, "signature"):
+        signature = inspect.signature(func)
+        return signature.parameters.get('self', None) != None
+    else:
+        spec = inspect.getargspec(func)
+        return spec and spec.args and spec.args[0] == 'self'
