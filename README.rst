@@ -9,7 +9,7 @@ This implementation of multiple dispatch is efficient, mostly complete,
 performs static analysis to avoid conflicts, and provides optional namespace
 support.  It looks good too.
 
-See the documentation at http://multiple-dispatch.readthedocs.org/
+See the documentation at https://multiple-dispatch.readthedocs.io/
 
 
 Example
@@ -131,7 +131,7 @@ Links
 .. _`Clojure Protocols`:
   http://clojure.org/protocols
 .. _`Julia methods docs`:
-  http://julia.readthedocs.org/en/latest/manual/methods/
+  https://julia.readthedocs.io/en/latest/manual/methods/
 .. _`Karpinksi notebook: *The Design Impact of Multiple Dispatch*`:
   http://nbviewer.ipython.org/gist/StefanKarpinski/b8fe9dbb36c1427b9f22
 .. _`Wikipedia article`:
