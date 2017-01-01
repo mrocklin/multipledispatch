@@ -17,5 +17,5 @@ requirements:
       - python
 
 about:
-    home: http://multiple-dispatch.readthedocs.org/
+    home: https://multiple-dispatch.readthedocs.io/
     license: BSD
