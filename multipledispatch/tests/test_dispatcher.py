@@ -1,8 +1,9 @@
 import warnings
 
+from nose.tools import assert_raises
+
 from multipledispatch.dispatcher import (Dispatcher, MethodDispatcher,
         halt_ordering, restart_ordering, MDNotImplementedError)
-from multipledispatch.utils import raises
 
 
 def identity(x):
@@ -108,7 +109,7 @@ def test_serializable():
 
 def test_raise_error_on_non_class():
     f = Dispatcher('f')
-    assert raises(TypeError, lambda: f.add((1,), inc))
+    assert_raises(TypeError, lambda: f.add((1,), inc))
 
 
 def test_docstring():
@@ -185,7 +186,7 @@ def test_source():
 def test_source_raises_on_missing_function():
     f = Dispatcher('f')
 
-    assert raises(TypeError, lambda: f.source(1))
+    assert_raises(TypeError, lambda: f.source(1))
 
 
 def test_halt_method_resolution():
@@ -215,7 +216,7 @@ def test_halt_method_resolution():
 
 def test_no_implementations():
     f = Dispatcher('f')
-    assert raises(NotImplementedError, lambda: f('hello'))
+    assert_raises(NotImplementedError, lambda: f('hello'))
 
 
 def test_register_stacking():
@@ -229,7 +230,7 @@ def test_register_stacking():
     assert f((1, 2, 3)) == (3, 2, 1)
     assert f([1, 2, 3]) == [3, 2, 1]
 
-    assert raises(NotImplementedError, lambda: f('hello'))
+    assert_raises(NotImplementedError, lambda: f('hello'))
     assert rev('hello') == 'olleh'
 
 
@@ -269,7 +270,7 @@ def test_not_implemented():
     assert f('hello') == 'default' # default behavior
     assert f(2) == 'even'          # specialized behavior
     assert f(3) == 'default'       # fall bac to default behavior
-    assert raises(NotImplementedError, lambda: f(1, 2))
+    assert_raises(NotImplementedError, lambda: f(1, 2))
 
 
 def test_not_implemented_error():
@@ -279,4 +280,4 @@ def test_not_implemented_error():
     def _(a):
         raise MDNotImplementedError()
 
-    assert raises(NotImplementedError, lambda: f(1.0))
+    assert_raises(NotImplementedError, lambda: f(1.0))

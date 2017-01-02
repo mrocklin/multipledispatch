@@ -1,5 +1,6 @@
+from nose.tools import assert_raises
+
 from multipledispatch import dispatch
-from multipledispatch.utils import raises
 from functools import partial
 
 test_namespace = dict()
@@ -25,7 +26,7 @@ def test_singledispatch():
     assert g(1) == 3
     assert f(1.0) == 0
 
-    assert raises(NotImplementedError, lambda: f('hello'))
+    assert_raises(NotImplementedError, lambda: f('hello'))
 
 
 def test_multipledispatch():
@@ -75,7 +76,7 @@ def test_inheritance_and_multiple_dispatch():
     assert f(A(), C()) == (A, C)
     assert f(A(), B()) == 0
     assert f(C(), B()) == 0
-    assert raises(NotImplementedError, lambda: f(B(), B()))
+    assert_raises(NotImplementedError, lambda: f(B(), B()))
 
 
 def test_competing_solutions():
@@ -112,7 +113,7 @@ def test_competing_ambiguous():
         return 2
 
     assert f(A(), C()) == f(C(), A()) == 2
-    # assert raises(Warning, lambda : f(C(), C()))
+    # assert_raises(Warning, lambda : f(C(), C()))
 
 
 def test_caching_correct_behavior():
