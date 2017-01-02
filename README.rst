@@ -106,7 +106,7 @@ It is, in short, a light weight dependency.
 License
 -------
 
-New BSD. See License_.
+New BSD. See `License file`_.
 
 
 Links
@@ -147,4 +147,4 @@ Links
    :target: https://pypi.python.org/pypi/multipledispatch/
 .. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.png
    :target: https://coveralls.io/r/mrocklin/multipledispatch
-.. _License: https://github.com/mrocklin/multipledispatch/blob/master/LICENSE.txt
+.. _License file: https://github.com/mrocklin/multipledispatch/blob/master/LICENSE.txt
