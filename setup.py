@@ -13,6 +13,6 @@ setup(name='multipledispatch',
       license='BSD',
       keywords='dispatch',
       packages=['multipledispatch'],
-      long_description=(open('README.md').read() if exists('README.md')
+      long_description=(open('README.rst').read() if exists('README.rst')
                         else ''),
       zip_safe=False)
