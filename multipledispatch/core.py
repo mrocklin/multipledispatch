@@ -54,11 +54,21 @@ def dispatch(*types, **kwargs):
     on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
 
     types = tuple(types)
+
     def _(func):
+        nonlocal types
+        if len(types) == 0:
+            sig = inspect.signature(func)
+            annotations = tuple(
+                param.annotation for param in sig.parameters.values())
+            if all(ann is not inspect.Parameter.empty for ann in annotations):
+                types = annotations
+
         name = func.__name__
 
         if ismethod(func):
-            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
+            dispatcher = inspect.currentframe().f_back.f_locals.get(
+                name,
                 MethodDispatcher(name))
         else:
             if name not in namespace:
