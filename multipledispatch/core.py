@@ -56,13 +56,13 @@ def dispatch(*types, **kwargs):
     types = tuple(types)
 
     def _(func):
-        nonlocal types
-        if len(types) == 0:
+        _types = types
+        if len(_types) == 0:
             sig = inspect.signature(func)
             annotations = tuple(
                 param.annotation for param in sig.parameters.values())
             if all(ann is not inspect.Parameter.empty for ann in annotations):
-                types = annotations
+                _types = annotations
 
         name = func.__name__
 
