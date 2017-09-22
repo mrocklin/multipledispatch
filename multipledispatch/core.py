@@ -1,8 +1,6 @@
-from contextlib import contextmanager
-from warnings import warn
 import inspect
-from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
 
+from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
 
 global_namespace = dict()
 
@@ -56,14 +54,6 @@ def dispatch(*types, **kwargs):
     types = tuple(types)
 
     def _(func):
-        _types = types
-        if len(_types) == 0:
-            sig = inspect.signature(func)
-            annotations = tuple(
-                param.annotation for param in sig.parameters.values())
-            if all(ann is not inspect.Parameter.empty for ann in annotations):
-                _types = annotations
-
         name = func.__name__
 
         if ismethod(func):
