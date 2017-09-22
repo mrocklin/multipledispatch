@@ -13,7 +13,12 @@ install:
     - pip install coverage
 
 script:
-    - nosetests --with-doctest
+    - |
+      if [[ $(bc <<< "$TRAVIS_PYTHON_VERSION >= 3.3") -eq 1 ]]; then
+         nosetests --with-doctest
+      else
+         nosetests --with-doctest -I '.*_3only.py$'
+      fi
 
 after_success:
     - |
