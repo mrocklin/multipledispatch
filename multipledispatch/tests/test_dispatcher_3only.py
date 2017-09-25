@@ -7,9 +7,6 @@ from multipledispatch.dispatcher import Dispatcher
 
 
 def test_function_annotation_register():
-    # if sys.version_info < (3, 3):
-    #     raise SkipTest
-
     f = Dispatcher('f')
 
     @f.register()
@@ -25,9 +22,6 @@ def test_function_annotation_register():
 
 
 def test_function_annotation_dispatch():
-    # if sys.version_info < (3, 3):
-    #     raise SkipTest
-
     @dispatch()
     def inc(x: int):
         return x + 1
@@ -41,8 +35,6 @@ def test_function_annotation_dispatch():
 
 
 def test_function_annotation_dispatch_custom_namespace():
-    # if sys.version_info < (3, 3):
-    #     raise SkipTest
     namespace = {}
 
     @dispatch(namespace=namespace)
@@ -55,3 +47,35 @@ def test_function_annotation_dispatch_custom_namespace():
 
     assert inc(1) == 3
     assert inc(1.0) == -1.0
+
+    assert namespace['inc'] == inc
+    assert list(inc.funcs) == [(int,), (float,)]
+
+
+def test_method_annotations():
+    class Foo():
+        @dispatch()
+        def f(self, x: int):
+            return x + 1
+
+        @dispatch()
+        def f(self, x: float):
+            return x - 1
+
+    foo = Foo()
+
+    assert foo.f(1) == 2
+    assert foo.f(1.0) == 0.0
+
+
+def test_overlaps():
+    @dispatch(int)
+    def inc(x: int):
+        return x + 1
+
+    @dispatch(float)
+    def inc(x: float):
+        return x - 1
+
+    assert inc(1) == 2
+    assert inc(1.0) == 0.0
