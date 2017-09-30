@@ -211,7 +211,6 @@ def test_halt_method_resolution():
 
     assert g == [1]
 
-    print(list(f.ordering))
     assert set(f.ordering) == set([(int, object), (object, int)])
 
 

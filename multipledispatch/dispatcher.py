@@ -2,6 +2,7 @@ from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
+import itertools as itl
 
 
 class MDNotImplementedError(NotImplementedError):
@@ -103,18 +104,29 @@ class Dispatcher(object):
         return _
 
     @classmethod
-    def get_function_annotations(cls, func):
-        """ get annotations of function positional paremeters
-        """
+    def get_func_params(cls, func):
         if hasattr(inspect, "signature"):
             sig = inspect.signature(func)
-            Param = inspect.Parameter
-            annotations = tuple(
-                param.annotation for param in sig.parameters.values()
-                if param.kind in (Param.POSITIONAL_ONLY,
-                                  Param.POSITIONAL_OR_KEYWORD))
+            return sig.parameters.values()
 
-            if all(ann is not inspect.Parameter.empty for ann in annotations):
+    @classmethod
+    def get_func_annotations(cls, func):
+        """ get annotations of function positional paremeters
+        """
+        params = cls.get_func_params(func)
+        if params:
+            Parameter = inspect.Parameter
+
+            params = (param for param in params
+                      if param.kind in
+                      (Parameter.POSITIONAL_ONLY,
+                       Parameter.POSITIONAL_OR_KEYWORD))
+
+            annotations = tuple(
+                param.annotation
+                for param in params)
+
+            if all(ann is not Parameter.empty for ann in annotations):
                 return annotations
 
     def add(self, signature, func, on_ambiguity=ambiguity_warn):
@@ -135,11 +147,13 @@ class Dispatcher(object):
         with a dispatcher/itself, and a set of ambiguous type signature pairs
         as inputs.  See ``ambiguity_warn`` for an example.
         """
-        # Handle union types
-        annotations = self.get_function_annotations(func)
-        if annotations:
-            signature = annotations
+        # Handle annotations
+        if not signature:
+            annotations = self.get_func_annotations(func)
+            if annotations:
+                signature = annotations
 
+        # Handle union types
         if any(isinstance(typ, tuple) for typ in signature):
             for typs in expand_tuples(signature):
                 self.add(typs, func, on_ambiguity)
@@ -308,6 +322,12 @@ class MethodDispatcher(Dispatcher):
     See Also:
         Dispatcher
     """
+
+    @classmethod
+    def get_func_params(cls, func):
+        if hasattr(inspect, "signature"):
+            sig = inspect.signature(func)
+            return itl.islice(sig.parameters.values(), 1, None)
 
     def __get__(self, instance, owner):
         self.obj = instance

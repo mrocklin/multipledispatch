@@ -49,7 +49,7 @@ def test_function_annotation_dispatch_custom_namespace():
     assert inc(1.0) == -1.0
 
     assert namespace['inc'] == inc
-    assert list(inc.funcs) == [(int,), (float,)]
+    assert set(inc.funcs.keys()) == set([(int,), (float,)])
 
 
 def test_method_annotations():
