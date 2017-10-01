@@ -79,3 +79,16 @@ def test_overlaps():
 
     assert inc(1) == 2
     assert inc(1.0) == 0.0
+
+
+def test_overlaps_conflict_annotation():
+    @dispatch(int)
+    def inc(x: str):
+        return x + 1
+
+    @dispatch(float)
+    def inc(x: int):
+        return x - 1
+
+    assert inc(1) == 2
+    assert inc(1.0) == 0.0
