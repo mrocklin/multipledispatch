@@ -76,7 +76,32 @@ class Variadic(metaclass=VariadicSignatureMeta):
     pass
 
 
-def create_variadic_pairs(types, full_signature):
+def variadic_signature_matches_iter(types, full_signature):
+    """Check if a set of input types matches a variadic signature.
+
+    Notes
+    -----
+    The algorithm is as follows:
+
+    Initialize the current signature to the first in the sequence
+
+    For each type in `types`:
+        If the current signature is variadic
+            If the type matches the signature
+                yield True
+            Else
+                Try to get the next signature
+                If no signatures are left we can't possibly have a match
+                    so yield False
+                Else
+                    (This means we've exhaused all possible variadic matches
+                     for the current variadic signature, multiple variadic
+                     signatures are not yet implemented)
+                    yield True if the type matches the current signature
+        Else
+            yield True if the type matches the current signature
+            Get the next signature
+    """
     sigiter = iter(full_signature)
     sig = next(sigiter)
     for typ in types:
@@ -85,6 +110,8 @@ def create_variadic_pairs(types, full_signature):
                 yield True
             else:
                 try:
+                    # We're out of signatures, but we still have types left to
+                    # match, so there's no possible match.
                     sig = next(sigiter)
                 except StopIteration:
                     yield False
@@ -98,7 +125,7 @@ def create_variadic_pairs(types, full_signature):
 def variadic_signature_matches(types, full_signature):
     assert types
     assert full_signature
-    return all(create_variadic_pairs(types, full_signature))
+    return all(variadic_signature_matches_iter(types, full_signature))
 
 
 class Dispatcher(object):
