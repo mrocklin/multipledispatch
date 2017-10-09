@@ -76,6 +76,31 @@ class Variadic(metaclass=VariadicSignatureMeta):
     pass
 
 
+def create_variadic_pairs(types, full_signature):
+    sigiter = iter(full_signature)
+    sig = next(sigiter)
+    for typ in types:
+        if isinstance(sig, VariadicSignatureType):
+            if issubclass(typ, sig):
+                yield True
+            else:
+                try:
+                    sig = next(sigiter)
+                except StopIteration:
+                    yield False
+                else:
+                    yield issubclass(typ, sig)
+        else:
+            yield issubclass(typ, sig)
+            sig = next(sigiter)
+
+
+def variadic_signature_matches(types, full_signature):
+    assert types
+    assert full_signature
+    return all(create_variadic_pairs(types, full_signature))
+
+
 class Dispatcher(object):
     """ Dispatch methods based on type signature
 
@@ -291,28 +316,6 @@ class Dispatcher(object):
             return None
 
     def dispatch_iter(self, *types):
-        def create_variadic_pairs(types, full_signature):
-            sigiter = iter(full_signature)
-            sig = next(sigiter)
-            for typ in types:
-                if isinstance(sig, VariadicSignatureType):
-                    if issubclass(typ, sig):
-                        yield True
-                    else:
-                        try:
-                            sig = next(sigiter)
-                        except StopIteration:
-                            yield False
-                        else:
-                            yield issubclass(typ, sig)
-                else:
-                    yield issubclass(typ, sig)
-                    sig = next(sigiter)
-
-        def variadic_signature_matches(types, full_signature):
-            assert types
-            assert full_signature
-            return all(create_variadic_pairs(types, full_signature))
 
         n = len(types)
         for signature in self.ordering:
