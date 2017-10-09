@@ -1,8 +1,7 @@
 import warnings
 
 from multipledispatch.dispatcher import (Dispatcher, MDNotImplementedError,
-                                         MethodDispatcher, halt_ordering,
-                                         restart_ordering)
+                                         MethodDispatcher)
 from multipledispatch.utils import raises
 
 
@@ -48,7 +47,7 @@ def test_dispatcher_as_decorator():
         return x + 1
 
     @f.register(float)
-    def inc(x):
+    def dec(x):
         return x - 1
 
     assert f(1) == 2
@@ -136,8 +135,10 @@ def test_docstring():
 
     assert one.__doc__.strip() in f.__doc__
     assert two.__doc__.strip() in f.__doc__
-    assert f.__doc__.find(one.__doc__.strip()) < \
+    assert (
+        f.__doc__.find(one.__doc__.strip()) <
         f.__doc__.find(two.__doc__.strip())
+    )
     assert 'object, object' in f.__doc__
     assert master_doc in f.__doc__
 
@@ -234,19 +235,19 @@ def test_not_implemented():
     f = Dispatcher('f')
 
     @f.register(object)
-    def _(x):
+    def _1(x):
         return 'default'
 
     @f.register(int)
-    def _(x):
+    def _2(x):
         if x % 2 == 0:
             return 'even'
         else:
             raise MDNotImplementedError()
 
     assert f('hello') == 'default'  # default behavior
-    assert f(2) == 'even'          # specialized behavior
-    assert f(3) == 'default'       # fall bac to default behavior
+    assert f(2) == 'even'           # specialized behavior
+    assert f(3) == 'default'        # fall back to default behavior
     assert raises(NotImplementedError, lambda: f(1, 2))
 
 
@@ -258,3 +259,76 @@ def test_not_implemented_error():
         raise MDNotImplementedError()
 
     assert raises(NotImplementedError, lambda: f(1.0))
+
+
+def test_vararg_dispatch_simple():
+    f = Dispatcher('f')
+
+    @f.register([float])
+    def _1(*args):
+        return args
+
+    assert f(1.0) == (1.0,)
+    assert f(1.0, 2.0, 3.0) == (1.0, 2.0, 3.0)
+
+
+def test_vararg_dispatch_multiple_types():
+    f = Dispatcher('f')
+
+    @f.register(str, [float], str)
+    def _1(*args):
+        return 1.2
+
+    result = f('a', 1.0, 2.0, 3.0, 'b')
+    assert result == 1.2
+
+
+def test_vararg_dispatch_multiple_types_explicit_args():
+    f = Dispatcher('f')
+
+    @f.register(str, [float])
+    def _1(a, *b):
+        return (a, b)
+
+    result = f('a', 1.0, 2.0, 3.0)
+    assert result == ('a', (1.0, 2.0, 3.0))
+
+
+def test_vararg_dispatch_multiple_implementations():
+    f = Dispatcher('f')
+
+    @f.register(str, [float])
+    def _1(a, *b):
+        return 'mixed_string_floats'
+
+    @f.register([float])
+    def _2(*b):
+        return 'floats'
+
+    @f.register([str])
+    def _3(*strings):
+        return 'strings'
+
+    assert f('a', 1.0, 2.0) == 'mixed_string_floats'
+    assert f(1.0, 2.0, 3.14) == 'floats'
+    assert f('a', 'b', 'c') == 'strings'
+
+
+def test_vararg_dispatch_unions():
+    f = Dispatcher('f')
+
+    @f.register(str, [(int, float)])
+    def _1(a, *b):
+        return 'mixed_string_ints_floats'
+
+    @f.register([float])
+    def _2(*b):
+        return 'floats'
+
+    @f.register([str])
+    def _3(*strings):
+        return 'strings'
+
+    assert f('a', 1.0, 7, 2.0, 11) == 'mixed_string_ints_floats'
+    assert f(1.0, 2.0, 3.14) == 'floats'
+    assert f('a', 'b', 'c') == 'strings'

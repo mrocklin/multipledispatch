@@ -1,9 +1,8 @@
 from warnings import warn
 import inspect
-from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
+from .conflict import ordering, super_signature, AmbiguityWarning
 from .utils import expand_tuples
 import itertools as itl
-
 
 
 class MDNotImplementedError(NotImplementedError):
@@ -45,6 +44,37 @@ def restart_ordering(on_ambiguity=ambiguity_warn):
         ' dispatcher.',
         DeprecationWarning,
     )
+
+
+class VariadicSignatureType(type):
+
+    def __subclasscheck__(self, subclass):
+        return subclass is self or issubclass(subclass, self.value_type)
+
+
+def typename(typ):
+    try:
+        return typ.__name__
+    except AttributeError:
+        return '({0})'.format(', '.join(map(typename, typ)))
+
+
+class VariadicSignatureMeta(type):
+
+    def __getitem__(self, value_type):
+        new_type_name = 'Variadic[{}]'.format(
+            ', '.join(typename(t) for t in value_type)
+        )
+        return VariadicSignatureType(
+            new_type_name,
+            (),
+            {'value_type': tuple(value_type), '__slots__': ()}
+        )
+
+
+class Variadic(metaclass=VariadicSignatureMeta):
+    pass
+
 
 class Dispatcher(object):
     """ Dispatch methods based on type signature
@@ -164,16 +194,24 @@ class Dispatcher(object):
                 self.add(typs, func)
             return
 
+        new_signature = []
+
         for typ in signature:
-            if not isinstance(typ, type):
+            if not isinstance(typ, (type, list)):
                 str_sig = ', '.join(c.__name__ if isinstance(c, type)
                                     else str(c) for c in signature)
                 raise TypeError("Tried to dispatch on non-type: %s\n"
                                 "In signature: <%s>\n"
                                 "In function: %s" %
                                 (typ, str_sig, self.name))
+            if isinstance(typ, list):
+                assert len(typ) == 1, \
+                    'Vararg signature must contain exactly one element'
+                new_signature.append(Variadic[typ])
+            else:
+                new_signature.append(typ)
 
-        self.funcs[signature] = func
+        self.funcs[tuple(new_signature)] = func
         self._cache.clear()
 
         try:
@@ -187,13 +225,6 @@ class Dispatcher(object):
             return self._ordering
         except AttributeError:
             return self.reorder()
-
-    def reorder(self, on_ambiguity=ambiguity_warn):
-        self._ordering = od = ordering(self.funcs)
-        amb = ambiguities(self.funcs)
-        if amb:
-            on_ambiguity(self, amb)
-        return od
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
@@ -248,7 +279,7 @@ class Dispatcher(object):
         None
 
         See Also:
-            ``multipledispatch.conflict`` - module to determine resolution order
+          ``multipledispatch.conflict`` - module to determine resolution order
         """
 
         if types in self.funcs:
@@ -260,11 +291,40 @@ class Dispatcher(object):
             return None
 
     def dispatch_iter(self, *types):
+        def create_variadic_pairs(types, full_signature):
+            sigiter = iter(full_signature)
+            sig = next(sigiter)
+            for typ in types:
+                if isinstance(sig, VariadicSignatureType):
+                    if issubclass(typ, sig):
+                        yield True
+                    else:
+                        try:
+                            sig = next(sigiter)
+                        except StopIteration:
+                            yield False
+                        else:
+                            yield issubclass(typ, sig)
+                else:
+                    yield issubclass(typ, sig)
+                    sig = next(sigiter)
+
+        def variadic_signature_matches(types, full_signature):
+            assert types
+            assert full_signature
+            return all(create_variadic_pairs(types, full_signature))
+
         n = len(types)
         for signature in self.ordering:
             if len(signature) == n and all(map(issubclass, types, signature)):
                 result = self.funcs[signature]
                 yield result
+            elif any(
+                isinstance(sig, VariadicSignatureType) for sig in signature
+            ):
+                if variadic_signature_matches(types, signature):
+                    result = self.funcs[signature]
+                    yield result
 
     def resolve(self, types):
         """ Deterimine appropriate implementation for this type signature
