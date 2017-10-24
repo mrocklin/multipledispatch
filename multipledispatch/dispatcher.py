@@ -5,6 +5,7 @@ from .utils import expand_tuples
 import itertools as itl
 
 
+
 class MDNotImplementedError(NotImplementedError):
     """ A NotImplementedError for multiple dispatch """
 
@@ -26,20 +27,24 @@ def ambiguity_warn(dispatcher, ambiguities):
     warn(warning_text(dispatcher.name, ambiguities), AmbiguityWarning)
 
 
-_unresolved_dispatchers = set()
-_resolve = [True]
-
-
 def halt_ordering():
-    _resolve[0] = False
+    """Deprecated interface to temporarily disable ordering.
+    """
+    warn(
+        'halt_ordering is deprecated, you can safely remove this call.',
+        DeprecationWarning,
+    )
 
 
 def restart_ordering(on_ambiguity=ambiguity_warn):
-    _resolve[0] = True
-    while _unresolved_dispatchers:
-        dispatcher = _unresolved_dispatchers.pop()
-        dispatcher.reorder(on_ambiguity=on_ambiguity)
-
+    """Deprecated interface to temporarily resume ordering.
+    """
+    warn(
+        'restart_ordering is deprecated, if you would like to eagerly order'
+        'the dispatchers, you should call the ``reorder()`` method on each'
+        ' dispatcher.',
+        DeprecationWarning,
+    )
 
 class Dispatcher(object):
     """ Dispatch methods based on type signature
@@ -67,10 +72,11 @@ class Dispatcher(object):
 
     def __init__(self, name, doc=None):
         self.name = self.__name__ = name
-        self.funcs = dict()
-        self._cache = dict()
-        self.ordering = []
+        self.funcs = {}
         self.doc = doc
+        self.ordering = []
+
+        self._cache = {}
 
     def register(self, *types, **kwargs):
         """ register dispatcher with new implementation
@@ -111,7 +117,7 @@ class Dispatcher(object):
 
     @classmethod
     def get_func_annotations(cls, func):
-        """ get annotations of function positional paremeters
+        """ get annotations of function positional parameters
         """
         params = cls.get_func_params(func)
         if params:
@@ -129,7 +135,7 @@ class Dispatcher(object):
             if all(ann is not Parameter.empty for ann in annotations):
                 return annotations
 
-    def add(self, signature, func, on_ambiguity=ambiguity_warn):
+    def add(self, signature, func):
         """ Add new types/method pair to dispatcher
 
         >>> D = Dispatcher('add')
@@ -156,7 +162,7 @@ class Dispatcher(object):
         # Handle union types
         if any(isinstance(typ, tuple) for typ in signature):
             for typs in expand_tuples(signature):
-                self.add(typs, func, on_ambiguity)
+                self.add(typs, func)
             return
 
         for typ in signature:
@@ -169,17 +175,15 @@ class Dispatcher(object):
                                 (typ, str_sig, self.name))
 
         self.funcs[signature] = func
-        self.reorder(on_ambiguity=on_ambiguity)
         self._cache.clear()
 
+        self.__class__ = self._unresolved_type
+
     def reorder(self, on_ambiguity=ambiguity_warn):
-        if _resolve[0]:
-            self.ordering = ordering(self.funcs)
-            amb = ambiguities(self.funcs)
-            if amb:
-                on_ambiguity(self, amb)
-        else:
-            _unresolved_dispatchers.add(self)
+        self.ordering = ordering(self.funcs)
+        amb = ambiguities(self.funcs)
+        if amb:
+            on_ambiguity(self, amb)
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
@@ -203,9 +207,13 @@ class Dispatcher(object):
                     return func(*args, **kwargs)
                 except MDNotImplementedError:
                     pass
-            raise NotImplementedError("Matching functions for "
-                                      "%s: <%s> found, but none completed successfully"
-                                      % (self.name, str_signature(types)))
+
+            raise NotImplementedError(
+                "Matching functions for "
+                "%s: <%s> found, but none completed successfully" % (
+                    self.name, str_signature(types),
+                ),
+            )
 
     def __str__(self):
         return "<dispatched %s>" % self.name
@@ -310,6 +318,31 @@ class Dispatcher(object):
         print(self._source(*args))
 
 
+class _UnresolvedDispatcher(Dispatcher):
+    __slots__ = ()
+
+    @property
+    def __doc__(self):
+        # trick python into giving us our super class's dynamic __doc__
+        return super(_UnresolvedDispatcher, self).__doc__
+
+    @property
+    def ordering(self):
+        self.__class__ = self._resolved_type
+        self.reorder()
+        return self.ordering
+
+    @ordering.setter
+    def ordering(self, value):
+        self.__class__ = self._resolved_type
+        self.reorder()
+        self.ordering = value
+
+
+Dispatcher._resolved_type = Dispatcher
+Dispatcher._unresolved_type = _UnresolvedDispatcher
+
+
 def source(func):
     s = 'File: %s\n\n' % inspect.getsourcefile(func)
     s = s + inspect.getsource(func)
@@ -322,6 +355,7 @@ class MethodDispatcher(Dispatcher):
     See Also:
         Dispatcher
     """
+    __slots__ = ('obj', 'cls')
 
     @classmethod
     def get_func_params(cls, func):
@@ -341,6 +375,19 @@ class MethodDispatcher(Dispatcher):
             raise NotImplementedError('Could not find signature for %s: <%s>' %
                                       (self.name, str_signature(types)))
         return func(self.obj, *args, **kwargs)
+
+
+class _UnresolvedMethodDispatcher(_UnresolvedDispatcher, MethodDispatcher):
+    __slots__ = ()
+
+    @property
+    def __doc__(self):
+        # trick python into giving us our super class's dynamic __doc__
+        return super(_UnresolvedDispatcher, self).__doc__
+
+
+MethodDispatcher._resolved_type = MethodDispatcher
+MethodDispatcher._unresolved_type = _UnresolvedMethodDispatcher
 
 
 def str_signature(sig):
