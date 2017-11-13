@@ -1,7 +1,8 @@
 import warnings
 
-from multipledispatch.dispatcher import (Dispatcher, MethodDispatcher,
-        halt_ordering, restart_ordering, MDNotImplementedError)
+from multipledispatch.dispatcher import (Dispatcher, MDNotImplementedError,
+                                         MethodDispatcher, halt_ordering,
+                                         restart_ordering)
 from multipledispatch.utils import raises
 
 
@@ -75,12 +76,12 @@ def test_register_instance_method():
 def test_on_ambiguity():
     f = Dispatcher('f')
 
-    identity = lambda x: x
+    def identity(x): return x
 
     ambiguities = [False]
+
     def on_ambiguity(dispatcher, amb):
         ambiguities[0] = True
-
 
     f.add((object, object), identity, on_ambiguity=on_ambiguity)
     assert not ambiguities[0]
@@ -134,7 +135,7 @@ def test_docstring():
     assert one.__doc__.strip() in f.__doc__
     assert two.__doc__.strip() in f.__doc__
     assert f.__doc__.find(one.__doc__.strip()) < \
-            f.__doc__.find(two.__doc__.strip())
+        f.__doc__.find(two.__doc__.strip())
     assert 'object, object' in f.__doc__
     assert master_doc in f.__doc__
 
@@ -190,6 +191,7 @@ def test_source_raises_on_missing_function():
 
 def test_halt_method_resolution():
     g = [0]
+
     def on_ambiguity(a, b):
         g[0] += 1
 
@@ -209,7 +211,6 @@ def test_halt_method_resolution():
 
     assert g == [1]
 
-    print(list(f.ordering))
     assert set(f.ordering) == set([(int, object), (object, int)])
 
 
@@ -266,7 +267,7 @@ def test_not_implemented():
         else:
             raise MDNotImplementedError()
 
-    assert f('hello') == 'default' # default behavior
+    assert f('hello') == 'default'  # default behavior
     assert f(2) == 'even'          # specialized behavior
     assert f(3) == 'default'       # fall bac to default behavior
     assert raises(NotImplementedError, lambda: f(1, 2))

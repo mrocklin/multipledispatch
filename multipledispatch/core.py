@@ -1,8 +1,6 @@
-from contextlib import contextmanager
-from warnings import warn
 import inspect
-from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
 
+from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
 
 global_namespace = dict()
 
@@ -54,11 +52,13 @@ def dispatch(*types, **kwargs):
     on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
 
     types = tuple(types)
+
     def _(func):
         name = func.__name__
 
         if ismethod(func):
-            dispatcher = inspect.currentframe().f_back.f_locals.get(name,
+            dispatcher = inspect.currentframe().f_back.f_locals.get(
+                name,
                 MethodDispatcher(name))
         else:
             if name not in namespace:

@@ -2,6 +2,8 @@ from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
+import itertools as itl
+
 
 class MDNotImplementedError(NotImplementedError):
     """ A NotImplementedError for multiple dispatch """
@@ -37,7 +39,6 @@ def restart_ordering(on_ambiguity=ambiguity_warn):
     while _unresolved_dispatchers:
         dispatcher = _unresolved_dispatchers.pop()
         dispatcher.reorder(on_ambiguity=on_ambiguity)
-
 
 
 class Dispatcher(object):
@@ -102,6 +103,32 @@ class Dispatcher(object):
             return func
         return _
 
+    @classmethod
+    def get_func_params(cls, func):
+        if hasattr(inspect, "signature"):
+            sig = inspect.signature(func)
+            return sig.parameters.values()
+
+    @classmethod
+    def get_func_annotations(cls, func):
+        """ get annotations of function positional paremeters
+        """
+        params = cls.get_func_params(func)
+        if params:
+            Parameter = inspect.Parameter
+
+            params = (param for param in params
+                      if param.kind in
+                      (Parameter.POSITIONAL_ONLY,
+                       Parameter.POSITIONAL_OR_KEYWORD))
+
+            annotations = tuple(
+                param.annotation
+                for param in params)
+
+            if all(ann is not Parameter.empty for ann in annotations):
+                return annotations
+
     def add(self, signature, func, on_ambiguity=ambiguity_warn):
         """ Add new types/method pair to dispatcher
 
@@ -120,6 +147,12 @@ class Dispatcher(object):
         with a dispatcher/itself, and a set of ambiguous type signature pairs
         as inputs.  See ``ambiguity_warn`` for an example.
         """
+        # Handle annotations
+        if not signature:
+            annotations = self.get_func_annotations(func)
+            if annotations:
+                signature = annotations
+
         # Handle union types
         if any(isinstance(typ, tuple) for typ in signature):
             for typs in expand_tuples(signature):
@@ -129,7 +162,7 @@ class Dispatcher(object):
         for typ in signature:
             if not isinstance(typ, type):
                 str_sig = ', '.join(c.__name__ if isinstance(c, type)
-                                               else str(c) for c in signature)
+                                    else str(c) for c in signature)
                 raise TypeError("Tried to dispatch on non-type: %s\n"
                                 "In signature: <%s>\n"
                                 "In function: %s" %
@@ -148,7 +181,6 @@ class Dispatcher(object):
         else:
             _unresolved_dispatchers.add(self)
 
-
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
         try:
@@ -157,25 +189,23 @@ class Dispatcher(object):
             func = self.dispatch(*types)
             if not func:
                 raise NotImplementedError(
-                        'Could not find signature for %s: <%s>' %
-                        (self.name, str_signature(types)))
+                    'Could not find signature for %s: <%s>' %
+                    (self.name, str_signature(types)))
             self._cache[types] = func
         try:
             return func(*args, **kwargs)
 
         except MDNotImplementedError:
             funcs = self.dispatch_iter(*types)
-            next(funcs) # burn first
+            next(funcs)  # burn first
             for func in funcs:
                 try:
                     return func(*args, **kwargs)
                 except MDNotImplementedError:
                     pass
             raise NotImplementedError("Matching functions for "
-                    "%s: <%s> found, but none completed successfully"
-                    % (self.name, str_signature(types)))
-
-
+                                      "%s: <%s> found, but none completed successfully"
+                                      % (self.name, str_signature(types)))
 
     def __str__(self):
         return "<dispatched %s>" % self.name
@@ -239,7 +269,6 @@ class Dispatcher(object):
         self.ordering = ordering(self.funcs)
         self._cache = dict()
 
-
     @property
     def __doc__(self):
         docs = ["Multiply dispatched method: %s" % self.name]
@@ -293,6 +322,13 @@ class MethodDispatcher(Dispatcher):
     See Also:
         Dispatcher
     """
+
+    @classmethod
+    def get_func_params(cls, func):
+        if hasattr(inspect, "signature"):
+            sig = inspect.signature(func)
+            return itl.islice(sig.parameters.values(), 1, None)
+
     def __get__(self, instance, owner):
         self.obj = instance
         self.cls = owner
@@ -315,13 +351,15 @@ def str_signature(sig):
     """
     return ', '.join(cls.__name__ for cls in sig)
 
+
 def warning_text(name, amb):
     """ The text for ambiguity warnings """
-    text = "\nAmbiguities exist in dispatched function %s\n\n"%(name)
+    text = "\nAmbiguities exist in dispatched function %s\n\n" % (name)
     text += "The following signatures may result in ambiguous behavior:\n"
     for pair in amb:
-        text += "\t" + ', '.join('['+str_signature(s)+']' for s in pair) + "\n"
+        text += "\t" + \
+            ', '.join('[' + str_signature(s) + ']' for s in pair) + "\n"
     text += "\n\nConsider making the following additions:\n\n"
     text += '\n\n'.join(['@dispatch(' + str_signature(super_signature(s))
-                      + ')\ndef %s(...)'%name for s in amb])
+                         + ')\ndef %s(...)' % name for s in amb])
     return text
