@@ -4,6 +4,7 @@
 
 from multipledispatch import dispatch
 from multipledispatch.dispatcher import Dispatcher
+import typing
 
 
 def test_function_annotation_register():
@@ -30,8 +31,23 @@ def test_function_annotation_dispatch():
     def inc(x: float):
         return x - 1
 
+    @dispatch()
+    def inc(x: typing.Optional[str]):
+        return x
+
+    @dispatch()
+    def inc(x: typing.List[int]):
+        return x[0] * 4
+
+    @dispatch()
+    def inc(x: typing.List[str]):
+        return x[0] + 'b'
+
     assert inc(1) == 2
     assert inc(1.0) == 0.0
+    assert inc('a') == 'a'
+    assert inc([8]) == 32
+    assert inc(['a']) == 'ab'
 
 
 def test_function_annotation_dispatch_custom_namespace():

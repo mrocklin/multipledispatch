@@ -1,3 +1,8 @@
+
+import pytypes
+import typing
+
+
 def raises(err, lamda):
     try:
         lamda()
@@ -14,15 +19,22 @@ def expand_tuples(L):
 
     >>> expand_tuples([1, 2])
     [(1, 2)]
+
+    >>> expand_tuples([1, typing.Optional[str]])
+    [(1, <class 'str'>), (1, <class 'NoneType'>)]
     """
     if not L:
         return [()]
-    elif not isinstance(L[0], tuple):
-        rest = expand_tuples(L[1:])
-        return [(L[0],) + t for t in rest]
     else:
-        rest = expand_tuples(L[1:])
-        return [(item,) + t for t in rest for item in L[0]]
+        if pytypes.is_Union(L[0]):
+           rest = expand_tuples(L[1:])
+           return [(item,) + t for t in rest for item in pytypes.get_Union_params(L[0])]
+        elif not pytypes.is_of_type(L[0], tuple):
+            rest = expand_tuples(L[1:])
+            return [(L[0],) + t for t in rest]
+        else:
+            rest = expand_tuples(L[1:])
+            return [(item,) + t for t in rest for item in L[0]]
 
 
 # Taken from theano/theano/gof/sched.py

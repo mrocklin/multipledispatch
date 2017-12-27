@@ -1,4 +1,6 @@
 from .utils import _toposort, groupby
+from pytypes import is_subtype
+
 
 class AmbiguityWarning(Warning):
     pass
@@ -6,13 +8,13 @@ class AmbiguityWarning(Warning):
 
 def supercedes(a, b):
     """ A is consistent and strictly more specific than B """
-    return len(a) == len(b) and all(map(issubclass, a, b))
+    return len(a) == len(b) and all(map(is_subtype, a, b))
 
 
 def consistent(a, b):
     """ It is possible for an argument list to satisfy both A and B """
     return (len(a) == len(b) and
-            all(issubclass(aa, bb) or issubclass(bb, aa)
+            all(is_subtype(aa, bb) or is_subtype(bb, aa)
                            for aa, bb in zip(a, b)))
 
 

@@ -2,8 +2,10 @@ from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
-import itertools as itl
 
+import itertools as itl
+import pytypes
+import typing
 
 class MDNotImplementedError(NotImplementedError):
     """ A NotImplementedError for multiple dispatch """
@@ -111,7 +113,7 @@ class Dispatcher(object):
 
     @classmethod
     def get_func_annotations(cls, func):
-        """ get annotations of function positional paremeters
+        """ get annotations of function positional parameters
         """
         params = cls.get_func_params(func)
         if params:
@@ -135,6 +137,7 @@ class Dispatcher(object):
         >>> D = Dispatcher('add')
         >>> D.add((int, int), lambda x, y: x + y)
         >>> D.add((float, float), lambda x, y: x + y)
+        >>> D.add((typing.Optional[str], ), lambda x: x)
 
         >>> D(1, 2)
         3
@@ -142,6 +145,9 @@ class Dispatcher(object):
         Traceback (most recent call last):
         ...
         NotImplementedError: Could not find signature for add: <int, float>
+        >>> D('s')
+        's'
+        >>> D(None)
 
         When ``add`` detects a warning it calls the ``on_ambiguity`` callback
         with a dispatcher/itself, and a set of ambiguous type signature pairs
@@ -154,7 +160,7 @@ class Dispatcher(object):
                 signature = annotations
 
         # Handle union types
-        if any(isinstance(typ, tuple) for typ in signature):
+        if any(isinstance(typ, tuple) or pytypes.is_Union(typ) for typ in signature):
             for typs in expand_tuples(signature):
                 self.add(typs, func, on_ambiguity)
             return
@@ -182,7 +188,7 @@ class Dispatcher(object):
             _unresolved_dispatchers.add(self)
 
     def __call__(self, *args, **kwargs):
-        types = tuple([type(arg) for arg in args])
+        types = tuple([pytypes.deep_type(arg) for arg in args])
         try:
             func = self._cache[types]
         except KeyError:
@@ -244,7 +250,7 @@ class Dispatcher(object):
     def dispatch_iter(self, *types):
         n = len(types)
         for signature in self.ordering:
-            if len(signature) == n and all(map(issubclass, types, signature)):
+            if len(signature) == n and all(map(pytypes.is_subtype, types, signature)):
                 result = self.funcs[signature]
                 yield result
 
