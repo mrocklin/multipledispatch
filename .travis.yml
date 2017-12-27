@@ -11,13 +11,14 @@ python:
 
 install:
     - pip install coverage
+    - pip install pytest pytest-benchmark
 
 script:
     - |
       if [[ $(bc <<< "$TRAVIS_PYTHON_VERSION >= 3.3") -eq 1 ]]; then
-         nosetests --with-doctest
+         py.test --doctest-modules multipledispatch
       else
-         nosetests --with-doctest -I '.*_3only.py$'
+         py.test --doctest-modules --ignore=multipledispatch/tests/test_dispatcher_3only.py multipledispatch
       fi
 
 after_success:

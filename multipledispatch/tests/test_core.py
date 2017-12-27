@@ -28,7 +28,7 @@ def test_singledispatch():
     assert raises(NotImplementedError, lambda: f('hello'))
 
 
-def test_multipledispatch():
+def test_multipledispatch(benchmark):
     @dispatch(int, int)
     def f(x, y):
         return x + y
@@ -203,3 +203,16 @@ def test_methods_multiple_dispatch():
     assert foo.f(A(), A()) == 1
     assert foo.f(A(), C()) == 2
     assert foo.f(C(), C()) == 2
+
+
+# Hacky method to get benchmnarks namespaced
+class TestBenchMark(object):
+    pass
+
+
+for k, v in list(locals().items()):
+    if callable(v) and (k.startswith('test_')):
+
+        def bench(self, benchmark):
+            benchmark(v)
+        setattr(TestBenchMark, '{}'.format(k), bench)
