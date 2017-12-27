@@ -68,13 +68,12 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = '__name__', 'name', 'funcs', 'ordering', '_cache', 'doc'
+    __slots__ = '__name__', 'name', 'funcs', '_ordering', '_cache', 'doc'
 
     def __init__(self, name, doc=None):
         self.name = self.__name__ = name
         self.funcs = {}
         self.doc = doc
-        self.ordering = []
 
         self._cache = {}
 
@@ -177,13 +176,24 @@ class Dispatcher(object):
         self.funcs[signature] = func
         self._cache.clear()
 
-        self.__class__ = self._unresolved_type
+        try:
+            del self._ordering
+        except AttributeError:
+            pass
+
+    @property
+    def ordering(self):
+        ordering = getattr(self, '_ordering', None)
+        if ordering is None:
+            ordering = self.reorder()
+        return ordering
 
     def reorder(self, on_ambiguity=ambiguity_warn):
-        self.ordering = ordering(self.funcs)
+        self._ordering = od = ordering(self.funcs)
         amb = ambiguities(self.funcs)
         if amb:
             on_ambiguity(self, amb)
+        return od
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
@@ -274,7 +284,7 @@ class Dispatcher(object):
     def __setstate__(self, d):
         self.name = d['name']
         self.funcs = d['funcs']
-        self.ordering = ordering(self.funcs)
+        self._ordering = ordering(self.funcs)
         self._cache = dict()
 
     @property
@@ -318,31 +328,6 @@ class Dispatcher(object):
         print(self._source(*args))
 
 
-class _UnresolvedDispatcher(Dispatcher):
-    __slots__ = ()
-
-    @property
-    def __doc__(self):
-        # trick python into giving us our super class's dynamic __doc__
-        return super(_UnresolvedDispatcher, self).__doc__
-
-    @property
-    def ordering(self):
-        self.__class__ = self._resolved_type
-        self.reorder()
-        return self.ordering
-
-    @ordering.setter
-    def ordering(self, value):
-        self.__class__ = self._resolved_type
-        self.reorder()
-        self.ordering = value
-
-
-Dispatcher._resolved_type = Dispatcher
-Dispatcher._unresolved_type = _UnresolvedDispatcher
-
-
 def source(func):
     s = 'File: %s\n\n' % inspect.getsourcefile(func)
     s = s + inspect.getsource(func)
@@ -375,19 +360,6 @@ class MethodDispatcher(Dispatcher):
             raise NotImplementedError('Could not find signature for %s: <%s>' %
                                       (self.name, str_signature(types)))
         return func(self.obj, *args, **kwargs)
-
-
-class _UnresolvedMethodDispatcher(_UnresolvedDispatcher, MethodDispatcher):
-    __slots__ = ()
-
-    @property
-    def __doc__(self):
-        # trick python into giving us our super class's dynamic __doc__
-        return super(_UnresolvedDispatcher, self).__doc__
-
-
-MethodDispatcher._resolved_type = MethodDispatcher
-MethodDispatcher._unresolved_type = _UnresolvedMethodDispatcher
 
 
 def str_signature(sig):
