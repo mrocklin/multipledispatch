@@ -141,10 +141,10 @@ class Dispatcher(object):
 
         >>> D(1, 2)
         3
-        >>> D(1, 2.0)
+        >>> D('1', 2.0)
         Traceback (most recent call last):
         ...
-        NotImplementedError: Could not find signature for add: <int, float>
+        NotImplementedError: Could not find signature for add: <str, float>
         >>> D('s')
         's'
         >>> D(None)
