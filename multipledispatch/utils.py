@@ -20,8 +20,8 @@ def expand_tuples(L):
     >>> expand_tuples([1, 2])
     [(1, 2)]
 
-    >>> expand_tuples([1, typing.Optional[str]])
-    [(1, <class 'str'>), (1, <class 'NoneType'>)]
+    >>> expand_tuples([1, typing.Optional[str]])  #doctest: +ELLIPSIS
+    [(1, <... 'str'>), (1, <... 'NoneType'>)]
     """
     if not L:
         return [()]
