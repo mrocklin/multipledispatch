@@ -4,6 +4,7 @@
 
 from multipledispatch import dispatch
 from multipledispatch.dispatcher import Dispatcher
+from multipledispatch.utils import raises
 import typing
 
 
@@ -82,6 +83,18 @@ def test_method_annotations():
 
     assert foo.f(1) == 2
     assert foo.f(1.0) == 0.0
+
+
+def test_diagonal_dispatch():
+    T = typing.TypeVar('T')
+    U = typing.TypeVar('U')
+
+    @dispatch()
+    def diag(x: T, y: T):
+        return 'same'
+
+    assert diag(1, 6) == 'same'
+    assert raises(NotImplementedError, lambda: diag(1, '1'))
 
 
 def test_overlaps():

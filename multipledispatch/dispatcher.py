@@ -1,5 +1,8 @@
 from warnings import warn
 import inspect
+
+import copy
+
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
 
@@ -158,15 +161,43 @@ class Dispatcher(object):
             annotations = self.get_func_annotations(func)
             if annotations:
                 signature = annotations
+        # Make function annotation dict
+        argspec = pytypes.getargspecs(func)
+        if pytypes.is_classmethod(func) or pytypes.is_method(func):
+            arg_names = argspec.args[1:]
+        else:
+            arg_names = argspec.args
 
+        def process_union(tp):
+            if isinstance(tp, tuple):
+                t = typing.Union[tp]
+                return t
+            else:
+                return tp
+        signature = tuple(process_union(tp) for tp in signature)
+        annotations = dict(zip(arg_names, signature))
+
+        # make a copy of the function (if needed) and apply the function annotations
+        if (not hasattr(func, '__annotations__')) or (not func.__annotations__):
+            func.__annotations__ = annotations
+        else:
+            if func.__annotations__  != annotations:
+                func = copy.deepcopy(func)
+                func.__annotations__ = annotations
+
+
+        # TODO: REMOVE THIS
         # Handle union types
-        if any(isinstance(typ, tuple) or pytypes.is_Union(typ) for typ in signature):
-            for typs in expand_tuples(signature):
-                self.add(typs, func, on_ambiguity)
-            return
+        #if any(isinstance(typ, tuple) or pytypes.is_Union(typ) for typ in signature):
+        #    for typs in expand_tuples(signature):
+        #        self.add(typs, func, on_ambiguity)
+        #    return
 
+        # TODO: MAKE THIS type or typevar
         for typ in signature:
-            if not isinstance(typ, type):
+            try:
+                typing.Union[typ]
+            except TypeError:
                 str_sig = ', '.join(c.__name__ if isinstance(c, type)
                                     else str(c) for c in signature)
                 raise TypeError("Tried to dispatch on non-type: %s\n"
@@ -192,7 +223,7 @@ class Dispatcher(object):
         try:
             func = self._cache[types]
         except KeyError:
-            func = self.dispatch(*types)
+            func = self.dispatch(*types, args=args)
             if not func:
                 raise NotImplementedError(
                     'Could not find signature for %s: <%s>' %
@@ -217,7 +248,7 @@ class Dispatcher(object):
         return "<dispatched %s>" % self.name
     __repr__ = __str__
 
-    def dispatch(self, *types):
+    def dispatch(self, *types, args=None):
         """Deterimine appropriate implementation for this type signature
 
         This method is internal.  Users should call this object as a function.
@@ -243,16 +274,20 @@ class Dispatcher(object):
             return self.funcs[types]
 
         try:
-            return next(self.dispatch_iter(*types))
+            return next(self.dispatch_iter(*types, args=args))
         except StopIteration:
             return None
 
-    def dispatch_iter(self, *types):
+    def dispatch_iter(self, *types, args=None):
         n = len(types)
         for signature in self.ordering:
-            if len(signature) == n and all(map(pytypes.is_subtype, types, signature)):
+            if len(signature) == n:
                 result = self.funcs[signature]
-                yield result
+                try:
+                    if pytypes.check_argument_types(result, call_args=args):
+                        yield result
+                except pytypes.InputTypeError:
+                    continue
 
     def resolve(self, types):
         """ Deterimine appropriate implementation for this type signature
