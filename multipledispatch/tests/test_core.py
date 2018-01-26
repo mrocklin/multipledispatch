@@ -28,7 +28,7 @@ def test_singledispatch():
     assert raises(NotImplementedError, lambda: f('hello'))
 
 
-def test_multipledispatch():
+def test_multipledispatch(benchmark):
     @dispatch(int, int)
     def f(x, y):
         return x + y
