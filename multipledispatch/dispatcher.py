@@ -10,6 +10,7 @@ import itertools as itl
 import pytypes
 import typing
 
+
 class MDNotImplementedError(NotImplementedError):
     """ A NotImplementedError for multiple dispatch """
 
@@ -31,20 +32,24 @@ def ambiguity_warn(dispatcher, ambiguities):
     warn(warning_text(dispatcher.name, ambiguities), AmbiguityWarning)
 
 
-_unresolved_dispatchers = set()
-_resolve = [True]
-
-
 def halt_ordering():
-    _resolve[0] = False
+    """Deprecated interface to temporarily disable ordering.
+    """
+    warn(
+        'halt_ordering is deprecated, you can safely remove this call.',
+        DeprecationWarning,
+    )
 
 
 def restart_ordering(on_ambiguity=ambiguity_warn):
-    _resolve[0] = True
-    while _unresolved_dispatchers:
-        dispatcher = _unresolved_dispatchers.pop()
-        dispatcher.reorder(on_ambiguity=on_ambiguity)
-
+    """Deprecated interface to temporarily resume ordering.
+    """
+    warn(
+        'restart_ordering is deprecated, if you would like to eagerly order'
+        'the dispatchers, you should call the ``reorder()`` method on each'
+        ' dispatcher.',
+        DeprecationWarning,
+    )
 
 class Dispatcher(object):
     """ Dispatch methods based on type signature
@@ -68,14 +73,14 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = '__name__', 'name', 'funcs', 'ordering', '_cache', 'doc'
+    __slots__ = '__name__', 'name', 'funcs', '_ordering', '_cache', 'doc'
 
     def __init__(self, name, doc=None):
         self.name = self.__name__ = name
-        self.funcs = dict()
-        self._cache = dict()
-        self.ordering = []
+        self.funcs = {}
         self.doc = doc
+
+        self._cache = {}
 
     def register(self, *types, **kwargs):
         """ register dispatcher with new implementation
@@ -134,7 +139,7 @@ class Dispatcher(object):
             if all(ann is not Parameter.empty for ann in annotations):
                 return annotations
 
-    def add(self, signature, func, on_ambiguity=ambiguity_warn):
+    def add(self, signature, func):
         """ Add new types/method pair to dispatcher
 
         >>> D = Dispatcher('add')
@@ -206,17 +211,26 @@ class Dispatcher(object):
                                 (typ, str_sig, self.name))
 
         self.funcs[signature] = func
-        self.reorder(on_ambiguity=on_ambiguity)
         self._cache.clear()
 
+        try:
+            del self._ordering
+        except AttributeError:
+            pass
+
+    @property
+    def ordering(self):
+        try:
+            return self._ordering
+        except AttributeError:
+            return self.reorder()
+
     def reorder(self, on_ambiguity=ambiguity_warn):
-        if _resolve[0]:
-            self.ordering = ordering(self.funcs)
-            amb = ambiguities(self.funcs)
-            if amb:
-                on_ambiguity(self, amb)
-        else:
-            _unresolved_dispatchers.add(self)
+        self._ordering = od = ordering(self.funcs)
+        amb = ambiguities(self.funcs)
+        if amb:
+            on_ambiguity(self, amb)
+        return od
 
     def __call__(self, *args, **kwargs):
         types = tuple([pytypes.deep_type(arg) for arg in args])
@@ -240,9 +254,13 @@ class Dispatcher(object):
                     return func(*args, **kwargs)
                 except MDNotImplementedError:
                     pass
-            raise NotImplementedError("Matching functions for "
-                                      "%s: <%s> found, but none completed successfully"
-                                      % (self.name, str_signature(types)))
+
+            raise NotImplementedError(
+                "Matching functions for "
+                "%s: <%s> found, but none completed successfully" % (
+                    self.name, str_signature(types),
+                ),
+            )
 
     def __str__(self):
         return "<dispatched %s>" % self.name
@@ -307,7 +325,7 @@ class Dispatcher(object):
     def __setstate__(self, d):
         self.name = d['name']
         self.funcs = d['funcs']
-        self.ordering = ordering(self.funcs)
+        self._ordering = ordering(self.funcs)
         self._cache = dict()
 
     @property
@@ -363,6 +381,7 @@ class MethodDispatcher(Dispatcher):
     See Also:
         Dispatcher
     """
+    __slots__ = ('obj', 'cls')
 
     @classmethod
     def get_func_params(cls, func):
