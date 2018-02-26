@@ -183,10 +183,10 @@ class Dispatcher(object):
 
     @property
     def ordering(self):
-        ordering = getattr(self, '_ordering', None)
-        if ordering is None:
-            ordering = self.reorder()
-        return ordering
+        try:
+            return self._ordering
+        except AttributeError:
+            return self.reorder()
 
     def reorder(self, on_ambiguity=ambiguity_warn):
         self._ordering = od = ordering(self.funcs)
