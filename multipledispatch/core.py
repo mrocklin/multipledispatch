@@ -49,7 +49,6 @@ def dispatch(*types, **kwargs):
     ...         self.data = [datum]
     """
     namespace = kwargs.get('namespace', global_namespace)
-    on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
 
     types = tuple(types)
 
@@ -59,13 +58,14 @@ def dispatch(*types, **kwargs):
         if ismethod(func):
             dispatcher = inspect.currentframe().f_back.f_locals.get(
                 name,
-                MethodDispatcher(name))
+                MethodDispatcher(name),
+            )
         else:
             if name not in namespace:
                 namespace[name] = Dispatcher(name)
             dispatcher = namespace[name]
 
-        dispatcher.add(types, func, on_ambiguity=on_ambiguity)
+        dispatcher.add(types, func)
         return dispatcher
     return _
 

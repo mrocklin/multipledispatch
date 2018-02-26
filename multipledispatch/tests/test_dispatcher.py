@@ -76,18 +76,20 @@ def test_register_instance_method():
 def test_on_ambiguity():
     f = Dispatcher('f')
 
-    def identity(x): return x
+    def identity(x):
+        return x
 
     ambiguities = [False]
 
     def on_ambiguity(dispatcher, amb):
         ambiguities[0] = True
 
-    f.add((object, object), identity, on_ambiguity=on_ambiguity)
+    f.add((object, object), identity)
+    f.add((object, float), identity)
+    f.add((float, object), identity)
+
     assert not ambiguities[0]
-    f.add((object, float), identity, on_ambiguity=on_ambiguity)
-    assert not ambiguities[0]
-    f.add((float, object), identity, on_ambiguity=on_ambiguity)
+    f.reorder(on_ambiguity=on_ambiguity)
     assert ambiguities[0]
 
 
@@ -187,31 +189,6 @@ def test_source_raises_on_missing_function():
     f = Dispatcher('f')
 
     assert raises(TypeError, lambda: f.source(1))
-
-
-def test_halt_method_resolution():
-    g = [0]
-
-    def on_ambiguity(a, b):
-        g[0] += 1
-
-    f = Dispatcher('f')
-
-    halt_ordering()
-
-    def func(*args):
-        pass
-
-    f.add((int, object), func)
-    f.add((object, int), func)
-
-    assert g == [0]
-
-    restart_ordering(on_ambiguity=on_ambiguity)
-
-    assert g == [1]
-
-    assert set(f.ordering) == set([(int, object), (object, int)])
 
 
 def test_no_implementations():
