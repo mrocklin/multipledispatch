@@ -51,6 +51,7 @@ def restart_ordering(on_ambiguity=ambiguity_warn):
         DeprecationWarning,
     )
 
+
 class Dispatcher(object):
     """ Dispatch methods based on type signature
 
@@ -73,11 +74,12 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = '__name__', 'name', 'funcs', '_ordering', '_cache', 'doc'
+    __slots__ = '__name__', 'name', 'funcs', 'annotations', '_ordering', '_cache', 'doc'
 
     def __init__(self, name, doc=None):
         self.name = self.__name__ = name
         self.funcs = {}
+        self.annotations = {}
         self.doc = doc
 
         self._cache = {}
@@ -183,12 +185,13 @@ class Dispatcher(object):
         annotations = dict(zip(arg_names, signature))
 
         # make a copy of the function (if needed) and apply the function annotations
-        if (not hasattr(func, '__annotations__')) or (not func.__annotations__):
-            func.__annotations__ = annotations
-        else:
-            if func.__annotations__  != annotations:
-                func = copy.deepcopy(func)
-                func.__annotations__ = annotations
+        # if (not hasattr(func, '__annotations__')) or (not func.__annotations__):
+        #     func.__annotations__ = annotations
+        # else:
+        #     if func.__annotations__ != annotations:
+        #         import functools
+        #         func = functools.wraps(func)
+        #         func.__annotations__ = annotations
 
 
         # TODO: REMOVE THIS
@@ -211,6 +214,7 @@ class Dispatcher(object):
                                 (typ, str_sig, self.name))
 
         self.funcs[signature] = func
+        self.annotations[signature] = annotations
         self._cache.clear()
 
         try:
@@ -301,8 +305,13 @@ class Dispatcher(object):
         for signature in self.ordering:
             if len(signature) == n:
                 result = self.funcs[signature]
+                annotations = self.annotations[signature]
+                result.__annotations__ = annotations
                 try:
-                    if pytypes.check_argument_types(result, call_args=args):
+                    if args is None:
+                        if pytypes.is_subtype(typing.Tuple[types], typing.Tuple[signature]):
+                            yield result
+                    elif pytypes.check_argument_types(result, call_args=args):
                         yield result
                 except pytypes.InputTypeError:
                     continue
@@ -320,11 +329,13 @@ class Dispatcher(object):
 
     def __getstate__(self):
         return {'name': self.name,
-                'funcs': self.funcs}
+                'funcs': self.funcs,
+                'annotations': self.annotations}
 
     def __setstate__(self, d):
         self.name = d['name']
         self.funcs = d['funcs']
+        self.annotations = d['annotations']
         self._ordering = ordering(self.funcs)
         self._cache = dict()
 

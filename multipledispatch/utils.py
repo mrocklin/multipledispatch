@@ -32,6 +32,9 @@ def expand_tuples(L):
         elif not pytypes.is_of_type(L[0], tuple):
             rest = expand_tuples(L[1:])
             return [(L[0],) + t for t in rest]
+        elif not isinstance(L[0], tuple):
+            rest = expand_tuples(L[1:])
+            return [(L[0],) + t for t in rest]
         else:
             rest = expand_tuples(L[1:])
             return [(item,) + t for t in rest for item in L[0]]
