@@ -185,43 +185,31 @@ class Dispatcher(object):
                 return t
             else:
                 return tp
-        signature = tuple(process_union(tp) for tp in signature)
-        import string
-        suffix_args = ['__' + c for c in string.ascii_lowercase][:len(signature) - len(arg_names)]
-        annotations = dict(zip(list(arg_names) + suffix_args, signature))
 
-        # make a copy of the function (if needed) and apply the function annotations
-        # if (not hasattr(func, '__annotations__')) or (not func.__annotations__):
-        #     func.__annotations__ = annotations
-        # else:
-        #     if func.__annotations__ != annotations:
-        #         import functools
-        #         func = functools.wraps(func)
-        #         func.__annotations__ = annotations
+        signatures = expand_tuples(signature)
+        for signature in signatures:
+            signature = tuple(process_union(tp) for tp in signature)
+            import string
+            suffix_args = ['__' + c for c in string.ascii_lowercase][:len(signature) - len(arg_names)]
+            annotations = dict(zip(list(arg_names) + suffix_args, signature))
 
+            # make a copy of the function (if needed) and apply the function annotations
 
-        # TODO: REMOVE THIS
-        # Handle union types
-        #if any(isinstance(typ, tuple) or pytypes.is_Union(typ) for typ in signature):
-        #    for typs in expand_tuples(signature):
-        #        self.add(typs, func, on_ambiguity)
-        #    return
+            # TODO: MAKE THIS type or typevar
+            for typ in signature:
+                try:
+                    typing.Union[typ]
+                except TypeError:
+                    str_sig = ', '.join(c.__name__ if isinstance(c, type)
+                                        else str(c) for c in signature)
+                    raise TypeError("Tried to dispatch on non-type: %s\n"
+                                    "In signature: <%s>\n"
+                                    "In function: %s" %
+                                    (typ, str_sig, self.name))
 
-        # TODO: MAKE THIS type or typevar
-        for typ in signature:
-            try:
-                typing.Union[typ]
-            except TypeError:
-                str_sig = ', '.join(c.__name__ if isinstance(c, type)
-                                    else str(c) for c in signature)
-                raise TypeError("Tried to dispatch on non-type: %s\n"
-                                "In signature: <%s>\n"
-                                "In function: %s" %
-                                (typ, str_sig, self.name))
-
-        self.funcs[signature] = func
-        self.annotations[signature] = annotations
-        self._cache.clear()
+            self.funcs[signature] = func
+            self.annotations[signature] = annotations
+            self._cache.clear()
 
         try:
             del self._ordering
