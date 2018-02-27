@@ -169,20 +169,26 @@ class Dispatcher(object):
             if annotations:
                 signature = annotations
         # Make function annotation dict
-        argspec = pytypes.getargspecs(func)
-        if pytypes.is_classmethod(func) or pytypes.is_method(func):
+        if hasattr(func, '__call__'):
+            argspec_func = func.__call__
+        else:
+            argspec_func = func
+        argspec = pytypes.getargspecs(argspec_func)
+        if pytypes.is_classmethod(argspec_func) or pytypes.is_method(argspec_func):
             arg_names = argspec.args[1:]
         else:
             arg_names = argspec.args
 
         def process_union(tp):
             if isinstance(tp, tuple):
-                t = typing.Union[tp]
+                t = typing.Union[tuple(process_union(e) for e in tp)]
                 return t
             else:
                 return tp
         signature = tuple(process_union(tp) for tp in signature)
-        annotations = dict(zip(arg_names, signature))
+        import string
+        suffix_args = ['__' + c for c in string.ascii_lowercase][:len(signature) - len(arg_names)]
+        annotations = dict(zip(list(arg_names) + suffix_args, signature))
 
         # make a copy of the function (if needed) and apply the function annotations
         # if (not hasattr(func, '__annotations__')) or (not func.__annotations__):
@@ -237,7 +243,10 @@ class Dispatcher(object):
         return od
 
     def __call__(self, *args, **kwargs):
-        types = tuple([pytypes.deep_type(arg) for arg in args])
+        try:
+            types = tuple([pytypes.deep_type(arg, 1, max_sample=10) for arg in args])
+        except:
+            types = tuple([type(arg) for arg in args])
         try:
             func = self._cache[types]
         except KeyError:
@@ -306,12 +315,13 @@ class Dispatcher(object):
             if len(signature) == n:
                 result = self.funcs[signature]
                 annotations = self.annotations[signature]
-                result.__annotations__ = annotations
+                def f():
+                    pass
+                f.__annotations__ = annotations
                 try:
-                    if args is None:
-                        if pytypes.is_subtype(typing.Tuple[types], typing.Tuple[signature]):
-                            yield result
-                    elif pytypes.check_argument_types(result, call_args=args):
+                    if pytypes.is_subtype(typing.Tuple[types], typing.Tuple[signature]):
+                        yield result
+                    elif pytypes.check_argument_types(f, call_args=args):
                         yield result
                 except pytypes.InputTypeError:
                     continue
