@@ -74,12 +74,11 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = '__name__', 'name', 'funcs', 'annotations', '_ordering', '_cache', 'doc'
+    __slots__ = '__name__', 'name', 'funcs', '_ordering', '_cache', 'doc'
 
     def __init__(self, name, doc=None):
         self.name = self.__name__ = name
         self.funcs = {}
-        self.annotations = {}
         self.doc = doc
 
         self._cache = {}
@@ -169,15 +168,6 @@ class Dispatcher(object):
             if annotations:
                 signature = annotations
         # Make function annotation dict
-        if hasattr(func, '__call__'):
-            argspec_func = func.__call__
-        else:
-            argspec_func = func
-        argspec = pytypes.getargspecs(argspec_func)
-        if pytypes.is_classmethod(argspec_func) or pytypes.is_method(argspec_func):
-            arg_names = argspec.args[1:]
-        else:
-            arg_names = argspec.args
 
         def process_union(tp):
             if isinstance(tp, tuple):
@@ -189,9 +179,6 @@ class Dispatcher(object):
         signatures = expand_tuples(signature)
         for signature in signatures:
             signature = tuple(process_union(tp) for tp in signature)
-            import string
-            suffix_args = ['__' + c for c in string.ascii_lowercase][:len(signature) - len(arg_names)]
-            annotations = dict(zip(list(arg_names) + suffix_args, signature))
 
             # make a copy of the function (if needed) and apply the function annotations
 
@@ -208,7 +195,6 @@ class Dispatcher(object):
                                     (typ, str_sig, self.name))
 
             self.funcs[signature] = func
-            self.annotations[signature] = annotations
             self._cache.clear()
 
         try:
@@ -233,14 +219,13 @@ class Dispatcher(object):
     def __call__(self, *args, **kwargs):
         try:
             types = tuple([pytypes.deep_type(arg, 1, max_sample=10) for arg in args])
-            dargs = args
         except:
+            # some things dont deeptype welkl
             types = tuple([type(arg) for arg in args])
-            dargs = None
         try:
             func = self._cache[types]
         except KeyError:
-            func = self.dispatch(*types, args=dargs)
+            func = self.dispatch(*types)
             if not func:
                 raise NotImplementedError(
                     'Could not find signature for %s: <%s>' %
@@ -250,7 +235,7 @@ class Dispatcher(object):
             return func(*args, **kwargs)
 
         except MDNotImplementedError:
-            funcs = self.dispatch_iter(*types, args=dargs)
+            funcs = self.dispatch_iter(*types)
             next(funcs)  # burn first
             for func in funcs:
                 try:
@@ -269,7 +254,7 @@ class Dispatcher(object):
         return "<dispatched %s>" % self.name
     __repr__ = __str__
 
-    def dispatch(self, *types, args=None):
+    def dispatch(self, *types):
         """Deterimine appropriate implementation for this type signature
 
         This method is internal.  Users should call this object as a function.
@@ -295,23 +280,26 @@ class Dispatcher(object):
             return self.funcs[types]
 
         try:
-            return next(self.dispatch_iter(*types, args=args))
+            return next(self.dispatch_iter(*types))
         except StopIteration:
             return None
 
-    def dispatch_iter(self, *types, args=None):
+    @staticmethod
+    def get_type_vars(x):
+        if isinstance(x, typing.TypeVar):
+            yield x
+        if isinstance(x, typing.GenericMeta):
+            yield from x.__parameters__
+
+    def dispatch_iter(self, *types):
         n = len(types)
         for signature in self.ordering:
             if len(signature) == n:
                 result = self.funcs[signature]
-                annotations = self.annotations[signature]
-                def f():
-                    pass
-                f.__annotations__ = annotations
                 try:
-                    if pytypes.is_subtype(typing.Tuple[types], typing.Tuple[signature]):
-                        yield result
-                    elif pytypes.check_argument_types(f, call_args=args):
+                    typsig = typing.Tuple[signature]
+                    typvars = list(self.get_type_vars(typsig))
+                    if pytypes.is_subtype(typing.Tuple[types], typsig, bound_typevars={t.__name__: t for t in typvars}):
                         yield result
                 except pytypes.InputTypeError:
                     continue
@@ -329,13 +317,11 @@ class Dispatcher(object):
 
     def __getstate__(self):
         return {'name': self.name,
-                'funcs': self.funcs,
-                'annotations': self.annotations}
+                'funcs': self.funcs}
 
     def __setstate__(self, d):
         self.name = d['name']
         self.funcs = d['funcs']
-        self.annotations = d['annotations']
         self._ordering = ordering(self.funcs)
         self._cache = dict()
 
