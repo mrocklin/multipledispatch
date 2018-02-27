@@ -289,7 +289,8 @@ class Dispatcher(object):
         if isinstance(x, typing.TypeVar):
             yield x
         if isinstance(x, typing.GenericMeta):
-            yield from x.__parameters__
+            for e in x.__parameters__:
+                yield e
 
     def dispatch_iter(self, *types):
         n = len(types)
