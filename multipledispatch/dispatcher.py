@@ -245,12 +245,14 @@ class Dispatcher(object):
     def __call__(self, *args, **kwargs):
         try:
             types = tuple([pytypes.deep_type(arg, 1, max_sample=10) for arg in args])
+            dargs = args
         except:
             types = tuple([type(arg) for arg in args])
+            dargs = None
         try:
             func = self._cache[types]
         except KeyError:
-            func = self.dispatch(*types, args=args)
+            func = self.dispatch(*types, args=dargs)
             if not func:
                 raise NotImplementedError(
                     'Could not find signature for %s: <%s>' %
@@ -260,7 +262,7 @@ class Dispatcher(object):
             return func(*args, **kwargs)
 
         except MDNotImplementedError:
-            funcs = self.dispatch_iter(*types)
+            funcs = self.dispatch_iter(*types, args=dargs)
             next(funcs)  # burn first
             for func in funcs:
                 try:
