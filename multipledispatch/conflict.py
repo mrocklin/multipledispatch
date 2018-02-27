@@ -1,6 +1,5 @@
 from .utils import _toposort, groupby
 from pytypes import is_subtype, is_Union, get_Union_params
-from itertools import zip_longest
 
 
 class AmbiguityWarning(Warning):
