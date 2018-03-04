@@ -139,9 +139,9 @@ Links
 
 .. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.png
    :target: https://travis-ci.org/mrocklin/multipledispatch
-.. |Version Status| image:: https://pypip.in/v/multipledispatch/badge.png
+.. |Version Status| image:: https://img.shields.io/pypi/v/multipledispatch.svg
    :target: https://pypi.python.org/pypi/multipledispatch/
-.. |Downloads| image:: https://pypip.in/d/multipledispatch/badge.png
+.. |Downloads| image:: https://img.shields.io/pypi/dm/multipledispatch.svg
    :target: https://pypi.python.org/pypi/multipledispatch/
 .. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.png
    :target: https://coveralls.io/r/mrocklin/multipledispatch
