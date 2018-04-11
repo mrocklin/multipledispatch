@@ -12,6 +12,7 @@ python:
 install:
     - pip install coverage
     - pip install --upgrade pytest pytest-benchmark
+    - pip install pytypes
 
 script:
     - |

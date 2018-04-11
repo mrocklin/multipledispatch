@@ -131,11 +131,11 @@ def test_caching_correct_behavior():
 
 def test_union_types():
     @dispatch((A, C))
-    def f(x):
+    def hh(x):
         return 1
 
-    assert f(A()) == 1
-    assert f(C()) == 1
+    assert hh(A()) == 1
+    assert hh(C()) == 1
 
 
 def test_namespaces():

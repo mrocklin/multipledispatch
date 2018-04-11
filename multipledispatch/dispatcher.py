@@ -1,9 +1,14 @@
 from warnings import warn
 import inspect
+
+import copy
+
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
-import itertools as itl
 
+import itertools as itl
+import pytypes
+import typing
 
 
 class MDNotImplementedError(NotImplementedError):
@@ -45,6 +50,7 @@ def restart_ordering(on_ambiguity=ambiguity_warn):
         ' dispatcher.',
         DeprecationWarning,
     )
+
 
 class Dispatcher(object):
     """ Dispatch methods based on type signature
@@ -140,13 +146,17 @@ class Dispatcher(object):
         >>> D = Dispatcher('add')
         >>> D.add((int, int), lambda x, y: x + y)
         >>> D.add((float, float), lambda x, y: x + y)
+        >>> D.add((typing.Optional[str], ), lambda x: x)
 
         >>> D(1, 2)
         3
-        >>> D(1, 2.0)
+        >>> D('1', 2.0)
         Traceback (most recent call last):
         ...
-        NotImplementedError: Could not find signature for add: <int, float>
+        NotImplementedError: Could not find signature for add: <str, float>
+        >>> D('s')
+        's'
+        >>> D(None)
 
         When ``add`` detects a warning it calls the ``on_ambiguity`` callback
         with a dispatcher/itself, and a set of ambiguous type signature pairs
@@ -157,24 +167,35 @@ class Dispatcher(object):
             annotations = self.get_func_annotations(func)
             if annotations:
                 signature = annotations
+        # Make function annotation dict
 
-        # Handle union types
-        if any(isinstance(typ, tuple) for typ in signature):
-            for typs in expand_tuples(signature):
-                self.add(typs, func)
-            return
+        def process_union(tp):
+            if isinstance(tp, tuple):
+                t = typing.Union[tuple(process_union(e) for e in tp)]
+                return t
+            else:
+                return tp
 
-        for typ in signature:
-            if not isinstance(typ, type):
-                str_sig = ', '.join(c.__name__ if isinstance(c, type)
-                                    else str(c) for c in signature)
-                raise TypeError("Tried to dispatch on non-type: %s\n"
-                                "In signature: <%s>\n"
-                                "In function: %s" %
-                                (typ, str_sig, self.name))
+        signatures = expand_tuples(signature)
+        for signature in signatures:
+            signature = tuple(process_union(tp) for tp in signature)
 
-        self.funcs[signature] = func
-        self._cache.clear()
+            # make a copy of the function (if needed) and apply the function annotations
+
+            # TODO: MAKE THIS type or typevar
+            for typ in signature:
+                try:
+                    typing.Union[typ]
+                except TypeError:
+                    str_sig = ', '.join(c.__name__ if isinstance(c, type)
+                                        else str(c) for c in signature)
+                    raise TypeError("Tried to dispatch on non-type: %s\n"
+                                    "In signature: <%s>\n"
+                                    "In function: %s" %
+                                    (typ, str_sig, self.name))
+
+            self.funcs[signature] = func
+            self._cache.clear()
 
         try:
             del self._ordering
@@ -196,7 +217,11 @@ class Dispatcher(object):
         return od
 
     def __call__(self, *args, **kwargs):
-        types = tuple([type(arg) for arg in args])
+        try:
+            types = tuple([pytypes.deep_type(arg, 1, max_sample=10) for arg in args])
+        except:
+            # some things dont deeptype welkl
+            types = tuple([type(arg) for arg in args])
         try:
             func = self._cache[types]
         except KeyError:
@@ -259,12 +284,26 @@ class Dispatcher(object):
         except StopIteration:
             return None
 
+    @staticmethod
+    def get_type_vars(x):
+        if isinstance(x, typing.TypeVar):
+            yield x
+        if isinstance(x, typing.GenericMeta):
+            for e in x.__parameters__:
+                yield e
+
     def dispatch_iter(self, *types):
         n = len(types)
         for signature in self.ordering:
-            if len(signature) == n and all(map(issubclass, types, signature)):
+            if len(signature) == n:
                 result = self.funcs[signature]
-                yield result
+                try:
+                    typsig = typing.Tuple[signature]
+                    typvars = list(self.get_type_vars(typsig))
+                    if pytypes.is_subtype(typing.Tuple[types], typsig, bound_typevars={t.__name__: t for t in typvars}):
+                        yield result
+                except pytypes.InputTypeError:
+                    continue
 
     def resolve(self, types):
         """ Deterimine appropriate implementation for this type signature
