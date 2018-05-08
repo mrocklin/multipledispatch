@@ -195,8 +195,14 @@ class Dispatcher(object):
             on_ambiguity(self, amb)
         return od
 
+    def arg_types(self, args):
+        """Determine of types of the arugments.
+        Could be overrided to better support metaclasses.
+        """
+        return tuple([type(arg) for arg in args])
+
     def __call__(self, *args, **kwargs):
-        types = tuple([type(arg) for arg in args])
+        types = self.arg_types(args)
         try:
             func = self._cache[types]
         except KeyError:
