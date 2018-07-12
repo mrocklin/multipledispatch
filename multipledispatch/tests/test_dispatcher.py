@@ -300,11 +300,11 @@ def test_vararg_dispatch_ambiguous():
 
     @f.register([float], float)
     def _1(*args):
-        return 1.2
+        return 1.0
 
     @f.register(float, [float])
     def _2(*args):
-        return 1.2
+        return 2.0
 
     assert ambiguities(f.funcs)
 
