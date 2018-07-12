@@ -1,6 +1,6 @@
 from warnings import warn
 import inspect
-from .conflict import ordering, super_signature, AmbiguityWarning
+from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
 import itertools as itl
 
@@ -277,6 +277,13 @@ class Dispatcher(object):
             return self._ordering
         except AttributeError:
             return self.reorder()
+
+    def reorder(self, on_ambiguity=ambiguity_warn):
+        self._ordering = od = ordering(self.funcs)
+        amb = ambiguities(self.funcs)
+        if amb:
+            on_ambiguity(self, amb)
+        return od
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
