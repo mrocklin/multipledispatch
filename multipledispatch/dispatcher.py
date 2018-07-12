@@ -1,3 +1,4 @@
+import collections
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
@@ -68,28 +69,48 @@ def typename(type):
     >>> typename(int)
     'int'
     >>> typename((int, float))
-    (int, float)
+    '(int, float)'
     """
     try:
         return type.__name__
     except AttributeError:
-        return '({0})'.format(', '.join(map(typename, type)))
+        return '(%s)' % ', '.join(map(typename, type))
 
 
 class VariadicSignatureMeta(type):
+    """A metaclass that overrides ``__getitem__`` on the class. This is used to
+    generate a new type for Variadic signatures. See the Variadic class for
+    examples of how this behaves.
+    """
     def __getitem__(self, value_type):
-        new_type_name = 'Variadic[{0}]'.format(
-            ', '.join(map(typename, value_type))
-        )
+        if isinstance(value_type, collections.abc.Sequence):
+            value_type = tuple(value_type)
         return VariadicSignatureType(
-            new_type_name,
+            'Variadic[%s]' % typename(value_type),
             (),
-            dict(value_type=tuple(value_type), __slots__=()),
+            dict(value_type=value_type, __slots__=())
         )
 
 
 class Variadic(metaclass=VariadicSignatureMeta):
-    pass
+    """A class whose getitem method can be used to generate a new type
+    representing a specific variadic signature.
+
+    Examples
+    --------
+    >>> Variadic[int]  # any number of int arguments
+    <class 'multipledispatch.dispatcher.Variadic[int]'>
+    >>> Variadic[(int, str)]  # any number of one of int or str arguments
+    <class 'multipledispatch.dispatcher.Variadic[(int, str)]'>
+    >>> issubclass(int, Variadic[int])
+    True
+    >>> issubclass(int, Variadic[(int, str)])
+    True
+    >>> issubclass(str, Variadic[(int, str)])
+    True
+    >>> issubclass(float, Variadic[(int, str)])
+    False
+    """
 
 
 def variadic_signature_matches_iter(types, full_signature):
@@ -112,7 +133,8 @@ def variadic_signature_matches_iter(types, full_signature):
                 Else
                     (This means we've exhaused all possible variadic matches
                      for the current variadic signature, multiple variadic
-                     signatures are not yet implemented)
+                     signatures are not yet implemented, and it's not clear if
+                     that even makes sense)
                     yield True if the type matches the current signature
         Else
             yield True if the type matches the current signature
