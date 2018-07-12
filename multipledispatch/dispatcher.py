@@ -47,28 +47,44 @@ def restart_ordering(on_ambiguity=ambiguity_warn):
 
 
 class VariadicSignatureType(type):
-
     def __subclasscheck__(self, subclass):
         return subclass is self or issubclass(subclass, self.value_type)
 
 
-def typename(typ):
+def typename(type):
+    """Get the name of `type`.
+
+    Parameters
+    ----------
+    type : Union[Type, Tuple[Type]]
+
+    Returns
+    -------
+    str
+        The name of `type` or a tuple of the names of the types in `type`.
+
+    Examples
+    --------
+    >>> typename(int)
+    'int'
+    >>> typename((int, float))
+    (int, float)
+    """
     try:
-        return typ.__name__
+        return type.__name__
     except AttributeError:
-        return '({0})'.format(', '.join(map(typename, typ)))
+        return '({0})'.format(', '.join(map(typename, type)))
 
 
 class VariadicSignatureMeta(type):
-
     def __getitem__(self, value_type):
-        new_type_name = 'Variadic[{}]'.format(
-            ', '.join(typename(t) for t in value_type)
+        new_type_name = 'Variadic[{0}]'.format(
+            ', '.join(map(typename, value_type))
         )
         return VariadicSignatureType(
             new_type_name,
             (),
-            {'value_type': tuple(value_type), '__slots__': ()}
+            dict(value_type=tuple(value_type), __slots__=()),
         )
 
 
@@ -256,9 +272,11 @@ class Dispatcher(object):
                                 "In signature: <%s>\n"
                                 "In function: %s" %
                                 (typ, str_sig, self.name))
+
+            # handle variadic signatures
             if isinstance(typ, list):
                 assert len(typ) == 1, \
-                    'Vararg signature must contain exactly one element'
+                    'Variadic signature must contain exactly one element'
                 new_signature.append(Variadic[typ])
             else:
                 new_signature.append(typ)
