@@ -138,12 +138,6 @@ def variadic_signature_matches_iter(types, full_signature):
                 Try to get the next signature
                 If no signatures are left we can't possibly have a match
                     so yield False
-                Else
-                    (This means we've exhaused all possible variadic matches
-                     for the current variadic signature, multiple variadic
-                     signatures are not yet implemented, and it's not clear if
-                     that even makes sense)
-                    yield True if the type matches the current signature
         Else
             yield True if the type matches the current signature
             Get the next signature
@@ -151,21 +145,34 @@ def variadic_signature_matches_iter(types, full_signature):
     sigiter = iter(full_signature)
     sig = next(sigiter)
     for typ in types:
+        matches = issubclass(typ, sig)
         if isinstance(sig, VariadicSignatureType):
-            if issubclass(typ, sig):
-                yield True
+            # if the current type matches the current variadic signature yield
+            # True
+            if matches:
+                yield matches
             else:
                 try:
-                    # We're out of signatures, but we still have types left to
-                    # match, so there's no possible match.
                     sig = next(sigiter)
                 except StopIteration:
+                    # We're out of signatures, but we still have types left to
+                    # match, so there's no possible match.
                     yield False
-                else:
-                    yield issubclass(typ, sig)
         else:
-            yield issubclass(typ, sig)
+            # we're not matching a variadic argument, so move to the next
+            # element in the signature
+            yield matches
             sig = next(sigiter)
+    else:
+        try:
+            sig = next(sigiter)
+        except StopIteration:
+            assert not isinstance(sig, Variadic)
+            yield True
+        else:
+            # We have signature items left over, so all of our arguments
+            # haven't matched
+            yield False
 
 
 def variadic_signature_matches(types, full_signature):
