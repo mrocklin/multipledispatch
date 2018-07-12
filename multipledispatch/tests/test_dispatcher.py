@@ -2,6 +2,7 @@ import warnings
 
 from multipledispatch.dispatcher import (Dispatcher, MDNotImplementedError,
                                          MethodDispatcher)
+from multipledispatch.conflict import ambiguities
 from multipledispatch.utils import raises
 
 
@@ -283,6 +284,31 @@ def test_vararg_dispatch_multiple_types():
     assert result == 1.2
 
 
+def test_vararg_dispatch_failure():
+    h = Dispatcher('h')
+
+    @h.register(str, [float], str)
+    def _1(*args):
+        return 1.2
+
+    assert raises(NotImplementedError, lambda: h('a', 'b', 2.0, 3.0, 'b'))
+    assert raises(NotImplementedError, lambda: h(2.0, 3.0))
+
+
+def test_vararg_dispatch_ambiguous():
+    f = Dispatcher('f')
+
+    @f.register([float], float)
+    def _1(*args):
+        return 1.2
+
+    @f.register(float, [float])
+    def _2(*args):
+        return 1.2
+
+    assert ambiguities(f.funcs)
+
+
 def test_vararg_dispatch_multiple_types_explicit_args():
     f = Dispatcher('f')
 
@@ -321,19 +347,40 @@ def test_vararg_dispatch_unions():
     def _1(a, *b):
         return 'mixed_string_ints_floats'
 
-    @f.register([float])
-    def _2(*b):
-        return 'floats'
-
     @f.register([str])
-    def _3(*strings):
+    def _2(*strings):
         return 'strings'
 
     @f.register([(str, int)])
-    def _4(*strings_ints):
+    def _3(*strings_ints):
         return 'mixed_strings_ints'
 
     assert f('a', 1.0, 7, 2.0, 11) == 'mixed_string_ints_floats'
-    assert f(1.0, 2.0, 3.14) == 'floats'
     assert f('a', 'b', 'c') == 'strings'
     assert f('a', 1, 'b', 2) == 'mixed_strings_ints'
+
+
+def test_vararg_no_args():
+    f = Dispatcher('f')
+
+    @f.register([str])
+    def _1(*strings):
+        return 'strings'
+
+    assert f() == 'strings'
+
+
+def test_vararg_no_args_failure():
+    f = Dispatcher('f')
+    g = Dispatcher('g')
+
+    @f.register([str], str)
+    def _1(*strings):
+        return 'strings'
+
+    @g.register(str, [str])
+    def _2(*strings):
+        return 'strings'
+
+    assert raises(NotImplementedError, f)
+    assert raises(NotImplementedError, g)
