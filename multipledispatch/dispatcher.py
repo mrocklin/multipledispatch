@@ -47,11 +47,6 @@ def restart_ordering(on_ambiguity=ambiguity_warn):
     )
 
 
-class VariadicSignatureType(type):
-    def __subclasscheck__(self, subclass):
-        return subclass is self or issubclass(subclass, self.value_type)
-
-
 def typename(type):
     """Get the name of `type`.
 
@@ -74,7 +69,18 @@ def typename(type):
     try:
         return type.__name__
     except AttributeError:
+        if len(type) == 1:
+            return typename(*type)
         return '(%s)' % ', '.join(map(typename, type))
+
+
+class VariadicSignatureType(type):
+    # checking if subclass is a subclass of self
+    def __subclasscheck__(self, subclass):
+        other_type = getattr(subclass, 'value_type', (subclass,))
+        return subclass is self or all(
+            issubclass(other, self.value_type) for other in other_type
+        )
 
 
 class VariadicSignatureMeta(type):
