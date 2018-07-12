@@ -90,7 +90,9 @@ class VariadicSignatureMeta(type):
     """
     def __getitem__(self, value_type):
         if isinstance(value_type, collections.abc.Sequence):
-            value_type = tuple(value_type)
+            assert isinstance(value_type, (tuple, type)), type(value_type)
+        if not isinstance(value_type, tuple):
+            value_type = value_type,
         return VariadicSignatureType(
             'Variadic[%s]' % typename(value_type),
             (),
@@ -305,7 +307,7 @@ class Dispatcher(object):
             if isinstance(typ, list):
                 assert len(typ) == 1, \
                     'Variadic signature must contain exactly one element'
-                new_signature.append(Variadic[typ])
+                new_signature.append(Variadic[typ[0]])
             else:
                 new_signature.append(typ)
 
