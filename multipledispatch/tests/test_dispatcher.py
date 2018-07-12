@@ -329,6 +329,11 @@ def test_vararg_dispatch_unions():
     def _3(*strings):
         return 'strings'
 
+    @f.register([(str, int)])
+    def _4(*strings_ints):
+        return 'mixed_strings_ints'
+
     assert f('a', 1.0, 7, 2.0, 11) == 'mixed_string_ints_floats'
     assert f(1.0, 2.0, 3.14) == 'floats'
     assert f('a', 'b', 'c') == 'strings'
+    assert f('a', 1, 'b', 2) == 'mixed_strings_ints'
