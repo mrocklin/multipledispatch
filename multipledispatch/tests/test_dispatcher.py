@@ -355,9 +355,14 @@ def test_vararg_dispatch_unions():
     def _3(*strings_ints):
         return 'mixed_strings_ints'
 
+    @f.register([object])
+    def _4(*objects):
+        return 'objects'
+
     assert f('a', 1.0, 7, 2.0, 11) == 'mixed_string_ints_floats'
     assert f('a', 'b', 'c') == 'strings'
     assert f('a', 1, 'b', 2) == 'mixed_strings_ints'
+    assert f([], (), {}) == 'objects'
 
 
 def test_vararg_no_args():
