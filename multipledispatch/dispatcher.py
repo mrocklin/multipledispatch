@@ -4,6 +4,7 @@ import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples, VariadicSignatureType
 import itertools as itl
+import six
 
 
 class MDNotImplementedError(NotImplementedError):
@@ -91,7 +92,7 @@ class VariadicSignatureMeta(type):
         )
 
 
-class Variadic(metaclass=VariadicSignatureMeta):
+class Variadic(six.with_metaclass(VariadicSignatureMeta)):
     """A class whose getitem method can be used to generate a new type
     representing a specific variadic signature.
 
