@@ -1,4 +1,3 @@
-import collections
 import six
 
 from .utils import typename
@@ -42,8 +41,7 @@ class VariadicSignatureMeta(type):
     examples of how this behaves.
     """
     def __getitem__(self, value_type):
-        if isinstance(value_type, collections.abc.Sequence):
-            assert isinstance(value_type, (tuple, type)), type(value_type)
+        assert isinstance(value_type, (type, tuple)), type(value_type)
         if not isinstance(value_type, tuple):
             value_type = value_type,
         return VariadicSignatureType(
