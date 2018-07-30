@@ -2,7 +2,7 @@ import collections
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
-from .utils import expand_tuples, VariadicSignatureType
+from .utils import expand_tuples, VariadicSignatureType, isvariadic
 import itertools as itl
 import six
 
@@ -138,7 +138,7 @@ def variadic_signature_matches_iter(types, full_signature):
     sig = next(sigiter)
     for typ in types:
         matches = issubclass(typ, sig)
-        if isinstance(sig, VariadicSignatureType):
+        if isvariadic(sig):
             # if the current type matches the current variadic signature yield
             # True
             if matches:
@@ -156,7 +156,7 @@ def variadic_signature_matches_iter(types, full_signature):
         try:
             sig = next(sigiter)
         except StopIteration:
-            assert isinstance(sig, VariadicSignatureType)
+            assert isvariadic(sig)
             yield True
         else:
             # We have signature items left over, so all of our arguments
@@ -402,9 +402,7 @@ class Dispatcher(object):
             if len(signature) == n and all(map(issubclass, types, signature)):
                 result = self.funcs[signature]
                 yield result
-            elif any(
-                isinstance(sig, VariadicSignatureType) for sig in signature
-            ):
+            elif any(isvariadic(sig) for sig in signature):
                 if variadic_signature_matches(types, signature):
                     result = self.funcs[signature]
                     yield result
