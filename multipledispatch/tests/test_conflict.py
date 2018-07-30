@@ -1,5 +1,6 @@
 from multipledispatch.conflict import (supercedes, ordering, ambiguities,
         ambiguous, super_signature, consistent)
+from multipledispatch.dispatcher import Variadic
 
 
 class A(object): pass
@@ -60,3 +61,31 @@ def test_ordering():
 
 def test_type_mro():
     assert super_signature([[object], [type]]) == [type]
+
+
+def test_supercedes_variadic():
+    assert supercedes([Variadic[B]], [Variadic[A]])
+    assert supercedes([B, Variadic[A]], [Variadic[A]])
+    assert supercedes([Variadic[A]], [Variadic[(A, C)]])
+    assert supercedes([A, B, Variadic[C]], [Variadic[object]])
+    assert supercedes([A, Variadic[B]], [Variadic[A]])
+    assert supercedes([], [Variadic[A]])
+    assert supercedes([A, A, A], [A, Variadic[A]])
+    assert not supercedes([Variadic[A]], [Variadic[B]])
+    assert not supercedes([Variadic[A]], [B, Variadic[A]])
+    assert not supercedes([Variadic[(A, C)]], [Variadic[A]])
+    assert not supercedes([Variadic[object]], [A, B, Variadic[C]])
+    assert not supercedes([Variadic[A]], [A, Variadic[B]])
+    assert not supercedes([Variadic[A]], [])
+    assert not supercedes([A, Variadic[A]], [A, A, A])
+
+
+def test_consistent_variadic():
+    assert consistent([Variadic[A]], [Variadic[A]])
+    assert consistent([Variadic[B]], [Variadic[B]])
+    assert not consistent([Variadic[C]], [Variadic[A]])
+    assert not consistent([Variadic[(A, C)]], [Variadic[A]])
+    assert not consistent([A, A, B], [A, A, Variadic[B]])
+
+    assert consistent([A, B, Variadic[C]], [B, A, Variadic[C]])
+    assert not consistent([A, B, Variadic[C]], [B, A, Variadic[(C, B)]])

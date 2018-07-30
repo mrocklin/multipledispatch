@@ -1,3 +1,4 @@
+
 import warnings
 
 from multipledispatch.dispatcher import (Dispatcher, MDNotImplementedError,
@@ -273,38 +274,16 @@ def test_vararg_dispatch_simple():
     assert f(1.0, 2.0, 3.0) == (1.0, 2.0, 3.0)
 
 
-def test_vararg_dispatch_multiple_types():
+def test_vararg_dispatch_ambiguity():
     f = Dispatcher('f')
 
-    @f.register(str, [float], str)
-    def _1(*args):
-        return 1.2
+    @f.register(float, object, [int])
+    def _1(a, b, *args):
+        return 1
 
-    result = f('a', 1.0, 2.0, 3.0, 'b')
-    assert result == 1.2
-
-
-def test_vararg_dispatch_failure():
-    h = Dispatcher('h')
-
-    @h.register(str, [float], str)
-    def _1(*args):
-        return 1.2
-
-    assert raises(NotImplementedError, lambda: h('a', 'b', 2.0, 3.0, 'b'))
-    assert raises(NotImplementedError, lambda: h(2.0, 3.0))
-
-
-def test_vararg_dispatch_ambiguous():
-    f = Dispatcher('f')
-
-    @f.register([float], float)
-    def _1(*args):
-        return 1.0
-
-    @f.register(float, [float])
-    def _2(*args):
-        return 2.0
+    @f.register(object, float, [int])
+    def _2(a, b, *args):
+        return 2
 
     assert ambiguities(f.funcs)
 
@@ -377,15 +356,34 @@ def test_vararg_no_args():
 
 def test_vararg_no_args_failure():
     f = Dispatcher('f')
-    g = Dispatcher('g')
 
-    @f.register([str], str)
-    def _1(*strings):
-        return 'strings'
-
-    @g.register(str, [str])
+    @f.register(str, [str])
     def _2(*strings):
         return 'strings'
 
     assert raises(NotImplementedError, f)
-    assert raises(NotImplementedError, g)
+
+
+def test_vararg_ordering():
+    f = Dispatcher('f')
+
+    @f.register(str, int, [object])
+    def _1(string, integer, *objects):
+        return 1
+
+    @f.register(str, [object])
+    def _2(string, *objects):
+        return 2
+
+    @f.register([object])
+    def _3(*objects):
+        return 3
+
+    assert f('a', 1) == 1
+    assert f('a', 1, ['a']) == 1
+    assert f('a', 1, 'a') == 1
+    assert f('a', 'a') == 2
+    assert f('a') == 2
+    assert f('a', ['a']) == 2
+    assert f(1) == 3
+    assert f() == 3
