@@ -1,3 +1,19 @@
+from collections import OrderedDict
+
+
+class VariadicSignatureType(type):
+    # checking if subclass is a subclass of self
+    def __subclasscheck__(self, subclass):
+        other_type = getattr(subclass, 'value_type', (subclass,))
+        return subclass is self or all(
+            issubclass(other, self.value_type) for other in other_type
+        )
+
+
+def isvariadic(obj):
+    return isinstance(obj, VariadicSignatureType)
+
+
 def raises(err, lamda):
     try:
         lamda()
@@ -45,18 +61,19 @@ def _toposort(edges):
     [2] http://en.wikipedia.org/wiki/Toposort#Algorithms
     """
     incoming_edges = reverse_dict(edges)
-    incoming_edges = dict((k, set(val)) for k, val in incoming_edges.items())
-    S = set((v for v in edges if v not in incoming_edges))
+    incoming_edges = OrderedDict((k, set(val))
+                                 for k, val in incoming_edges.items())
+    S = OrderedDict.fromkeys((v for v in edges if v not in incoming_edges))
     L = []
 
     while S:
-        n = S.pop()
+        n, _ = S.popitem()
         L.append(n)
         for m in edges.get(n, ()):
             assert n in incoming_edges[m]
             incoming_edges[m].remove(n)
             if not incoming_edges[m]:
-                S.add(m)
+                S[m] = None
     if any(incoming_edges.get(v, None) for v in edges):
         raise ValueError("Input has cycles")
     return L
@@ -75,7 +92,7 @@ def reverse_dict(d):
         as undeterministic.
 
     """
-    result = {}
+    result = OrderedDict()
     for key in d:
         for val in d[key]:
             result[val] = result.get(val, tuple()) + (key, )
@@ -99,7 +116,7 @@ def groupby(func, seq):
         ``countby``
     """
 
-    d = dict()
+    d = OrderedDict()
     for item in seq:
         key = func(item)
         if key not in d:

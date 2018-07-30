@@ -2,7 +2,7 @@ import collections
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
-from .utils import expand_tuples
+from .utils import expand_tuples, VariadicSignatureType
 import itertools as itl
 
 
@@ -74,15 +74,6 @@ def typename(type):
         return '(%s)' % ', '.join(map(typename, type))
 
 
-class VariadicSignatureType(type):
-    # checking if subclass is a subclass of self
-    def __subclasscheck__(self, subclass):
-        other_type = getattr(subclass, 'value_type', (subclass,))
-        return subclass is self or all(
-            issubclass(other, self.value_type) for other in other_type
-        )
-
-
 class VariadicSignatureMeta(type):
     """A metaclass that overrides ``__getitem__`` on the class. This is used to
     generate a new type for Variadic signatures. See the Variadic class for
@@ -152,12 +143,9 @@ def variadic_signature_matches_iter(types, full_signature):
             if matches:
                 yield matches
             else:
-                try:
-                    sig = next(sigiter)
-                except StopIteration:
-                    # We're out of signatures, but we still have types left to
-                    # match, so there's no possible match.
-                    yield False
+                # We're out of signatures, but we still have types left to
+                # match, so there's no possible match.
+                yield False
         else:
             # we're not matching a variadic argument, so move to the next
             # element in the signature
@@ -167,7 +155,7 @@ def variadic_signature_matches_iter(types, full_signature):
         try:
             sig = next(sigiter)
         except StopIteration:
-            assert not isinstance(sig, Variadic)
+            assert isinstance(sig, VariadicSignatureType)
             yield True
         else:
             # We have signature items left over, so all of our arguments
@@ -301,7 +289,7 @@ class Dispatcher(object):
 
         new_signature = []
 
-        for typ in signature:
+        for index, typ in enumerate(signature, start=1):
             if not isinstance(typ, (type, list)):
                 str_sig = ', '.join(c.__name__ if isinstance(c, type)
                                     else str(c) for c in signature)
@@ -312,6 +300,8 @@ class Dispatcher(object):
 
             # handle variadic signatures
             if isinstance(typ, list):
+                assert index == len(signature), \
+                    'Variadic signature must be the last element'
                 assert len(typ) == 1, \
                     'Variadic signature must contain exactly one element'
                 new_signature.append(Variadic[typ[0]])
