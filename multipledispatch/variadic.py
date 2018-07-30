@@ -58,9 +58,9 @@ class Variadic(six.with_metaclass(VariadicSignatureMeta)):
     Examples
     --------
     >>> Variadic[int]  # any number of int arguments
-    <class 'multipledispatch.dispatcher.Variadic[int]'>
+    <class 'multipledispatch.variadic.Variadic[int]'>
     >>> Variadic[(int, str)]  # any number of one of int or str arguments
-    <class 'multipledispatch.dispatcher.Variadic[(int, str)]'>
+    <class 'multipledispatch.variadic.Variadic[(int, str)]'>
     >>> issubclass(int, Variadic[int])
     True
     >>> issubclass(int, Variadic[(int, str)])
