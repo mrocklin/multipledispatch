@@ -9,15 +9,9 @@ class VariadicSignatureType(type):
             issubclass(other, self.value_type) for other in other_type
         )
 
-    def __eq__(self, other):
-        """
-        Return true if we have the same value type
-        """
-        return (isinstance(other, VariadicSignatureType) and
-                self.value_type == other.value_type)
 
-    def __hash__(self):
-        return hash(self.value_type)
+def isvariadic(obj):
+    return isinstance(obj, VariadicSignatureType)
 
 
 def raises(err, lamda):
@@ -73,7 +67,7 @@ def _toposort(edges):
     L = []
 
     while S:
-        n = S.popitem()[0]
+        n, _ = S.popitem()
         L.append(n)
         for m in edges.get(n, ()):
             assert n in incoming_edges[m]

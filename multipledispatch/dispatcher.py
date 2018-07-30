@@ -289,7 +289,7 @@ class Dispatcher(object):
 
         new_signature = []
 
-        for index, typ in enumerate(signature):
+        for index, typ in enumerate(signature, start=1):
             if not isinstance(typ, (type, list)):
                 str_sig = ', '.join(c.__name__ if isinstance(c, type)
                                     else str(c) for c in signature)
@@ -300,7 +300,7 @@ class Dispatcher(object):
 
             # handle variadic signatures
             if isinstance(typ, list):
-                assert index == len(signature) - 1, \
+                assert index == len(signature), \
                     'Variadic signature must be the last element'
                 assert len(typ) == 1, \
                     'Variadic signature must contain exactly one element'

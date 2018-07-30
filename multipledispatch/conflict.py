@@ -1,4 +1,4 @@
-from .utils import _toposort, groupby, VariadicSignatureType
+from .utils import _toposort, groupby, isvariadic
 
 
 class AmbiguityWarning(Warning):
@@ -11,7 +11,7 @@ def supercedes(a, b):
         # only case is if a is empty and b is variadic
         return (len(a) == 0 and
                 len(b) == 1 and
-                isinstance(b[-1], VariadicSignatureType))
+                isvariadic(b[-1]))
     elif len(a) == len(b):
         return all(map(issubclass, a, b))
     else:
@@ -19,18 +19,20 @@ def supercedes(a, b):
         p1 = 0
         p2 = 0
         while p1 < len(a) and p2 < len(b):
-            if (not isinstance(a[p1], VariadicSignatureType) and
-                    not isinstance(b[p2], VariadicSignatureType)):
-                if not issubclass(a[p1], b[p2]):
+            cur_a = a[p1]
+            cur_b = b[p2]
+            if (not isvariadic(cur_a) and
+                    not isvariadic(cur_b)):
+                if not issubclass(cur_a, cur_b):
                     return False
                 p1 += 1
                 p2 += 1
-            elif isinstance(a[p1], VariadicSignatureType):
+            elif isvariadic(cur_a):
                 assert p1 == len(a) - 1
-                return p2 == len(b) - 1 and issubclass(a[p1], b[p2])
-            elif isinstance(b[p2], VariadicSignatureType):
+                return p2 == len(b) - 1 and issubclass(cur_a, cur_b)
+            elif isvariadic(cur_b):
                 assert p2 == len(b) - 1
-                if not issubclass(a[p1], b[p2]):
+                if not issubclass(cur_a, cur_b):
                     return False
                 p1 += 1
         return p2 == len(b) - 1 and p1 == len(a)
@@ -38,18 +40,37 @@ def supercedes(a, b):
 
 def consistent(a, b):
     """ It is possible for an argument list to satisfy both A and B """
-    def check_variadic_consistency(a, b):
-        if (len(a) == 0 or
-            (not isinstance(a[-1], VariadicSignatureType) and
-             not isinstance(b[-1], VariadicSignatureType))):
-            return True
-        else:
-            return a[-1] == b[-1]
 
-    return (len(a) == len(b) and
-            all(issubclass(aa, bb) or issubclass(bb, aa)
-                for aa, bb in zip(a, b)) and
-            check_variadic_consistency(a, b))
+    # Need to check for empty args
+    if len(a) == 0:
+        return len(b) == 0 or isvariadic(b[0])
+    if len(b) == 0:
+        return len(a) == 0 or isvariadic(a[0])
+    
+    # Non-empty args check for mutual subclasses
+    if len(a) == len(b):
+        return all(issubclass(aa, bb) or issubclass(bb, aa)
+                   for aa, bb in zip(a, b))
+    else:
+        p1 = 0
+        p2 = 0
+        while p1 < len(a) and p2 < len(b):
+            cur_a = a[p1]
+            cur_b = b[p2]
+            if not issubclass(cur_b, cur_a) and not issubclass(cur_a, cur_b):
+                return False
+            if (not isvariadic(cur_a) and
+                    not isvariadic(cur_b)):
+                p1 += 1
+                p2 += 1
+            elif isvariadic(cur_a):
+                p2 += 1
+            elif isvariadic(cur_b):
+                p1 += 1
+        # We only need to check for variadic ends
+        # Variadic types are guaranteed to be the last element
+        return ((isvariadic(cur_a) and p2 == len(b)) or
+                (isvariadic(cur_b) and p1 == len(a)))
 
 
 def ambiguous(a, b):
