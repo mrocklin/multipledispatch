@@ -1,19 +1,6 @@
 from collections import OrderedDict
 
 
-class VariadicSignatureType(type):
-    # checking if subclass is a subclass of self
-    def __subclasscheck__(self, subclass):
-        other_type = getattr(subclass, 'value_type', (subclass,))
-        return subclass is self or all(
-            issubclass(other, self.value_type) for other in other_type
-        )
-
-
-def isvariadic(obj):
-    return isinstance(obj, VariadicSignatureType)
-
-
 def raises(err, lamda):
     try:
         lamda()
@@ -123,3 +110,30 @@ def groupby(func, seq):
             d[key] = list()
         d[key].append(item)
     return d
+
+
+def typename(type):
+    """Get the name of `type`.
+
+    Parameters
+    ----------
+    type : Union[Type, Tuple[Type]]
+
+    Returns
+    -------
+    str
+        The name of `type` or a tuple of the names of the types in `type`.
+
+    Examples
+    --------
+    >>> typename(int)
+    'int'
+    >>> typename((int, float))
+    '(int, float)'
+    """
+    try:
+        return type.__name__
+    except AttributeError:
+        if len(type) == 1:
+            return typename(*type)
+        return '(%s)' % ', '.join(map(typename, type))

@@ -1,10 +1,9 @@
-import collections
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
-from .utils import expand_tuples, VariadicSignatureType, isvariadic
+from .utils import expand_tuples
+from .variadic import Variadic, isvariadic
 import itertools as itl
-import six
 
 
 class MDNotImplementedError(NotImplementedError):
@@ -46,71 +45,6 @@ def restart_ordering(on_ambiguity=ambiguity_warn):
         ' dispatcher.',
         DeprecationWarning,
     )
-
-
-def typename(type):
-    """Get the name of `type`.
-
-    Parameters
-    ----------
-    type : Union[Type, Tuple[Type]]
-
-    Returns
-    -------
-    str
-        The name of `type` or a tuple of the names of the types in `type`.
-
-    Examples
-    --------
-    >>> typename(int)
-    'int'
-    >>> typename((int, float))
-    '(int, float)'
-    """
-    try:
-        return type.__name__
-    except AttributeError:
-        if len(type) == 1:
-            return typename(*type)
-        return '(%s)' % ', '.join(map(typename, type))
-
-
-class VariadicSignatureMeta(type):
-    """A metaclass that overrides ``__getitem__`` on the class. This is used to
-    generate a new type for Variadic signatures. See the Variadic class for
-    examples of how this behaves.
-    """
-    def __getitem__(self, value_type):
-        if isinstance(value_type, collections.abc.Sequence):
-            assert isinstance(value_type, (tuple, type)), type(value_type)
-        if not isinstance(value_type, tuple):
-            value_type = value_type,
-        return VariadicSignatureType(
-            'Variadic[%s]' % typename(value_type),
-            (),
-            dict(value_type=value_type, __slots__=())
-        )
-
-
-class Variadic(six.with_metaclass(VariadicSignatureMeta)):
-    """A class whose getitem method can be used to generate a new type
-    representing a specific variadic signature.
-
-    Examples
-    --------
-    >>> Variadic[int]  # any number of int arguments
-    <class 'multipledispatch.dispatcher.Variadic[int]'>
-    >>> Variadic[(int, str)]  # any number of one of int or str arguments
-    <class 'multipledispatch.dispatcher.Variadic[(int, str)]'>
-    >>> issubclass(int, Variadic[int])
-    True
-    >>> issubclass(int, Variadic[(int, str)])
-    True
-    >>> issubclass(str, Variadic[(int, str)])
-    True
-    >>> issubclass(float, Variadic[(int, str)])
-    False
-    """
 
 
 def variadic_signature_matches_iter(types, full_signature):

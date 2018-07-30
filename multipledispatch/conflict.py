@@ -1,4 +1,5 @@
-from .utils import _toposort, groupby, isvariadic
+from .utils import _toposort, groupby
+from .variadic import isvariadic
 
 
 class AmbiguityWarning(Warning):
