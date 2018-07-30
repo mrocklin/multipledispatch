@@ -9,9 +9,7 @@ def supercedes(a, b):
     """ A is consistent and strictly more specific than B """
     if len(a) < len(b):
         # only case is if a is empty and b is variadic
-        return (len(a) == 0 and
-                len(b) == 1 and
-                isvariadic(b[-1]))
+        return not a and len(b) == 1 and isvariadic(b[-1])
     elif len(a) == len(b):
         return all(map(issubclass, a, b))
     else:
@@ -21,8 +19,7 @@ def supercedes(a, b):
         while p1 < len(a) and p2 < len(b):
             cur_a = a[p1]
             cur_b = b[p2]
-            if (not isvariadic(cur_a) and
-                    not isvariadic(cur_b)):
+            if not (isvariadic(cur_a) or isvariadic(cur_b)):
                 if not issubclass(cur_a, cur_b):
                     return False
                 p1 += 1
@@ -42,11 +39,11 @@ def consistent(a, b):
     """ It is possible for an argument list to satisfy both A and B """
 
     # Need to check for empty args
-    if len(a) == 0:
-        return len(b) == 0 or isvariadic(b[0])
-    if len(b) == 0:
-        return len(a) == 0 or isvariadic(a[0])
-    
+    if not a:
+        return not b or isvariadic(b[0])
+    if not b:
+        return not a or isvariadic(a[0])
+
     # Non-empty args check for mutual subclasses
     if len(a) == len(b):
         return all(issubclass(aa, bb) or issubclass(bb, aa)
@@ -59,8 +56,7 @@ def consistent(a, b):
             cur_b = b[p2]
             if not issubclass(cur_b, cur_a) and not issubclass(cur_a, cur_b):
                 return False
-            if (not isvariadic(cur_a) and
-                    not isvariadic(cur_b)):
+            if not (isvariadic(cur_a) or isvariadic(cur_b)):
                 p1 += 1
                 p2 += 1
             elif isvariadic(cur_a):
@@ -69,8 +65,8 @@ def consistent(a, b):
                 p1 += 1
         # We only need to check for variadic ends
         # Variadic types are guaranteed to be the last element
-        return ((isvariadic(cur_a) and p2 == len(b)) or
-                (isvariadic(cur_b) and p1 == len(a)))
+        return (isvariadic(cur_a) and p2 == len(b) or
+                isvariadic(cur_b) and p1 == len(a))
 
 
 def ambiguous(a, b):
@@ -81,11 +77,11 @@ def ambiguous(a, b):
 def ambiguities(signatures):
     """ All signature pairs such that A is ambiguous with B """
     signatures = list(map(tuple, signatures))
-    return set([(a, b) for a in signatures for b in signatures
-                if hash(a) < hash(b)
-                and ambiguous(a, b)
-                and not any(supercedes(c, a) and supercedes(c, b)
-                            for c in signatures)])
+    return set((a, b) for a in signatures for b in signatures
+               if hash(a) < hash(b)
+               and ambiguous(a, b)
+               and not any(supercedes(c, a) and supercedes(c, b)
+                           for c in signatures))
 
 
 def super_signature(signatures):
@@ -102,12 +98,11 @@ def edge(a, b, tie_breaker=hash):
 
     Tie broken by tie_breaker, defaults to ``hash``
     """
-    if supercedes(a, b):
-        if supercedes(b, a):
-            return tie_breaker(a) > tie_breaker(b)
-        else:
-            return True
-    return False
+    # A either supercedes B and B does not supercede A or if B does then call
+    # tie_breaker
+    return supercedes(a, b) and (
+        not supercedes(b, a) or tie_breaker(a) > tie_breaker(b)
+    )
 
 
 def ordering(signatures):
