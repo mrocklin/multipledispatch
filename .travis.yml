@@ -10,6 +10,7 @@ python:
     - "pypy3"
 
 install:
+    - pip install --upgrade pip
     - pip install coverage
     - pip install --upgrade pytest pytest-benchmark
 
