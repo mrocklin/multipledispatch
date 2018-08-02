@@ -50,7 +50,7 @@ def _toposort(edges):
     incoming_edges = reverse_dict(edges)
     incoming_edges = OrderedDict((k, set(val))
                                  for k, val in incoming_edges.items())
-    S = OrderedDict.fromkeys((v for v in edges if v not in incoming_edges))
+    S = OrderedDict.fromkeys(v for v in edges if v not in incoming_edges)
     L = []
 
     while S:

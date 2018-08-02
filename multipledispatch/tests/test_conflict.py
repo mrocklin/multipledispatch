@@ -7,12 +7,14 @@ class A(object): pass
 class B(A): pass
 class C(object): pass
 
+def _test_supercedes(a, b):
+    assert supercedes(a, b)
+    assert not supercedes(b, a)
+
 
 def test_supercedes():
-    assert supercedes([B], [A])
-    assert supercedes([B, A], [A, A])
-    assert not supercedes([B, A], [A, B])
-    assert not supercedes([A], [B])
+    _test_supercedes([B], [A])
+    _test_supercedes([B, A], [A, A])
 
 
 def test_consistent():
@@ -64,20 +66,13 @@ def test_type_mro():
 
 
 def test_supercedes_variadic():
-    assert supercedes((Variadic[B],), (Variadic[A],))
-    assert supercedes((B, Variadic[A]), (Variadic[A],))
-    assert supercedes((Variadic[A],), (Variadic[(A, C)],))
-    assert supercedes((A, B, Variadic[C]), (Variadic[object],))
-    assert supercedes((A, Variadic[B]), (Variadic[A],))
-    assert supercedes(tuple([]), (Variadic[A],))
-    assert supercedes((A, A, A), (A, Variadic[A]))
-    assert not supercedes((Variadic[A],), (Variadic[B],))
-    assert not supercedes((Variadic[A],), (B, Variadic[A]))
-    assert not supercedes((Variadic[(A, C)],), (Variadic[A],))
-    assert not supercedes((Variadic[object],), (A, B, Variadic[C]))
-    assert not supercedes((Variadic[A],), (A, Variadic[B]))
-    assert not supercedes((Variadic[A],), tuple([]))
-    assert not supercedes((A, Variadic[A]), (A, A, A))
+    _test_supercedes((Variadic[B],), (Variadic[A],))
+    _test_supercedes((B, Variadic[A]), (Variadic[A],))
+    _test_supercedes((Variadic[A],), (Variadic[(A, C)],))
+    _test_supercedes((A, B, Variadic[C]), (Variadic[object],))
+    _test_supercedes((A, Variadic[B]), (Variadic[A],))
+    _test_supercedes(tuple([]), (Variadic[A],))
+    _test_supercedes((A, A, A), (A, Variadic[A]))
 
 
 def test_consistent_variadic():
