@@ -62,7 +62,7 @@ class VariadicSignatureMeta(type):
     examples of how this behaves.
     """
     def __getitem__(self, variadic_type):
-        if not isinstance(variadic_type, (type, tuple)), type(variadic_type):
+        if not (isinstance(variadic_type, (type, tuple)) or type(variadic_type)):
             raise ValueError("Variadic types must be type or tuple of types"
                              " (Variadic[int] or Variadic[(int, float)]")
 
