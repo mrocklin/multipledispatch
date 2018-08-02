@@ -1,9 +1,6 @@
-from multipledispatch import dispatch
+import six
 
-try:
-    range = xrange
-except NameError:
-    pass
+from multipledispatch import dispatch
 
 
 @dispatch(int)
@@ -17,6 +14,6 @@ def isint(x):
 
 
 def test_simple():
-    for i in range(100000):
+    for i in six.moves.xrange(100000):
         assert isint(5)
         assert not isint('a')
