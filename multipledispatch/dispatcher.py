@@ -338,7 +338,7 @@ class Dispatcher(object):
             if len(signature) == n and all(map(issubclass, types, signature)):
                 result = self.funcs[signature]
                 yield result
-            elif any(isvariadic(sig) for sig in signature):
+            elif len(signature) and isvariadic(signature[-1]):
                 if variadic_signature_matches(types, signature):
                     result = self.funcs[signature]
                     yield result
