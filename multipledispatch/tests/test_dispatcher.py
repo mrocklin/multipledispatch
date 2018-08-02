@@ -298,6 +298,20 @@ def test_vararg_dispatch_ambiguity():
     assert ambiguities(f.funcs)
 
 
+def test_vararg_dispatch_ambiguity_in_variadic():
+    f = Dispatcher('f')
+
+    @f.register(float, [object])
+    def _1(a, b, *args):
+        return 1
+
+    @f.register(object, [float])
+    def _2(a, b, *args):
+        return 2
+
+    assert ambiguities(f.funcs)
+
+
 def test_vararg_dispatch_multiple_types_explicit_args():
     f = Dispatcher('f')
 
@@ -372,6 +386,16 @@ def test_vararg_no_args_failure():
         return 'strings'
 
     assert raises(NotImplementedError, f)
+
+
+def test_vararg_no_args_failure():
+    f = Dispatcher('f')
+
+    @f.register([str])
+    def _2(*strings):
+        return 'strings'
+
+    assert raises(NotImplementedError, lambda: f('a', 'b', 1))
 
 
 def test_vararg_ordering():

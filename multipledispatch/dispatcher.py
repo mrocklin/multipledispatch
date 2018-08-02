@@ -74,13 +74,8 @@ def variadic_signature_matches_iter(types, full_signature):
         matches = issubclass(typ, sig)
         if isvariadic(sig):
             # if the current type matches the current variadic signature yield
-            # True
-            if matches:
-                yield matches
-            else:
-                # We're out of signatures, but we still have types left to
-                # match, so there's no possible match.
-                yield False
+            # True, else yield False
+            yield matches
         else:
             # we're not matching a variadic argument, so move to the next
             # element in the signature
