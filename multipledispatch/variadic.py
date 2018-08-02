@@ -12,6 +12,26 @@ class VariadicSignatureType(type):
             issubclass(other, self.variadic_type) for other in other_type
         )
 
+    def __eq__(self, other):
+        """
+        Return True if other has the same variadic type
+
+        Parameters
+        ----------
+        other : object (type)
+            The object (type) to check
+
+        Returns
+        -------
+        bool
+            Whether or not `other` is equal to `self`
+        """
+        return (isvariadic(other) and
+                set(self.variadic_type) == set(other.variadic_type))
+
+    def __hash__(self):
+        return hash((type(self), frozenset(self.variadic_type)))
+
 
 def isvariadic(obj):
     """Check whether the type `obj` is variadic.
