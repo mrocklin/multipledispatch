@@ -263,6 +263,16 @@ def test_not_implemented_error():
     assert raises(NotImplementedError, lambda: f(1.0))
 
 
+def test_vararg_not_last_element_of_signature():
+    f = Dispatcher('f')
+    assert raises(TypeError, lambda: f.register([float], str)(lambda: None))
+
+
+def test_vararg_has_multiple_elements():
+    f = Dispatcher('f')
+    assert raises(TypeError, lambda: f.register([float, str])(lambda: None))
+
+
 def test_vararg_dispatch_simple():
     f = Dispatcher('f')
 
