@@ -235,10 +235,17 @@ class Dispatcher(object):
 
             # handle variadic signatures
             if isinstance(typ, list):
-                assert index == len(signature), \
-                    'Variadic signature must be the last element'
-                assert len(typ) == 1, \
-                    'Variadic signature must contain exactly one element'
+                if index != len(signature):
+                    raise TypeError(
+                        'Variadic signature must be the last element'
+                    )
+
+                if len(typ) != 1:
+                    raise TypeError(
+                        'Variadic signature must contain exactly one element. '
+                        'To use a variadic union type place the desired types '
+                        'inside of a tuple, e.g., [(int, str)]'
+                    )
                 new_signature.append(Variadic[typ[0]])
             else:
                 new_signature.append(typ)
