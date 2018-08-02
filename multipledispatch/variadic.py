@@ -6,9 +6,10 @@ from .utils import typename
 class VariadicSignatureType(type):
     # checking if subclass is a subclass of self
     def __subclasscheck__(self, subclass):
-        other_type = getattr(subclass, 'value_type', (subclass,))
+        other_type = (subclass.variadic_type if isvariadic(subclass)
+                      else (subclass,))
         return subclass is self or all(
-            issubclass(other, self.value_type) for other in other_type
+            issubclass(other, self.variadic_type) for other in other_type
         )
 
 
@@ -40,14 +41,14 @@ class VariadicSignatureMeta(type):
     generate a new type for Variadic signatures. See the Variadic class for
     examples of how this behaves.
     """
-    def __getitem__(self, value_type):
-        assert isinstance(value_type, (type, tuple)), type(value_type)
-        if not isinstance(value_type, tuple):
-            value_type = value_type,
+    def __getitem__(self, variadic_type):
+        assert isinstance(variadic_type, (type, tuple)), type(variadic_type)
+        if not isinstance(variadic_type, tuple):
+            variadic_type = variadic_type,
         return VariadicSignatureType(
-            'Variadic[%s]' % typename(value_type),
+            'Variadic[%s]' % typename(variadic_type),
             (),
-            dict(value_type=value_type, __slots__=())
+            dict(variadic_type=variadic_type, __slots__=())
         )
 
 
