@@ -72,14 +72,10 @@ def variadic_signature_matches_iter(types, full_signature):
     sig = next(sigiter)
     for typ in types:
         matches = issubclass(typ, sig)
-        if isvariadic(sig):
-            # if the current type matches the current variadic signature yield
-            # True, else yield False
-            yield matches
-        else:
+        yield matches
+        if not isvariadic(sig):
             # we're not matching a variadic argument, so move to the next
             # element in the signature
-            yield matches
             sig = next(sigiter)
     else:
         try:
