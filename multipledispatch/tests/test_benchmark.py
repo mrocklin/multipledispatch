@@ -40,6 +40,15 @@ def test_benchmark_add_and_use_instance(benchmark):
         def mul(x, y):
             return x * y
 
+        @dispatch(int, int, [float], namespace=namespace)
+        def mul(x, y, *args):
+            return x * y
+
+        @dispatch([int], namespace=namespace)
+        def mul(*args):
+            return sum(args)
+
         mul(4, 5)
         mul('x', 5)
-
+        mul(1, 2, 3., 4., 5.)
+        mul(1, 2, 3, 4, 5)
