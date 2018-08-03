@@ -144,8 +144,8 @@ types) as the last set of arguments passed into the function.
 Variadic signatures are specified with a single-element list containing the
 type of the arguments the function takes.
 
-For example, here's a function that takes a ``float`` followed by any number of
-either ``int`` or ``str`` include no additional arguments:
+For example, here's a function that takes a ``float`` followed by any number
+(including 0) of either ``int`` or ``str``:
 
 .. code::
 
