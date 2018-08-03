@@ -57,14 +57,6 @@ What this does
 What this doesn't do
 --------------------
 
--  Vararg dispatch
-
-.. code-block:: python
-
-   @dispatch([int])
-   def add(*args):
-       ...
-
 -  Diagonal dispatch
 
 .. code-block:: python
