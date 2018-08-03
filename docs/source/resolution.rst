@@ -134,6 +134,33 @@ All of these rules apply when we introduce multiple inputs.
     >>> f(1.0, 10.0)
     101.0
 
+
+Variadic Dispatch
+-----------------
+
+``multipledispatch`` supports variadic dispatch (including support for union
+types) as the last set of arguments passed into the function.
+
+Variadic signatures are specified with a single-element list containing the
+type of the arguments the function takes.
+
+For example, here's a function that takes a ``float`` followed by any number
+(including 0) of either ``int`` or ``str``:
+
+.. code::
+
+   @dispatch(float, [(int, str)])
+   def float_then_int_or_str(x, *args):
+       return x + sum(map(int, args))
+
+.. code::
+
+   >>> f(1.0, '2', '3', 4)
+   10.0
+
+   >>> f(2.0, '4', 6, 8)
+   20.0
+
 Ambiguities
 -----------
 
