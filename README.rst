@@ -54,6 +54,8 @@ What this does
 
 -  Supports namespaces with optional keyword arguments
 
+-  Supports variadic dispatch
+
 What this doesn't do
 --------------------
 
@@ -88,8 +90,8 @@ or
 
 
 ``multipledispatch`` supports Python 2.6+ and Python 3.2+ with a common
-codebase.  It is pure Python and requires no dependencies beyond the standard
-library.
+codebase.  It is pure Python and requires only the small `six
+<https://pypi.org/project/six/>`_ library as a dependency.
 
 It is, in short, a light weight dependency.
 
