@@ -1,3 +1,5 @@
+import itertools
+
 from .utils import _toposort, groupby
 from .variadic import isvariadic
 
@@ -8,6 +10,9 @@ class AmbiguityWarning(Warning):
 
 def supercedes(a, b):
     """ A is consistent and strictly more specific than B """
+    if any(isinstance(x, str) for x in itertools.chain(a, b)):
+        # skip due to lazy types
+        return False
     if len(a) < len(b):
         # only case is if a is empty and b is variadic
         return not a and len(b) == 1 and isvariadic(b[-1])
