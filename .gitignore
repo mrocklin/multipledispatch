@@ -2,3 +2,7 @@
 *.egg-info/
 .cache/
 .pytest_cache/
+
+
+# For CLion or PyCharm
+/.idea/
