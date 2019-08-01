@@ -1,4 +1,5 @@
 import inspect
+import sys
 
 from .dispatcher import Dispatcher, MethodDispatcher, ambiguity_warn
 
@@ -80,5 +81,8 @@ def ismethod(func):
         signature = inspect.signature(func)
         return signature.parameters.get('self', None) is not None
     else:
-        spec = inspect.getargspec(func)
+        if sys.version_info.major < 3:
+            spec = inspect.getargspec(func)
+        else:
+            spec = inspect.getfullargspec(func)
         return spec and spec.args and spec.args[0] == 'self'

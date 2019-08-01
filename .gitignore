@@ -3,6 +3,9 @@
 .cache/
 .pytest_cache/
 
+# Virtualenv
+/venv/
+/.venv/
 
 # For CLion or PyCharm
 /.idea/
