@@ -1,13 +1,17 @@
+
 language: python
 python:
-    - "2.7"
-    - "3.4"
-    - "3.5"
-    - "3.6"
-    - "3.7-dev"
     - "pypy"
     - "pypy3"
-
+matrix:
+  include:
+      - { python: '2.7', env: }
+      - { arch: arm64, python: '2.7' }
+      - { python: '3.4', env: }
+      - { python: '3.5', env: }
+      - { python: '3.6', env: }
+      - { python: '3.7-dev', env: }
+      - { arch: arm64, python: '3.7-dev' }
 install:
     - pip install --upgrade pip
     - pip install coverage
