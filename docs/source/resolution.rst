@@ -237,3 +237,20 @@ then one of the competing functions will be selected pseudo-randomly.
 By default the selection is dependent on hash, so it will be consistent
 during the interpreter session, but it might change from session to
 session.
+
+Instance Methods
+-----------
+
+If you need multiple dispatch on instance methods, then you would omit providing a type for ``self``
+
+.. code::
+
+    class X:
+
+        @dispatch(int)
+        def f(self, y):
+            ...
+
+        @dispatch(int, int)
+        def f(self, y, z):
+            ...
