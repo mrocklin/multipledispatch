@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, Generic, List, Optional, Tuple, TypeVar
+from typing import Any, Generic, List, Optional, Tuple, TypeVar, get_type_hints
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
@@ -178,14 +178,14 @@ class Dispatcher(Generic[DISPATCHED_RETURN]):
         if params:
             Parameter = inspect.Parameter
 
-            params = (param for param in params
-                      if param.kind in
-                      (Parameter.POSITIONAL_ONLY,
-                       Parameter.POSITIONAL_OR_KEYWORD))
-
+            hints = get_type_hints(func)
             annotations = tuple(
-                param.annotation
-                for param in params)
+                hints.get(param.name, Parameter.empty)
+                for param in params
+                if param.kind in (
+                    Parameter.POSITIONAL_ONLY, Parameter.POSITIONAL_OR_KEYWORD
+                )
+            )
 
             if all(ann is not Parameter.empty for ann in annotations):
                 return annotations
