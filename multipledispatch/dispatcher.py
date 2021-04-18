@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from typing import Any, Generic, List, Optional, Tuple, TypeVar
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
@@ -95,7 +97,10 @@ def variadic_signature_matches(types, full_signature):
     return all(variadic_signature_matches_iter(types, full_signature))
 
 
-class Dispatcher(object):
+DISPATCHED_RETURN = TypeVar("DISPATCHED_RETURN")
+
+
+class Dispatcher(Generic[DISPATCHED_RETURN]):
     """ Dispatch methods based on type signature
 
     Use ``dispatch`` to add implementations
@@ -119,14 +124,16 @@ class Dispatcher(object):
     """
     __slots__ = '__name__', 'name', 'funcs', '_ordering', '_cache', 'doc'
 
-    def __init__(self, name, doc=None):
+    def __init__(self, name: str, doc: Optional[None] = None) -> None:
         self.name = self.__name__ = name
         self.funcs = {}
         self.doc = doc
 
         self._cache = {}
 
-    def register(self, *types, **kwargs):
+    def register(
+        self, *types: List[type], **kwargs: Any
+    ) -> Callable[[Callable[..., DISPATCHED_RETURN]], Callable[..., DISPATCHED_RETURN]]:
         """ register dispatcher with new implementation
 
         >>> f = Dispatcher('f')
@@ -183,7 +190,7 @@ class Dispatcher(object):
             if all(ann is not Parameter.empty for ann in annotations):
                 return annotations
 
-    def add(self, signature, func):
+    def add(self, signature: Tuple[type, ...], func: Callable[..., DISPATCHED_RETURN]) -> None:
         """ Add new types/method pair to dispatcher
 
         >>> D = Dispatcher('add')
@@ -263,7 +270,7 @@ class Dispatcher(object):
             on_ambiguity(self, amb)
         return od
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> DISPATCHED_RETURN:
         types = tuple([type(arg) for arg in args])
         try:
             func = self._cache[types]
