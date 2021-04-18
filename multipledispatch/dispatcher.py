@@ -1,5 +1,4 @@
-from collections.abc import Callable
-from typing import Any, Generic, List, Optional, Tuple, TypeVar, get_type_hints
+from typing import Any, Callable, Generic, List, Optional, Tuple, TypeVar, get_type_hints
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
