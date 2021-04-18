@@ -1,4 +1,4 @@
-from typing import Any, Callable, Generic, List, Optional, Tuple, TypeVar, get_type_hints
+from typing import Any, Callable, Generic, Optional, Tuple, TypeVar, get_type_hints
 from warnings import warn
 import inspect
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
@@ -131,7 +131,7 @@ class Dispatcher(Generic[DISPATCHED_RETURN]):
         self._cache = {}
 
     def register(
-        self, *types: List[type], **kwargs: Any
+        self, *types: type, **kwargs: Any
     ) -> Callable[[Callable[..., DISPATCHED_RETURN]], Callable[..., DISPATCHED_RETURN]]:
         """ register dispatcher with new implementation
 
