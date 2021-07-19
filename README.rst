@@ -136,6 +136,6 @@ Links
    :target: https://travis-ci.org/mrocklin/multipledispatch
 .. |Version Status| image:: https://pypip.in/v/multipledispatch/badge.svg
    :target: https://img.shields.io/pypi/v/multipledispatch.svg
-.. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.png
+.. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.svg
    :target: https://coveralls.io/r/mrocklin/multipledispatch
 .. _License file: https://github.com/mrocklin/multipledispatch/blob/master/LICENSE.txt
