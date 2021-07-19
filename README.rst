@@ -132,9 +132,9 @@ Links
 .. _`PEP 3124 - *Overloading, Generic Functions, Interfaces, and Adaptation*`:
   http://legacy.python.org/dev/peps/pep-3124/
 
-.. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.png
+.. |Build Status| image:: https://travis-ci.org/mrocklin/multipledispatch.svg
    :target: https://travis-ci.org/mrocklin/multipledispatch
-.. |Version Status| image:: https://pypip.in/v/multipledispatch/badge.png
+.. |Version Status| image:: https://pypip.in/v/multipledispatch/badge.svg
    :target: https://img.shields.io/pypi/v/multipledispatch.svg
 .. |Coverage Status| image:: https://coveralls.io/repos/mrocklin/multipledispatch/badge.png
    :target: https://coveralls.io/r/mrocklin/multipledispatch
