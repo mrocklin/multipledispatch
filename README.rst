@@ -124,7 +124,7 @@ Links
 .. _`Clojure Protocols`:
   http://clojure.org/protocols
 .. _`Julia methods docs`:
-  https://julia.readthedocs.io/en/latest/manual/methods/
+  https://docs.julialang.org/en/v1/manual/methods/
 .. _`Karpinksi notebook: *The Design Impact of Multiple Dispatch*`:
   http://nbviewer.ipython.org/gist/StefanKarpinski/b8fe9dbb36c1427b9f22
 .. _`Wikipedia article`:
