@@ -17,6 +17,10 @@ def test_function_annotation_register():
     def inc(x: float):
         return x - 1
 
+    @f.register()
+    def inc(x: 'float'):
+        return x - 1
+
     assert f(1) == 2
     assert f(1.0) == 0.0
 

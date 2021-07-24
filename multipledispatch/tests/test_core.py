@@ -1,14 +1,15 @@
-from multipledispatch import dispatch
+from multipledispatch import dispatch as orig_dispatch
 from multipledispatch.utils import raises
 from functools import partial
-
-test_namespace = dict()
-
-orig_dispatch = dispatch
-dispatch = partial(dispatch, namespace=test_namespace)
+import pytest
 
 
-def test_singledispatch():
+@pytest.fixture(name="dispatch")
+def fixture_dispatch():
+    return partial(orig_dispatch, namespace=dict())
+
+
+def test_singledispatch(dispatch):
     @dispatch(int)
     def f(x):
         return x + 1
@@ -28,7 +29,7 @@ def test_singledispatch():
     assert raises(NotImplementedError, lambda: f('hello'))
 
 
-def test_multipledispatch(benchmark):
+def test_multipledispatch(dispatch):
     @dispatch(int, int)
     def f(x, y):
         return x + y
@@ -48,7 +49,7 @@ class D(C): pass
 class E(C): pass
 
 
-def test_inheritance():
+def test_inheritance(dispatch):
     @dispatch(A)
     def f(x):
         return 'a'
@@ -62,7 +63,7 @@ def test_inheritance():
     assert f(C()) == 'a'
 
 
-def test_inheritance_and_multiple_dispatch():
+def test_inheritance_and_multiple_dispatch(dispatch):
     @dispatch(A, A)
     def f(x, y):
         return type(x), type(y)
@@ -78,7 +79,7 @@ def test_inheritance_and_multiple_dispatch():
     assert raises(NotImplementedError, lambda: f(B(), B()))
 
 
-def test_competing_solutions():
+def test_competing_solutions(dispatch):
     @dispatch(A)
     def h(x):
         return 1
@@ -90,7 +91,7 @@ def test_competing_solutions():
     assert h(D()) == 2
 
 
-def test_competing_multiple():
+def test_competing_multiple(dispatch):
     @dispatch(A, B)
     def h(x, y):
         return 1
@@ -102,7 +103,7 @@ def test_competing_multiple():
     assert h(D(), B()) == 2
 
 
-def test_competing_ambiguous():
+def test_competing_ambiguous(dispatch):
     @dispatch(A, C)
     def f(x, y):
         return 2
@@ -115,7 +116,7 @@ def test_competing_ambiguous():
     # assert raises(Warning, lambda : f(C(), C()))
 
 
-def test_caching_correct_behavior():
+def test_caching_correct_behavior(dispatch):
     @dispatch(A)
     def f(x):
         return 1
@@ -129,7 +130,7 @@ def test_caching_correct_behavior():
     assert f(C()) == 2
 
 
-def test_union_types():
+def test_union_types(dispatch):
     @dispatch((A, C))
     def f(x):
         return 1
@@ -156,7 +157,7 @@ def test_namespaces():
 
 """
 Fails
-def test_dispatch_on_dispatch():
+def test_dispatch_on_dispatch(dispatch):
     @dispatch(A)
     @dispatch(C)
     def q(x):
@@ -167,7 +168,7 @@ def test_dispatch_on_dispatch():
 """
 
 
-def test_methods():
+def test_methods(dispatch):
     class Foo(object):
         @dispatch(float)
         def f(self, x):
@@ -188,7 +189,7 @@ def test_methods():
     assert foo.g(1) == 4
 
 
-def test_methods_multiple_dispatch():
+def test_methods_multiple_dispatch(dispatch):
     class Foo(object):
         @dispatch(A, A)
         def f(x, y):
