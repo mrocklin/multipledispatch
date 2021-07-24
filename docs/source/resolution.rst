@@ -161,6 +161,19 @@ For example, here's a function that takes a ``float`` followed by any number
    >>> f(2.0, '4', 6, 8)
    20.0
 
+Lazy Dispatch
+-------------
+
+You may need to refer to your own class while defining it. Just use its name as
+a string and ``multipledispatch`` will resolve a name to a class during runtime
+
+.. code::
+
+   class MyInteger(int):
+       @dispatch('MyInteger')
+       def add(self, x):
+           return self + x
+
 Ambiguities
 -----------
 

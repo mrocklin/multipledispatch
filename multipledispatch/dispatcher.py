@@ -117,7 +117,8 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = '__name__', 'name', 'funcs', '_ordering', '_cache', 'doc'
+    __slots__ = '__name__', 'name', 'funcs', '_ordering', '_cache', 'doc', \
+                '_lazy'
 
     def __init__(self, name, doc=None):
         self.name = self.__name__ = name
@@ -125,6 +126,7 @@ class Dispatcher(object):
         self.doc = doc
 
         self._cache = {}
+        self._lazy = False
 
     def register(self, *types, **kwargs):
         """ register dispatcher with new implementation
@@ -214,9 +216,8 @@ class Dispatcher(object):
             return
 
         new_signature = []
-
         for index, typ in enumerate(signature, start=1):
-            if not isinstance(typ, (type, list)):
+            if not isinstance(typ, (type, list, str)):
                 str_sig = ', '.join(c.__name__ if isinstance(c, type)
                                     else str(c) for c in signature)
                 raise TypeError("Tried to dispatch on non-type: %s\n"
@@ -237,9 +238,12 @@ class Dispatcher(object):
                         'To use a variadic union type place the desired types '
                         'inside of a tuple, e.g., [(int, str)]'
                     )
-                new_signature.append(Variadic[typ[0]])
-            else:
-                new_signature.append(typ)
+                typ = Variadic[typ[0]]
+
+            if isinstance(typ, str):
+                self._lazy = True
+
+            new_signature.append(typ)
 
         self.funcs[tuple(new_signature)] = func
         self._cache.clear()
@@ -264,6 +268,9 @@ class Dispatcher(object):
         return od
 
     def __call__(self, *args, **kwargs):
+        if self._lazy:
+            self._unlazy()
+
         types = tuple([type(arg) for arg in args])
         try:
             func = self._cache[types]
@@ -359,6 +366,7 @@ class Dispatcher(object):
         self.funcs = d['funcs']
         self._ordering = ordering(self.funcs)
         self._cache = dict()
+        self._lazy = any(isinstance(t, str) for t in itl.chain(*d['funcs']))
 
     @property
     def __doc__(self):
@@ -400,6 +408,31 @@ class Dispatcher(object):
         """ Print source code for the function corresponding to inputs """
         print(self._source(*args))
 
+    def _unlazy(self):
+        funcs = {}
+        for signature, func in self.funcs.items():
+            new_signature = []
+            for typ in signature:
+                if isinstance(typ, str):
+                    for frame_info in inspect.stack():
+                        frame = frame_info[0]
+                        scope = dict(frame.f_globals)
+                        scope.update(frame.f_locals)
+                        if typ in scope:
+                            typ = scope[typ]
+                            break
+                    else:
+                        raise NameError("name '%s' is not defined" % typ)
+                new_signature.append(typ)
+
+            new_signature = tuple(new_signature)
+            funcs[new_signature] = func
+
+        self.funcs = funcs
+        self.reorder()
+
+        self._lazy = False
+
 
 def source(func):
     s = 'File: %s\n\n' % inspect.getsourcefile(func)
@@ -427,6 +460,9 @@ class MethodDispatcher(Dispatcher):
         return self
 
     def __call__(self, *args, **kwargs):
+        if self._lazy:
+            self._unlazy()
+
         types = tuple([type(arg) for arg in args])
         func = self.dispatch(*types)
         if not func:

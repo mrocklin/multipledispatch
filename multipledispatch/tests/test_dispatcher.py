@@ -1,6 +1,7 @@
 
 import warnings
 
+from multipledispatch import dispatch
 from multipledispatch.dispatcher import (Dispatcher, MDNotImplementedError,
                                          MethodDispatcher)
 from multipledispatch.conflict import ambiguities
@@ -421,3 +422,74 @@ def test_vararg_ordering():
     assert f('a', ['a']) == 2
     assert f(1) == 3
     assert f() == 3
+
+
+def test_lazy_methods():
+    class A(object):
+        @dispatch(int)
+        def get(self, _):
+            return 'int'
+
+        @dispatch('A')
+        def get(self, _):
+            """Self reference"""
+            return 'A'
+
+        @dispatch('B')
+        def get(self, _):
+            """Yet undeclared type"""
+            return 'B'
+
+    class B(object):
+        pass
+
+    class C(A):
+        @dispatch('D')
+        def get(self, _):
+            """Non-existent type"""
+            return 'D'
+
+    a = A()
+    b = B()
+    c = C()
+
+    assert a.get(1) == 'int'
+    assert a.get(a) == 'A'
+    assert a.get(b) == 'B'
+    assert raises(NameError, lambda: c.get(1))
+
+
+def test_lazy_functions():
+    f = Dispatcher('f')
+    f.add((int,), inc)
+    f.add(('Int',), dec)
+
+    assert raises(NameError, lambda: f(1))
+
+    class Int(int):
+        pass
+
+    assert f(1) == 2
+    assert f(Int(1)) == 0
+
+
+def test_lazy_serializable():
+    f = Dispatcher('f')
+    f.add((int,), inc)
+    f.add(('Int',), dec)
+
+    import pickle
+    assert isinstance(pickle.dumps(f), (str, bytes))
+
+    g = pickle.loads(pickle.dumps(f))
+
+    assert f.funcs == g.funcs
+    assert f._lazy == g._lazy
+
+    assert raises(NameError, lambda: f(1))
+
+    class Int(int):
+        pass
+
+    assert g(1) == 2
+    assert g(Int(1)) == 0
