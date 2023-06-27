@@ -7,7 +7,7 @@ from multipledispatch.dispatcher import Dispatcher
 
 
 def test_function_annotation_register():
-    f = Dispatcher('f')
+    f = Dispatcher("f")
 
     @f.register()
     def inc(x: int):
@@ -48,12 +48,12 @@ def test_function_annotation_dispatch_custom_namespace():
     assert inc(1) == 3
     assert inc(1.0) == -1.0
 
-    assert namespace['inc'] == inc
+    assert namespace["inc"] == inc
     assert set(inc.funcs.keys()) == set([(int,), (float,)])
 
 
 def test_method_annotations():
-    class Foo():
+    class Foo:
         @dispatch()
         def f(self, x: int):
             return x + 1

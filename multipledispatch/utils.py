@@ -31,7 +31,7 @@ def expand_tuples(L):
 # Taken from theano/theano/gof/sched.py
 # Avoids licensing issues because this was written by Matthew Rocklin
 def _toposort(edges):
-    """ Topological sort algorithm by Kahn [1] - O(nodes + vertices)
+    """Topological sort algorithm by Kahn [1] - O(nodes + vertices)
 
     inputs:
         edges - a dict of the form {a: {b, c}} where b and c depend on a
@@ -48,8 +48,7 @@ def _toposort(edges):
     [2] http://en.wikipedia.org/wiki/Toposort#Algorithms
     """
     incoming_edges = reverse_dict(edges)
-    incoming_edges = OrderedDict((k, set(val))
-                                 for k, val in incoming_edges.items())
+    incoming_edges = OrderedDict((k, set(val)) for k, val in incoming_edges.items())
     S = OrderedDict.fromkeys(v for v in edges if v not in incoming_edges)
     L = []
 
@@ -82,14 +81,14 @@ def reverse_dict(d):
     result = OrderedDict()
     for key in d:
         for val in d[key]:
-            result[val] = result.get(val, tuple()) + (key, )
+            result[val] = result.get(val, tuple()) + (key,)
     return result
 
 
 # Taken from toolz
 # Avoids licensing issues because this version was authored by Matthew Rocklin
 def groupby(func, seq):
-    """ Group a collection by a key function
+    """Group a collection by a key function
 
     >>> names = ['Alice', 'Bob', 'Charlie', 'Dan', 'Edith', 'Frank']
     >>> groupby(len, names)  # doctest: +SKIP
@@ -136,4 +135,4 @@ def typename(type):
     except AttributeError:
         if len(type) == 1:
             return typename(*type)
-        return '(%s)' % ', '.join(map(typename, type))
+        return "(%s)" % ", ".join(map(typename, type))

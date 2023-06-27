@@ -7,7 +7,7 @@ global_namespace = dict()
 
 
 def dispatch(*types, **kwargs):
-    """ Dispatch function on the types of the inputs
+    """Dispatch function on the types of the inputs
 
     Supports dispatch on all non-keyword arguments.
 
@@ -49,7 +49,7 @@ def dispatch(*types, **kwargs):
     ...     def __init__(self, datum):
     ...         self.data = [datum]
     """
-    namespace = kwargs.get('namespace', global_namespace)
+    namespace = kwargs.get("namespace", global_namespace)
 
     types = tuple(types)
 
@@ -68,21 +68,22 @@ def dispatch(*types, **kwargs):
 
         dispatcher.add(types, func)
         return dispatcher
+
     return _df
 
 
 def ismethod(func):
-    """ Is func a method?
+    """Is func a method?
 
     Note that this has to work as the method is defined but before the class is
     defined.  At this stage methods look like functions.
     """
     if hasattr(inspect, "signature"):
         signature = inspect.signature(func)
-        return signature.parameters.get('self', None) is not None
+        return signature.parameters.get("self", None) is not None
     else:
         if sys.version_info.major < 3:
             spec = inspect.getargspec(func)
         else:
             spec = inspect.getfullargspec(func)
-        return spec and spec.args and spec.args[0] == 'self'
+        return spec and spec.args and spec.args[0] == "self"

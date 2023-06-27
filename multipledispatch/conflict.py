@@ -7,7 +7,7 @@ class AmbiguityWarning(Warning):
 
 
 def supercedes(a, b):
-    """ A is consistent and strictly more specific than B """
+    """A is consistent and strictly more specific than B"""
     if len(a) < len(b):
         # only case is if a is empty and b is variadic
         return not a and len(b) == 1 and isvariadic(b[-1])
@@ -37,7 +37,7 @@ def supercedes(a, b):
 
 
 def consistent(a, b):
-    """ It is possible for an argument list to satisfy both A and B """
+    """It is possible for an argument list to satisfy both A and B"""
 
     # Need to check for empty args
     if not a:
@@ -47,8 +47,7 @@ def consistent(a, b):
 
     # Non-empty args check for mutual subclasses
     if len(a) == len(b):
-        return all(issubclass(aa, bb) or issubclass(bb, aa)
-                   for aa, bb in zip(a, b))
+        return all(issubclass(aa, bb) or issubclass(bb, aa) for aa, bb in zip(a, b))
     else:
         p1 = 0
         p2 = 0
@@ -66,36 +65,37 @@ def consistent(a, b):
                 p1 += 1
         # We only need to check for variadic ends
         # Variadic types are guaranteed to be the last element
-        return (isvariadic(cur_a) and p2 == len(b) or
-                isvariadic(cur_b) and p1 == len(a))
+        return isvariadic(cur_a) and p2 == len(b) or isvariadic(cur_b) and p1 == len(a)
 
 
 def ambiguous(a, b):
-    """ A is consistent with B but neither is strictly more specific """
+    """A is consistent with B but neither is strictly more specific"""
     return consistent(a, b) and not (supercedes(a, b) or supercedes(b, a))
 
 
 def ambiguities(signatures):
-    """ All signature pairs such that A is ambiguous with B """
+    """All signature pairs such that A is ambiguous with B"""
     signatures = list(map(tuple, signatures))
-    return set((a, b) for a in signatures for b in signatures
-               if hash(a) < hash(b)
-               and ambiguous(a, b)
-               and not any(supercedes(c, a) and supercedes(c, b)
-                           for c in signatures))
+    return set(
+        (a, b)
+        for a in signatures
+        for b in signatures
+        if hash(a) < hash(b)
+        and ambiguous(a, b)
+        and not any(supercedes(c, a) and supercedes(c, b) for c in signatures)
+    )
 
 
 def super_signature(signatures):
-    """ A signature that would break ambiguities """
+    """A signature that would break ambiguities"""
     n = len(signatures[0])
     assert all(len(s) == n for s in signatures)
 
-    return [max([type.mro(sig[i]) for sig in signatures], key=len)[0]
-            for i in range(n)]
+    return [max([type.mro(sig[i]) for sig in signatures], key=len)[0] for i in range(n)]
 
 
 def edge(a, b, tie_breaker=hash):
-    """ A should be checked before B
+    """A should be checked before B
 
     Tie broken by tie_breaker, defaults to ``hash``
     """
@@ -107,7 +107,7 @@ def edge(a, b, tie_breaker=hash):
 
 
 def ordering(signatures):
-    """ A sane ordering of signatures to check, first to last
+    """A sane ordering of signatures to check, first to last
 
     Topoological sort of edges as given by ``edge`` and ``supercedes``
     """

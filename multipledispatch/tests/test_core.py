@@ -25,7 +25,7 @@ def test_singledispatch():
     assert g(1) == 3
     assert f(1.0) == 0
 
-    assert raises(NotImplementedError, lambda: f('hello'))
+    assert raises(NotImplementedError, lambda: f("hello"))
 
 
 def test_multipledispatch(benchmark):
@@ -41,25 +41,38 @@ def test_multipledispatch(benchmark):
     assert f(1.0, 2.0) == -1.0
 
 
-class A(object): pass
-class B(object): pass
-class C(A): pass
-class D(C): pass
-class E(C): pass
+class A(object):
+    pass
+
+
+class B(object):
+    pass
+
+
+class C(A):
+    pass
+
+
+class D(C):
+    pass
+
+
+class E(C):
+    pass
 
 
 def test_inheritance():
     @dispatch(A)
     def f(x):
-        return 'a'
+        return "a"
 
     @dispatch(B)
     def f(x):
-        return 'b'
+        return "b"
 
-    assert f(A()) == 'a'
-    assert f(B()) == 'b'
-    assert f(C()) == 'a'
+    assert f(A()) == "a"
+    assert f(B()) == "b"
+    assert f(C()) == "a"
 
 
 def test_inheritance_and_multiple_dispatch():
@@ -144,10 +157,12 @@ def test_namespaces():
 
     def foo(x):
         return 1
+
     foo1 = orig_dispatch(int, namespace=ns1)(foo)
 
     def foo(x):
         return 2
+
     foo2 = orig_dispatch(int, namespace=ns2)(foo)
 
     assert foo1(0) == 1
@@ -181,7 +196,6 @@ def test_methods():
         def g(self, x):
             return x + 3
 
-
     foo = Foo()
     assert foo.f(1) == 2
     assert foo.f(1.0) == 0.0
@@ -197,7 +211,6 @@ def test_methods_multiple_dispatch():
         @dispatch(A, C)
         def f(x, y):
             return 2
-
 
     foo = Foo()
     assert foo.f(A(), A()) == 1

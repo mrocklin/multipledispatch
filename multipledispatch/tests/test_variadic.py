@@ -1,9 +1,16 @@
 from multipledispatch.variadic import isvariadic, Variadic
 
 
-class A(object): pass
-class B(A): pass
-class C(object): pass
+class A(object):
+    pass
+
+
+class B(A):
+    pass
+
+
+class C(object):
+    pass
 
 
 def test_is_variadic():

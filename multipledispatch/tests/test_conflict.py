@@ -1,11 +1,25 @@
-from multipledispatch.conflict import (supercedes, ordering, ambiguities,
-        ambiguous, super_signature, consistent)
+from multipledispatch.conflict import (
+    supercedes,
+    ordering,
+    ambiguities,
+    ambiguous,
+    super_signature,
+    consistent,
+)
 from multipledispatch.dispatcher import Variadic
 
 
-class A(object): pass
-class B(A): pass
-class C(object): pass
+class A(object):
+    pass
+
+
+class B(A):
+    pass
+
+
+class C(object):
+    pass
+
 
 def _test_supercedes(a, b):
     assert supercedes(a, b)
