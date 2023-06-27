@@ -82,18 +82,8 @@ Installation and Dependencies
 
     pip install multipledispatch
 
-or
-
-::
-
-    easy_install multipledispatch
-
-
-``multipledispatch`` supports Python 2.6+ and Python 3.2+ with a common
-codebase.  It is pure Python and requires only the small `six
-<https://pypi.org/project/six/>`_ library as a dependency.
-
-It is, in short, a light weight dependency.
+It is Pure-Python and depends only on the standard library.
+It is a light weight dependency.
 
 
 License
