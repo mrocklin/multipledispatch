@@ -1,6 +1,4 @@
-import six
-
-from .utils import typename
+from multipledispatch.utils import typename
 
 
 class VariadicSignatureType(type):
@@ -76,7 +74,7 @@ class VariadicSignatureMeta(type):
         )
 
 
-class Variadic(six.with_metaclass(VariadicSignatureMeta)):
+class Variadic(metaclass=VariadicSignatureMeta):
     """A class whose getitem method can be used to generate a new type
     representing a specific variadic signature.
 

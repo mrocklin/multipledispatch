@@ -1,5 +1,3 @@
-import six
-
 from multipledispatch import dispatch
 
 
@@ -14,6 +12,6 @@ def isint(x):
 
 
 def test_simple():
-    for i in six.moves.xrange(100000):
+    for _ in range(100000):
         assert isint(5)
-        assert not isint('a')
+        assert not isint("a")
