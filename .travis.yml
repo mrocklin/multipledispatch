@@ -5,26 +5,19 @@ python:
     - "pypy3"
 matrix:
   include:
-      - { python: '2.7', env: }
-      - { arch: arm64, python: '2.7' }
-      - { python: '3.4', env: }
-      - { python: '3.5', env: }
-      - { python: '3.6', env: }
       - { python: '3.7', env: }
       - { python: '3.8', env: }
       - { arch: arm64, python: '3.8' }
+      - { python: '3.9', env: }
+      - { python: '3.10', env: }
+      - { python: '3.11', env: }
 install:
     - pip install --upgrade pip
     - pip install coverage
     - pip install --upgrade pytest pytest-benchmark
 
 script:
-    - |
-      if [[ $(bc <<< "$TRAVIS_PYTHON_VERSION >= 3.3") -eq 1 ]]; then
-         py.test --doctest-modules multipledispatch
-      else
-         py.test --doctest-modules --ignore=multipledispatch/tests/test_dispatcher_3only.py multipledispatch
-      fi
+    - py.test --doctest-modules multipledispatch
 
 after_success:
     - |
