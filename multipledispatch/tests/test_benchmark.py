@@ -17,7 +17,7 @@ def isint(x, y):
     return False
 
 
-@pytest.mark.parametrize("val", [1, 'a'])
+@pytest.mark.parametrize("val", [1, "a"])
 def test_benchmark_call_single_dispatch(benchmark, val):
     benchmark(isint, val)
 
@@ -49,6 +49,6 @@ def test_benchmark_add_and_use_instance(benchmark):
             return sum(args)
 
         mul(4, 5)
-        mul('x', 5)
-        mul(1, 2, 3., 4., 5.)
+        mul("x", 5)
+        mul(1, 2, 3.0, 4.0, 5.0)
         mul(1, 2, 3, 4, 5)
