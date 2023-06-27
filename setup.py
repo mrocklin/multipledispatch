@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 from os.path import exists
+
 from setuptools import setup
 
 setup(
     name="multipledispatch",
-    version="0.6.0",
+    version="1.0.0",
     description="Multiple dispatch",
     url="http://github.com/mrocklin/multipledispatch/",
     author="Matthew Rocklin",
