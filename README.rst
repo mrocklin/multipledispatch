@@ -89,7 +89,7 @@ It is a light weight dependency.
 License
 -------
 
-New BSD. See `License file`_.
+BSD-3-Clause. See `License file`_.
 
 
 Links
